@@ -16,20 +16,20 @@ export function HeroSection({ featured }: { featured: Product[] }) {
         <div className="flex flex-col justify-center">
           <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--black)] md:text-sm">
             <span className="h-[2px] w-8 bg-[var(--terra)]"></span>
-            Saison 2024/25
+            390+ maillots · Grands championnats
           </p>
           <h1 className="relative mb-6 font-bebas text-7xl uppercase leading-[0.85] tracking-tighter text-[var(--black)] sm:text-8xl md:text-[9rem] lg:text-[11rem]">
-            L&apos;ELITE
+            LE LOOK
             <br />
-            DU <span className="relative inline-block text-[var(--terra)]">FOOTBALL</span>
+            DES <span className="relative inline-block text-[var(--terra)]">PROS</span>
           </h1>
           <p className="mb-8 max-w-lg text-lg font-normal leading-relaxed text-[var(--black-3)] md:text-xl">
-            Plus de 390 maillots officiels des plus grands clubs et championnats. Qualite premium, flocages et patchs officiels.
+            Plus de 390 maillots de football des plus grands clubs. Qualité premium, flocages et patchs disponibles.
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link href="/shop" className="group relative inline-flex items-center justify-center overflow-hidden bg-[var(--black)] px-8 py-5 font-condensed text-sm uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:bg-[var(--terra)]">
-              <span className="relative z-10">Decouvrir la collection</span>
+              <span className="relative z-10">Explorer les maillots</span>
             </Link>
             <Link href="/ligue/premier-league" className="group relative inline-flex items-center justify-center border border-[var(--black)] bg-transparent px-8 py-5 font-condensed text-sm uppercase tracking-[0.2em] text-[var(--black)] transition-colors duration-300 hover:bg-[var(--black-2)] hover:text-white">
               <span className="relative z-10">Premier League</span>
@@ -38,9 +38,9 @@ export function HeroSection({ featured }: { featured: Product[] }) {
 
           <div className="mt-12 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
             {[
-              ['390+', 'Maillots Premium'],
-              ['48h', 'Livraison Rapide'],
-              ['SSL', 'Paiement Securise'],
+              ['390+', 'Références dispo'],
+              ['1000+', 'Clients satisfaits'],
+              ['48h', 'Livraison rapide'],
             ].map(([value, label]) => (
               <div key={label} className="group cursor-default">
                 <p className="mb-1 font-bebas text-4xl text-[var(--black)] transition-colors group-hover:text-[var(--terra)] lg:text-5xl">{value}</p>

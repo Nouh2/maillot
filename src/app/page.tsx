@@ -6,12 +6,13 @@ import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { WhyUsSection } from '@/components/home/WhyUsSection'
 import { ReassuranceBar } from '@/components/home/ReassuranceBar'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
+import { PromoStrip } from '@/components/home/PromoStrip'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Accueil',
-  description: 'Maillots de football premium — 390+ clubs, livraison rapide, patchs disponibles.',
+  title: 'Accueil | KITLAB — Maillots de Football Premium',
+  description: 'Plus de 390 maillots de football premium — grands clubs, toutes années. Flocage et patchs disponibles. Livraison rapide.',
 }
 
 export default async function HomePage() {
@@ -23,6 +24,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection featured={featured} />
+      <PromoStrip />
       <LeaguesStrip leagues={leagues} />
       <ReassuranceBar />
 

@@ -3,9 +3,9 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { Zap, Trophy, Truck } from 'lucide-react'
 
 const WHY_ITEMS = [
-  { icon: Zap, title: 'Fournisseur direct', desc: 'Nous travaillons directement avec les fabricants pour vous garantir les meilleurs prix sans intermediaire.' },
-  { icon: Trophy, title: 'Patchs officiels', desc: "Ajoutez les patchs LDC, Copa, FA Cup et bien d'autres a votre maillot selon l'eligibilite du club." },
-  { icon: Truck, title: 'Livraison rapide', desc: "Expedition sous 24-48h. Livraison offerte des 60 EUR d'achats en France." },
+  { icon: Zap, title: 'Fournisseur direct', desc: 'Nous travaillons directement avec les fabricants pour vous proposer les meilleurs prix, sans intermédiaire ni surprix.' },
+  { icon: Trophy, title: 'Patchs disponibles', desc: "Personnalisez votre maillot avec les patchs LDC, Copa, FA Cup et bien d'autres — au choix, selon le club." },
+  { icon: Truck, title: 'Livraison rapide', desc: "Expédition sous 24-48h avec suivi. Livraison offerte dès 60 € d'achats en France." },
 ] as const
 
 export function WhyUsSection() {
@@ -18,16 +18,16 @@ export function WhyUsSection() {
           <div>
             <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)] sm:text-sm">
               <span className="h-[2px] w-8 bg-[var(--terra)]"></span>
-              Prouver notre valeur
+              Notre promesse
             </p>
             <h2 className="font-bebas text-6xl leading-none md:text-8xl">
-              LA DIFFERENCE
+              LA DIFFÉRENCE
               <br />
               KITLAB
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">
-            L&apos;exigence du sport de haut niveau appliquee a notre service. Des produits authentiques, une logistique parfaitement maitrisee.
+            L&apos;exigence du sport de haut niveau appliquée à notre service. Des maillots premium, une logistique parfaitement maîtrisée.
           </p>
         </div>
 

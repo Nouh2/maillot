@@ -1,10 +1,11 @@
 // src/components/home/ReviewsSection.tsx
 import { Star } from 'lucide-react'
+import Link from 'next/link'
 
 const REVIEWS = [
-  { name: 'Thomas M.', rating: 5, text: 'Qualite exceptionnelle, les coutures sont parfaites. Mon maillot du Real Madrid avec le patch LDC est magnifique !', date: 'Il y a 2 semaines' },
-  { name: 'Sarah K.', rating: 5, text: 'Livraison ultra rapide, maillot conforme a la description. Je recommande vivement KITLAB pour son serieux !', date: 'Il y a 1 mois' },
-  { name: 'Pierre D.', rating: 5, text: 'Achete 3 maillots pour mes enfants, ils sont ravis. Bonne taille, belle finition. Site tres professionnel et a recommander.', date: 'Il y a 3 semaines' },
+  { name: 'Thomas M.', rating: 5, text: 'Qualité exceptionnelle, les coutures sont parfaites. Mon maillot du Real Madrid avec le patch LDC est magnifique !', date: 'Il y a 2 semaines' },
+  { name: 'Sarah K.', rating: 5, text: 'Livraison ultra rapide, maillot conforme à la description. Je recommande vivement KITLAB pour son sérieux !', date: 'Il y a 1 mois' },
+  { name: 'Pierre D.', rating: 5, text: 'Acheté 3 maillots pour mes enfants, ils sont ravis. Bonne taille, belle finition. Site très professionnel, à recommander.', date: 'Il y a 3 semaines' },
 ] as const
 
 export function ReviewsSection() {
@@ -23,9 +24,23 @@ export function ReviewsSection() {
               CLIENTS
             </h2>
           </div>
-          <p className="max-w-sm text-sm font-semibold leading-relaxed text-[var(--black-3)]">
-            Rejoignez des passionnes qui s&apos;equipent chez KITLAB pour vivre leur passion du football sans compromis.
-          </p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-6 w-6 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <span className="font-bebas text-3xl text-[var(--black)]">4.9</span>
+              <span className="font-condensed text-xs uppercase tracking-widest text-[var(--grey)]">/ 5</span>
+            </div>
+            <p className="font-condensed text-xs uppercase tracking-[0.15em] text-[var(--grey)]">
+              Basé sur <span className="font-bold text-[var(--black)]">1 000+</span> clients satisfaits
+            </p>
+            <p className="max-w-xs text-sm font-semibold leading-relaxed text-[var(--black-3)]">
+              Rejoignez des passionnés qui s&apos;équipent chez KITLAB pour vivre leur passion du football.
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
@@ -34,7 +49,7 @@ export function ReviewsSection() {
               <div className="absolute right-0 top-0 h-16 w-16 border-b border-l border-[var(--black)]/5 bg-[var(--cream-2)]"></div>
               <div className="relative z-10 mb-8 flex gap-1">
                 {Array.from({ length: review.rating }).map((_, starIndex) => (
-                  <Star key={starIndex} className="h-5 w-5 fill-[var(--black)] text-[var(--black)]" />
+                  <Star key={starIndex} className="h-5 w-5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
               <p className="relative z-10 mb-10 text-base italic leading-snug text-[var(--black-2)] md:text-lg">&ldquo;{review.text}&rdquo;</p>
@@ -44,6 +59,15 @@ export function ReviewsSection() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <Link
+            href="/shop"
+            className="inline-flex items-center justify-center bg-[var(--black)] px-10 py-5 font-condensed text-sm uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:bg-[var(--terra)]"
+          >
+            Rejoindre 1 000+ fans équipés
+          </Link>
         </div>
       </div>
     </section>
