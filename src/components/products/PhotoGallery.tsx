@@ -15,6 +15,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           src={proxyImage(photos[active])}
           alt={name}
           fill
+          unoptimized
           className="object-cover"
           priority
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -34,6 +35,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               src={proxyImage(p)}
               alt={`${name} vue ${i + 1}`}
               fill
+              unoptimized
               sizes="80px"
               className="object-cover"
             />
