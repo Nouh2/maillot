@@ -10,11 +10,11 @@ const WHY_ITEMS = [
 
 export function WhyUsSection() {
   return (
-    <section className="relative overflow-hidden bg-[var(--black)] py-24 text-white">
+    <section className="relative overflow-hidden bg-[var(--black)] py-16 text-white">
       <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_center,var(--black-2)_0%,transparent_70%)] opacity-50 blur-3xl"></div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-16 flex flex-col justify-between gap-8 border-b border-white/10 pb-8 md:flex-row md:items-end">
+        <div className="mb-10 flex flex-col justify-between gap-8 border-b border-white/10 pb-8 md:flex-row md:items-end">
           <div>
             <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)] sm:text-sm">
               <span className="h-[2px] w-8 bg-[var(--terra)]"></span>

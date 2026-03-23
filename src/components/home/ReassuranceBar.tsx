@@ -15,7 +15,7 @@ export function ReassuranceBar() {
         {ITEMS.map((item) => {
           const Icon = item.icon
           return (
-            <div key={item.label} className="flex flex-col lg:flex-row items-center lg:items-start gap-4 py-8 px-4 lg:px-8 group">
+            <div key={item.label} className="flex flex-col lg:flex-row items-center lg:items-start gap-4 py-5 px-4 lg:px-8 group">
               <Icon strokeWidth={1} className="w-8 h-8 text-[var(--terra)] group-hover:scale-110 transition-transform duration-300" />
               <div className="text-center lg:text-left">
                 <p className="font-condensed text-xs sm:text-sm tracking-[0.15em] font-bold uppercase text-white mb-1.5">{item.label}</p>

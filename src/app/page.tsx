@@ -26,7 +26,7 @@ export default async function HomePage() {
       <LeaguesStrip leagues={leagues} />
       <ReassuranceBar />
 
-      <section className="py-20 bg-[var(--cream)]">
+      <section className="py-10 bg-[var(--cream)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <ScrollReveal>
             <ProductsGrid

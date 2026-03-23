@@ -5,8 +5,8 @@ import type { League } from '@/types/product'
 
 export function LeaguesStrip({ leagues }: { leagues: League[] }) {
   return (
-    <section className="bg-[var(--cream)] py-16 border-b border-[var(--black)]/5 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 flex flex-col sm:flex-row justify-between sm:items-end gap-6">
+    <section className="bg-[var(--cream)] py-10 border-b border-[var(--black)]/5 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 flex flex-col sm:flex-row justify-between sm:items-end gap-6">
         <div>
           <h2 className="font-bebas text-5xl md:text-6xl text-[var(--black)] leading-none text-left">CHAMPIONNATS<br/><span className="text-[var(--grey)]">MAJEURS</span></h2>
         </div>

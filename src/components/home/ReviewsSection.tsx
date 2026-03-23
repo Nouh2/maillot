@@ -9,9 +9,9 @@ const REVIEWS = [
 
 export function ReviewsSection() {
   return (
-    <section className="relative overflow-hidden bg-[var(--cream)] py-24">
+    <section className="relative overflow-hidden bg-[var(--cream)] py-16">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+        <div className="mb-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div>
             <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)] sm:text-sm">
               <span className="h-[2px] w-8 bg-[var(--terra)]"></span>

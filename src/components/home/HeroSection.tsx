@@ -7,23 +7,23 @@ import type { Product } from '@/types/product'
 
 export function HeroSection({ featured }: { featured: Product[] }) {
   return (
-    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-[var(--cream)]">
+    <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-[var(--cream)]">
       <div className="pointer-events-none absolute inset-0 z-0 opacity-5">
         <div className="h-full w-full bg-[radial-gradient(circle_at_center,var(--black)_0%,transparent_100%)] mix-blend-multiply"></div>
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[60fr_40fr] lg:gap-8">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-4 pt-6 pb-12 sm:px-6 lg:grid-cols-[60fr_40fr] lg:gap-8">
         <div className="flex flex-col justify-center">
-          <p className="mb-6 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--black)] md:text-sm">
+          <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--black)] md:text-sm">
             <span className="h-[2px] w-8 bg-[var(--terra)]"></span>
             Saison 2024/25
           </p>
-          <h1 className="relative mb-8 font-bebas text-7xl uppercase leading-[0.85] tracking-tighter text-[var(--black)] sm:text-8xl md:text-[9rem] lg:text-[11rem]">
+          <h1 className="relative mb-6 font-bebas text-7xl uppercase leading-[0.85] tracking-tighter text-[var(--black)] sm:text-8xl md:text-[9rem] lg:text-[11rem]">
             L&apos;ELITE
             <br />
             DU <span className="relative inline-block text-[var(--terra)]">FOOTBALL</span>
           </h1>
-          <p className="mb-10 max-w-lg text-lg font-normal leading-relaxed text-[var(--black-3)] md:text-xl">
+          <p className="mb-8 max-w-lg text-lg font-normal leading-relaxed text-[var(--black-3)] md:text-xl">
             Plus de 390 maillots officiels des plus grands clubs et championnats. Qualite premium, flocages et patchs officiels.
           </p>
 
@@ -36,7 +36,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
             </Link>
           </div>
 
-          <div className="mt-16 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
+          <div className="mt-12 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
             {[
               ['390+', 'Maillots Premium'],
               ['48h', 'Livraison Rapide'],
