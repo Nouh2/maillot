@@ -16,6 +16,7 @@ export interface Product {
   stock: number
   is_active: boolean
   is_featured: boolean
+  is_retro: boolean
   created_at: string
 }
 
