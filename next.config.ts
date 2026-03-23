@@ -3,7 +3,6 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,6 +12,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'photo.yupoo.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.yupoo.com',
       },
     ],
   },
