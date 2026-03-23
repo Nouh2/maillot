@@ -1,20 +1,20 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CartButton } from '@/components/cart/CartButton'
-import { NATIONAL_TEAMS_HREF } from '@/lib/catalog'
+import { getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
 import type { League } from '@/types/product'
-import { 
-  ChevronRight, 
-  X, 
-  HelpCircle, 
-  ShoppingBag, 
-  Package, 
-  MessageCircle,
+import {
+  ArrowRight,
+  ChevronRight,
+  HelpCircle,
   Menu,
+  MessageCircle,
+  Package,
   Search,
-  ArrowRight
+  ShoppingBag,
+  X,
 } from 'lucide-react'
 
 interface NavbarClientProps {
@@ -24,6 +24,7 @@ interface NavbarClientProps {
 
 export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
   const router = useRouter()
+  const leagueNavigation = getLeagueNavigationOptions(leagues)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLeagues, setShowLeagues] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -49,7 +50,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
       if (window.innerWidth >= 768) closeMobileMenu()
     }
     window.addEventListener('resize', handleResize)
-    
+
     if (mobileOpen || searchOpen) {
       document.body.style.overflow = 'hidden'
     } else {
@@ -59,7 +60,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
     if (searchOpen && searchInputRef.current) {
       setTimeout(() => searchInputRef.current?.focus(), 100)
     }
-    
+
     return () => {
       window.removeEventListener('resize', handleResize)
       document.body.style.overflow = ''
@@ -74,27 +75,29 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
             KITLAB
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden items-center gap-8 md:flex">
             <Link href="/shop" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
               Tous les maillots
             </Link>
-            <Link href="/coupe-du-monde" className="font-condensed text-sm uppercase tracking-widest text-[var(--terra)] transition-colors hover:text-[var(--black)] font-black">
-              🏆 Coupe du Monde
+            <Link href="/coupe-du-monde" className="font-condensed text-sm font-black uppercase tracking-widest text-[var(--terra)] transition-colors hover:text-[var(--black)]">
+              Coupe du Monde
             </Link>
             <Link href="/retro" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              📼 Rétro
+              Retro
             </Link>
             <Link href={NATIONAL_TEAMS_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
               Selections nationales
+            </Link>
+            <Link href={REST_OF_WORLD_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Reste du monde
             </Link>
             <div className="group relative">
               <button className="flex items-center gap-1 font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
                 Championnats
                 <ChevronRight className="h-3 w-3 rotate-90" />
               </button>
-              <div className="invisible absolute left-0 top-full mt-2 w-64 border border-[var(--cream-3)] bg-white py-2 shadow-lg opacity-0 transition-all group-hover:visible group-hover:opacity-100">
-                {leagues.map((league) => (
+              <div className="invisible absolute left-0 top-full mt-2 w-64 border border-[var(--cream-3)] bg-white py-2 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
+                {leagueNavigation.map((league) => (
                   <Link
                     key={league.id}
                     href={`/ligue/${league.slug}`}
@@ -110,11 +113,11 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
 
           <div className="flex items-center gap-1 md:gap-2">
             <button
-               onClick={() => setSearchOpen(true)}
-               className="rounded-full p-2 text-[var(--black)] hover:bg-[var(--cream)] transition-colors group"
-               aria-label="Rechercher"
+              onClick={() => setSearchOpen(true)}
+              className="group rounded-full p-2 text-[var(--black)] transition-colors hover:bg-[var(--cream)]"
+              aria-label="Rechercher"
             >
-              <Search className="h-6 w-6 group-hover:scale-110 transition-transform" />
+              <Search className="h-6 w-6 transition-transform group-hover:scale-110" />
             </button>
 
             <Link
@@ -125,7 +128,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
             </Link>
             <CartButton />
             <button
-              className="rounded-full p-2 text-[var(--black)] md:hidden hover:bg-[var(--cream)] transition-colors"
+              className="rounded-full p-2 text-[var(--black)] transition-colors hover:bg-[var(--cream)] md:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Menu"
             >
@@ -135,43 +138,34 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
         </nav>
       </header>
 
-      {/* Search Overlay */}
-      <div 
-        className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}
-      >
+      <div className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex items-center justify-between h-20 md:h-24">
+          <div className="flex h-20 items-center justify-between md:h-24">
             <span className="font-bebas text-3xl tracking-widest text-[var(--black)]">KITLAB</span>
-            <button 
-              onClick={() => setSearchOpen(false)}
-              className="p-2 transition-transform hover:rotate-90"
-            >
+            <button onClick={() => setSearchOpen(false)} className="p-2 transition-transform hover:rotate-90">
               <X className="h-8 w-8 text-[var(--black)]" />
             </button>
           </div>
 
           <div className="py-10 md:py-20">
-            <form onSubmit={handleSearch} className="relative group">
+            <form onSubmit={handleSearch} className="group relative">
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="RECHERCHER UN MAILLOT, UNE ÉQUIPE..."
+                placeholder="RECHERCHER UN MAILLOT, UNE EQUIPE..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent border-b-2 border-[#E5E5E5] pb-4 text-2xl md:text-5xl font-black uppercase tracking-tight text-[var(--black)] placeholder-[#E5E5E5] focus:outline-none focus:border-[var(--black)] transition-colors"
+                className="w-full border-b-2 border-[#E5E5E5] bg-transparent pb-4 text-2xl font-black uppercase tracking-tight text-[var(--black)] placeholder-[#E5E5E5] transition-colors focus:border-[var(--black)] focus:outline-none md:text-5xl"
               />
-              <button 
-                type="submit"
-                className="absolute right-0 bottom-6 p-2 text-[#E5E5E5] group-focus-within:text-[var(--black)] transition-colors"
-              >
+              <button type="submit" className="absolute bottom-6 right-0 p-2 text-[#E5E5E5] transition-colors group-focus-within:text-[var(--black)]">
                 <ArrowRight className="h-10 w-10 md:h-14 md:w-14" />
               </button>
             </form>
 
             <div className="mt-12">
-              <p className="font-condensed text-sm font-bold uppercase tracking-widest text-[#707072] mb-6">Suggestions</p>
+              <p className="mb-6 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions</p>
               <div className="flex flex-wrap gap-3">
-                {['Real Madrid', 'Equipe de France', 'Version Joueur', 'Nouveautés', 'Bons Plans'].map((tag) => (
+                {['Real Madrid', 'Equipe de France', 'Version Joueur', 'Nouveautes', 'Bons Plans'].map((tag) => (
                   <button
                     key={tag}
                     onClick={() => {
@@ -179,7 +173,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
                       router.push(`/shop?q=${encodeURIComponent(tag)}`)
                       setSearchOpen(false)
                     }}
-                    className="px-6 py-2 bg-[var(--cream)] hover:bg-[var(--black)] hover:text-white text-[15px] font-bold rounded-full transition-all"
+                    className="rounded-full bg-[var(--cream)] px-6 py-2 text-[15px] font-bold transition-all hover:bg-[var(--black)] hover:text-white"
                   >
                     {tag}
                   </button>
@@ -190,143 +184,96 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
         </div>
       </div>
 
-      {/* Mobile Menu Sidebar */}
-      <div 
-        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-      >
-        {/* Overlay */}
-        <div 
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={closeMobileMenu}
-        />
-        
-        {/* Panel */}
-        <div 
-          className={`absolute top-0 right-0 h-full w-[85%] max-w-sm bg-white shadow-2xl transition-transform duration-500 ease-out transform flex flex-col ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        >
-          {/* Header */}
+      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 md:hidden ${mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeMobileMenu} />
+
+        <div className={`absolute right-0 top-0 flex h-full w-[85%] max-w-sm transform flex-col bg-white shadow-2xl transition-transform duration-500 ease-out ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex items-center justify-end p-4">
-            <button 
-              onClick={closeMobileMenu}
-              className="p-2 transition-transform hover:rotate-90"
-            >
+            <button onClick={closeMobileMenu} className="p-2 transition-transform hover:rotate-90">
               <X className="h-7 w-7 text-[var(--black)]" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
-            {/* Main Links */}
-            <div className="space-y-4 mb-10">
-              <Link
-                href="/shop"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-2"
-              >
+          <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-4">
+            <div className="mb-10 space-y-4">
+              <Link href="/shop" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
                 <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Tout voir</span>
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
               </Link>
-              <Link
-                href="/coupe-du-monde"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-2"
-              >
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--terra)]">🏆 Coupe du Monde</span>
+              <Link href="/coupe-du-monde" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--terra)]">Coupe du Monde</span>
                 <ChevronRight className="h-6 w-6 text-[var(--terra)]" />
               </Link>
-              <Link
-                href="/retro"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-2"
-              >
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">📼 Rétro</span>
+              <Link href="/retro" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Retro</span>
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
               </Link>
-              <Link
-                href={NATIONAL_TEAMS_HREF}
-                onClick={closeMobileMenu}
-                className="flex items-center justify-between py-2"
-              >
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Sélections</span>
+              <Link href={NATIONAL_TEAMS_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Selections</span>
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
               </Link>
-              <button
-                onClick={() => setShowLeagues(!showLeagues)}
-                className="w-full flex items-center justify-between py-2"
-              >
+              <Link href={REST_OF_WORLD_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Reste du monde</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <button onClick={() => setShowLeagues(!showLeagues)} className="flex w-full items-center justify-between py-2">
                 <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Championnats</span>
                 <ChevronRight className={`h-6 w-6 text-[var(--black)] transition-transform duration-300 ${showLeagues ? 'rotate-90' : ''}`} />
               </button>
-              
+
               {showLeagues && (
-                <div className="pl-4 space-y-3 mt-4 border-l-2 border-[var(--cream-3)] animate-in slide-in-from-left-2 duration-300">
-                  {leagues.map((l) => (
+                <div className="mt-4 space-y-3 border-l-2 border-[var(--cream-3)] pl-4 animate-in slide-in-from-left-2 duration-300">
+                  {leagueNavigation.map((league) => (
                     <Link
-                      key={l.id}
-                      href={`/ligue/${l.slug}`}
+                      key={league.id}
+                      href={`/ligue/${league.slug}`}
                       onClick={closeMobileMenu}
-                      className="flex items-center gap-3 text-lg font-bold font-condensed uppercase tracking-wide text-[var(--grey)] hover:text-[var(--terra)]"
+                      className="flex items-center gap-3 font-condensed text-lg font-bold uppercase tracking-wide text-[var(--grey)] hover:text-[var(--terra)]"
                     >
-                      <span className="text-xl">{l.flag_emoji}</span>
-                      {l.name}
+                      <span className="text-xl">{league.flag_emoji}</span>
+                      {league.name}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="mb-10 pt-10 border-t border-[var(--cream-3)] flex flex-col gap-8">
-              <p className="text-[#707072] text-[16px] leading-relaxed">
-                Deviens membre <span className="font-bold text-[var(--black)]">KITLAB</span> pour accéder au meilleur des produits et profiter d&apos;offres exclusives. <span className="font-bold text-[var(--black)] underline cursor-pointer">En savoir plus</span>
+            <div className="mb-10 flex flex-col gap-8 border-t border-[var(--cream-3)] pt-10">
+              <p className="text-[16px] leading-relaxed text-[#707072]">
+                Deviens membre <span className="font-bold text-[var(--black)]">KITLAB</span> pour acceder au meilleur des produits et profiter d&apos;offres exclusives. <span className="cursor-pointer font-bold text-[var(--black)] underline">En savoir plus</span>
               </p>
               <div className="flex gap-3">
                 <Link
                   href="/compte"
                   onClick={closeMobileMenu}
-                  className="px-6 py-2 bg-[var(--black)] text-white text-[15px] font-bold rounded-full hover:opacity-70 transition-opacity min-w-[120px] text-center"
+                  className="min-w-[120px] rounded-full bg-[var(--black)] px-6 py-2 text-center text-[15px] font-bold text-white transition-opacity hover:opacity-70"
                 >
                   Rejoins-nous
                 </Link>
                 <Link
                   href="/compte"
                   onClick={closeMobileMenu}
-                  className="px-6 py-2 bg-white text-[var(--black)] border border-[#E5E5E5] text-[15px] font-bold rounded-full hover:border-[var(--black)] transition-colors min-w-[120px] text-center"
+                  className="min-w-[120px] rounded-full border border-[#E5E5E5] bg-white px-6 py-2 text-center text-[15px] font-bold text-[var(--black)] transition-colors hover:border-[var(--black)]"
                 >
                   S&apos;identifier
                 </Link>
               </div>
             </div>
 
-            {/* Bottom Utilities */}
-            <div className="space-y-6 pt-10 border-t border-[var(--cream-3)] pb-20">
-              <Link
-                href="/faq"
-                onClick={closeMobileMenu}
-                className="flex items-center gap-4 group"
-              >
+            <div className="space-y-6 border-t border-[var(--cream-3)] pb-20 pt-10">
+              <Link href="/faq" onClick={closeMobileMenu} className="group flex items-center gap-4">
                 <HelpCircle className="h-6 w-6 text-[var(--black)]" strokeWidth={1} />
                 <span className="text-[16px] font-bold text-[var(--black)]">Aide</span>
               </Link>
-              <Link
-                href="/panier"
-                onClick={closeMobileMenu}
-                className="flex items-center gap-4 group"
-              >
+              <Link href="/panier" onClick={closeMobileMenu} className="group flex items-center gap-4">
                 <ShoppingBag className="h-6 w-6 text-[var(--black)]" strokeWidth={1} />
                 <span className="text-[16px] font-bold text-[var(--black)]">Panier</span>
               </Link>
-              <Link
-                href="/suivi"
-                onClick={closeMobileMenu}
-                className="flex items-center gap-4 group"
-              >
+              <Link href="/suivi" onClick={closeMobileMenu} className="group flex items-center gap-4">
                 <Package className="h-6 w-6 text-[var(--black)]" strokeWidth={1} />
                 <span className="text-[16px] font-bold text-[var(--black)]">Commandes</span>
               </Link>
-              <Link
-                href="/contact"
-                onClick={closeMobileMenu}
-                className="flex items-center gap-4 group"
-              >
+              <Link href="/contact" onClick={closeMobileMenu} className="group flex items-center gap-4">
                 <MessageCircle className="h-6 w-6 text-[var(--black)]" strokeWidth={1} />
                 <span className="text-[16px] font-bold text-[var(--black)]">Contact</span>
               </Link>

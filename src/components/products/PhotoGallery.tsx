@@ -7,10 +7,10 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
   const [active, setActive] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  if (photos.length === 0) return null
-
   // Sync scroll position when active index changes (from thumbnail click)
   useEffect(() => {
+    if (photos.length === 0) return
+
     const el = scrollRef.current
     if (el) {
       el.scrollTo({
@@ -18,7 +18,9 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
         behavior: 'smooth'
       })
     }
-  }, [active])
+  }, [active, photos.length])
+
+  if (photos.length === 0) return null
 
   const handleScroll = () => {
     const el = scrollRef.current

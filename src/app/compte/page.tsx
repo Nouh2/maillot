@@ -5,6 +5,22 @@ import { getSupabaseServerClient, getSupabaseServiceClient } from '@/lib/supabas
 
 export const metadata: Metadata = { title: 'Mon Compte' }
 
+interface OrderItem {
+  name: string
+  size: string
+  qty: number
+  price: number
+  patch_name?: string
+}
+
+interface AccountOrder {
+  id: string
+  status: string
+  total_amount: number | null
+  created_at: string
+  items: OrderItem[] | null
+}
+
 interface AccountPageProps {
   searchParams: Promise<{ error?: string }>
 }
@@ -24,17 +40,16 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const authError = params.error === 'auth'
 
   // Récupérer les commandes si connecté
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let orders: any[] = []
+  let orders: AccountOrder[] = []
   if (user?.email) {
-    const service = getSupabaseServiceClient() as any
+    const service = getSupabaseServiceClient()
     const { data } = await service
       .from('orders')
       .select('id, status, total_amount, created_at, items')
       .eq('customer_email', user.email)
       .order('created_at', { ascending: false })
       .limit(10)
-    orders = data ?? []
+    orders = (data as AccountOrder[] | null) ?? []
   }
 
   return (
@@ -142,7 +157,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                         </div>
                       </div>
                       <div className="mt-3 pt-3 border-t border-[var(--cream-3)] space-y-1">
-                        {order.items?.map((item: { name: string; size: string; qty: number; price: number; patch_name?: string }, i: number) => (
+                        {order.items?.map((item, i: number) => (
                           <p key={i} className="text-xs text-[var(--grey)]">
                             {item.name} — T.{item.size}{item.patch_name ? ` + ${item.patch_name}` : ''}{item.qty > 1 ? ` ×${item.qty}` : ''}
                           </p>

@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
-import { getProducts, getLeagues } from '@/lib/supabase/queries'
-import { resolveLeagueFilterParam } from '@/lib/catalog'
+import type { Metadata } from 'next'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
-import type { Metadata } from 'next'
+import { getProducts, getLeagues } from '@/lib/supabase/queries'
+import { getLeagueDisplayName, resolveLeagueFilterParam } from '@/lib/catalog'
 
 export const metadata: Metadata = { title: 'Tous les Maillots' }
 
@@ -24,35 +24,36 @@ function parseType(value: string | undefined): ProductType | undefined {
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams
   const leagues = await getLeagues()
+  const resolvedLeague = resolveLeagueFilterParam(params.league, leagues)
   const products = await getProducts({
-    league: resolveLeagueFilterParam(params.league, leagues),
+    league: resolvedLeague,
     type: parseType(params.type),
     q: params.q,
   })
 
-  const title = params.q 
-    ? `Résultats pour "${params.q}"` 
-    : params.league 
-      ? params.league.toUpperCase()
+  const title = params.q
+    ? `Resultats pour "${params.q}"`
+    : params.league
+      ? getLeagueDisplayName(params.league, leagues) ?? resolvedLeague ?? params.league.toUpperCase()
       : 'TOUS LES MAILLOTS'
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <div className="bg-[var(--black-2)] py-12 text-center px-4">
-        <p className="font-condensed text-xs tracking-[4px] uppercase text-[var(--terra)] mb-2">Notre catalogue</p>
-        <h1 className="font-bebas text-5xl md:text-7xl text-white break-words max-w-4xl mx-auto">{title}</h1>
-        <p className="text-[var(--grey-lt)] mt-2">{products.length} maillots disponibles</p>
+      <div className="bg-[var(--black-2)] px-4 py-12 text-center">
+        <p className="mb-2 font-condensed text-xs uppercase tracking-[4px] text-[var(--terra)]">Notre catalogue</p>
+        <h1 className="mx-auto max-w-4xl break-words font-bebas text-5xl text-white md:text-7xl">{title}</h1>
+        <p className="mt-2 text-[var(--grey-lt)]">{products.length} maillots disponibles</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Suspense fallback={null}>
           <FilterSidebar leagues={leagues} />
         </Suspense>
 
         <div>
           {products.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouvé</p>
+            <div className="py-20 text-center">
+              <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouve</p>
             </div>
           ) : (
             <ProductsGrid products={products} />

@@ -4,7 +4,6 @@ import { Plus, Minus, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { SizeSelector } from './SizeSelector'
 import { PatchSelector } from './PatchSelector'
-import { Button } from '@/components/ui/Button'
 import type { Product, Patch } from '@/types/product'
 
 const FLOCAGE_PRICE = 15
