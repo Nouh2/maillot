@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import './globals.css'
+import { Providers } from '@/components/providers/Providers'
 
 const barlow = Barlow({
   subsets: ['latin'],
@@ -40,7 +41,9 @@ export default function RootLayout({
       className={`${barlow.variable} ${barlowCondensed.variable} ${bebasNeue.variable}`}
     >
       <body className="antialiased">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )
