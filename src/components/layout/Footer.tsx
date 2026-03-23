@@ -13,7 +13,7 @@ export function Footer() {
         <div>
           <h3 className="font-condensed text-xs tracking-[3px] uppercase text-[var(--grey-lt)] mb-4">Boutique</h3>
           <ul className="space-y-2">
-            {[['Tous les maillots', '/shop'], ['Ligue 1', '/ligue/ligue-1'], ['Premier League', '/ligue/premier-league'], ['La Liga', '/ligue/la-liga']].map(([label, href]) => (
+            {[['Tous les maillots', '/shop'], ['Maillots concept', '/concept'], ['Ligue 1', '/ligue/ligue-1'], ['Premier League', '/ligue/premier-league'], ['La Liga', '/ligue/la-liga']].map(([label, href]) => (
               <li key={href}><Link href={href} className="text-sm text-[var(--grey-lt)] hover:text-white transition-colors">{label}</Link></li>
             ))}
           </ul>

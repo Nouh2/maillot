@@ -6,6 +6,7 @@ export async function getProducts(filters?: {
   club?: string
   type?: string
   featured?: boolean
+  concept?: boolean
   q?: string
   limit?: number
 }): Promise<Product[]> {
@@ -19,6 +20,8 @@ export async function getProducts(filters?: {
   if (filters?.club) query = query.eq('club', filters.club)
   if (filters?.type) query = query.eq('type', filters.type)
   if (filters?.featured) query = query.eq('is_featured', true)
+  if (filters?.concept === true) query = query.eq('season', 'A definir')
+  if (filters?.concept === false) query = query.neq('season', 'A definir')
   if (filters?.q) {
     // Découper par mots pour gérer les recherches multi-mots ("ac milan", "real madrid"...)
     // Chaque mot doit matcher au moins une colonne (AND entre mots, OR entre colonnes)
@@ -72,6 +75,7 @@ export async function getWorldCupProducts(): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('is_active', true)
+    .neq('season', 'A definir')
     .eq('league', 'Selections nationales')
     .in('season', ['2026', '2026-2027'])
     .order('club')
@@ -85,10 +89,15 @@ export async function getRetroProducts(): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('is_active', true)
+    .neq('season', 'A definir')
     .eq('is_retro', true)
     .order('season', { ascending: false })
   if (error) throw error
   return data ?? []
+}
+
+export async function getConceptProducts(): Promise<Product[]> {
+  return getProducts({ concept: true })
 }
 
 export async function getPatches(): Promise<Patch[]> {

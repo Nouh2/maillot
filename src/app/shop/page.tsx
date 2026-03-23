@@ -28,6 +28,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const products = await getProducts({
     league: resolvedLeague,
     type: parseType(params.type),
+    concept: false,
     q: params.q,
   })
 

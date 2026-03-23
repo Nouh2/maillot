@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CartButton } from '@/components/cart/CartButton'
-import { getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
+import { CONCEPT_HREF, getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
 import type { League } from '@/types/product'
 import {
   ArrowRight,
@@ -76,21 +76,6 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
           </Link>
 
           <div className="hidden items-center gap-8 md:flex">
-            <Link href="/shop" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              Tous les maillots
-            </Link>
-            <Link href="/coupe-du-monde" className="font-condensed text-sm font-black uppercase tracking-widest text-[var(--terra)] transition-colors hover:text-[var(--black)]">
-              Coupe du Monde
-            </Link>
-            <Link href="/retro" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              Retro
-            </Link>
-            <Link href={NATIONAL_TEAMS_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              Selections nationales
-            </Link>
-            <Link href={REST_OF_WORLD_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              Reste du monde
-            </Link>
             <div className="group relative">
               <button className="flex items-center gap-1 font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
                 Championnats
@@ -109,6 +94,24 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
                 ))}
               </div>
             </div>
+            <Link href="/coupe-du-monde" className="font-condensed text-sm font-black uppercase tracking-widest text-[var(--terra)] transition-colors hover:text-[var(--black)]">
+              Coupe du Monde
+            </Link>
+            <Link href={CONCEPT_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Maillots concept
+            </Link>
+            <Link href={NATIONAL_TEAMS_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Selections nationales
+            </Link>
+            <Link href={REST_OF_WORLD_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Reste du monde
+            </Link>
+            <Link href="/retro" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Retro
+            </Link>
+            <Link href="/shop" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
+              Tous les maillots
+            </Link>
           </div>
 
           <div className="flex items-center gap-1 md:gap-2">
@@ -196,26 +199,6 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
 
           <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-4">
             <div className="mb-10 space-y-4">
-              <Link href="/shop" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Tout voir</span>
-                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
-              </Link>
-              <Link href="/coupe-du-monde" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--terra)]">Coupe du Monde</span>
-                <ChevronRight className="h-6 w-6 text-[var(--terra)]" />
-              </Link>
-              <Link href="/retro" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Retro</span>
-                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
-              </Link>
-              <Link href={NATIONAL_TEAMS_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Selections</span>
-                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
-              </Link>
-              <Link href={REST_OF_WORLD_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Reste du monde</span>
-                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
-              </Link>
               <button onClick={() => setShowLeagues(!showLeagues)} className="flex w-full items-center justify-between py-2">
                 <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Championnats</span>
                 <ChevronRight className={`h-6 w-6 text-[var(--black)] transition-transform duration-300 ${showLeagues ? 'rotate-90' : ''}`} />
@@ -236,6 +219,31 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
                   ))}
                 </div>
               )}
+
+              <Link href="/coupe-du-monde" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--terra)]">Coupe du Monde</span>
+                <ChevronRight className="h-6 w-6 text-[var(--terra)]" />
+              </Link>
+              <Link href={CONCEPT_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Concept</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <Link href={NATIONAL_TEAMS_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Selections</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <Link href={REST_OF_WORLD_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Reste du monde</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <Link href="/retro" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Retro</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <Link href="/shop" onClick={closeMobileMenu} className="flex items-center justify-between py-2">
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Tout voir</span>
+                <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
             </div>
 
             <div className="mb-10 flex flex-col gap-8 border-t border-[var(--cream-3)] pt-10">

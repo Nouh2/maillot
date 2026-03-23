@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const [featured, leagues] = await Promise.all([
-    getProducts({ featured: true, limit: 8 }),
+    getProducts({ featured: true, concept: false, limit: 8 }),
     getLeagues(),
   ])
 

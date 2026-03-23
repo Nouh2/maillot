@@ -1,0 +1,50 @@
+import type { Metadata } from 'next'
+import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { getConceptProducts } from '@/lib/supabase/queries'
+
+export const metadata: Metadata = {
+  title: 'Maillots Concept',
+  description: 'Collection de maillots concept avec des designs speciaux et des editions creatives.',
+}
+
+export default async function ConceptPage() {
+  const products = await getConceptProducts()
+  const clubs = new Set(products.map((product) => product.club)).size
+
+  return (
+    <div className="min-h-screen bg-[var(--cream)]">
+      <div className="relative overflow-hidden bg-[var(--black-2)] py-16 text-center">
+        <div className="pointer-events-none absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(135deg, white 0, white 1px, transparent 0, transparent 50%)',
+              backgroundSize: '18px 18px',
+            }}
+          />
+        </div>
+        <div className="relative z-10">
+          <p className="mb-3 font-condensed text-xs uppercase tracking-[6px] text-[var(--terra)]">
+            Collection creative
+          </p>
+          <h1 className="font-bebas text-6xl leading-none text-white md:text-8xl">
+            MAILLOTS CONCEPT
+          </h1>
+          <p className="mt-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey-lt)]">
+            {products.length} maillots · {clubs} clubs
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        {products.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot concept trouve</p>
+          </div>
+        ) : (
+          <ProductsGrid products={products} />
+        )}
+      </div>
+    </div>
+  )
+}

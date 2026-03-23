@@ -4,6 +4,7 @@ export const NATIONAL_TEAMS_SLUG = 'selections-nationales'
 export const NATIONAL_TEAMS_VALUE = 'Selections nationales'
 export const REST_OF_WORLD_SLUG = 'reste-du-monde'
 export const REST_OF_WORLD_VALUE = 'Reste du monde'
+export const CONCEPT_HREF = '/concept'
 
 export const NATIONAL_TEAMS_OPTION: League = {
   id: 'national-teams',
