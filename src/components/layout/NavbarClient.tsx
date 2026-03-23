@@ -59,6 +59,9 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
             <Link href="/shop" className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
               Tous les maillots
             </Link>
+            <Link href="/coupe-du-monde" className="font-condensed text-sm uppercase tracking-widest text-[var(--terra)] transition-colors hover:text-[var(--black)] font-black">
+              🏆 Coupe du Monde
+            </Link>
             <Link href={NATIONAL_TEAMS_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
               Selections nationales
             </Link>
@@ -135,6 +138,14 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
               >
                 <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Tout voir</span>
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
+              </Link>
+              <Link
+                href="/coupe-du-monde"
+                onClick={closeMobileMenu}
+                className="flex items-center justify-between py-2"
+              >
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--terra)]">🏆 Coupe du Monde</span>
+                <ChevronRight className="h-6 w-6 text-[var(--terra)]" />
               </Link>
               <Link
                 href={NATIONAL_TEAMS_HREF}

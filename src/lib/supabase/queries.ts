@@ -56,6 +56,19 @@ export async function getLeagueBySlug(slug: string): Promise<League | null> {
   return data ?? null
 }
 
+export async function getWorldCupProducts(): Promise<Product[]> {
+  const supabase = await getSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .eq('league', 'Selections nationales')
+    .in('season', ['2026', '2026-2027'])
+    .order('club')
+  if (error) throw error
+  return data ?? []
+}
+
 export async function getPatches(): Promise<Patch[]> {
   const supabase = await getSupabaseServerClient()
   const { data } = await supabase.from('patches').select('*')
