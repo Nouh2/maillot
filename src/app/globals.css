@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Polices — utiliser des noms uniques pour éviter les boucles CSS infinies */
+  --font-sans: "Barlow", "Barlow Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Bebas Neue Fallback", sans-serif;
+  --font-condensed: "Barlow Condensed", "Barlow Condensed Fallback", sans-serif;
+}
+
+:root {
+  --cream:     #faf7f2;
+  --cream-2:   #f3ede3;
+  --cream-3:   #e8dfd0;
+  --cream-4:   #ddd0be;
+  --black:     #1c1712;
+  --black-2:   #2e2820;
+  --black-3:   #3f3830;
+  --grey:      #7a6f62;
+  --grey-lt:   #a89f92;
+  --terra:     #c1440e;
+  --terra-2:   #a83a0c;
+  --terra-3:   #d4581f;
+  --terra-lt:  #fdf0ea;
+  --terra-mid: #e8956d;
+  --white:     #ffffff;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--black);
+}
+
+/* Curseur custom — desktop uniquement */
+@media (pointer: fine) {
+  * { cursor: none; }
+  .cursor-dot {
+    width: 8px; height: 8px;
+    background: var(--terra);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 2px solid var(--terra);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out;
+  }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ticker animation */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker 30s linear infinite;
+}
+
+/* Hide scrollbar for league strip */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
