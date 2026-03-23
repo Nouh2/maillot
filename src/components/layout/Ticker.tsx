@@ -10,7 +10,7 @@ export function Ticker() {
   return (
     <div
       className="overflow-hidden py-3 bg-[var(--terra)]"
-      role="marquee"
+      role="region"
       aria-label="Informations du site"
     >
       <div className="ticker-track flex gap-12 whitespace-nowrap w-max">

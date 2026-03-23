@@ -17,7 +17,7 @@ export function CartDrawer() {
       <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between p-6 border-b border-[var(--cream-3)]">
           <h2 className="font-bebas text-2xl tracking-widest">Mon Panier</h2>
-          <button onClick={closeCart} className="text-[var(--grey)] hover:text-[var(--black)]">
+          <button onClick={closeCart} aria-label="Fermer le panier" className="text-[var(--grey)] hover:text-[var(--black)]">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -54,13 +54,18 @@ function CheckoutButton() {
   const { items, total } = useCartStore()
 
   const handleCheckout = async () => {
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: items, total: total() }),
-    })
-    const { url } = await res.json()
-    if (url) window.location.href = url
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, total: total() }),
+      })
+      if (!res.ok) throw new Error(`Erreur ${res.status}`)
+      const { url } = await res.json()
+      if (url) window.location.href = url
+    } catch (err) {
+      console.error('Checkout échoué', err)
+    }
   }
 
   return (
