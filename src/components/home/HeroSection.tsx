@@ -48,13 +48,15 @@ export function HeroSection({ featured }: { featured: Product[] }) {
               className={`group block bg-white shadow-sm hover:shadow-md transition-all hover:-translate-y-1 hover:border-[var(--terra)] border border-[var(--cream-3)] ${i === 1 ? 'mt-8' : ''}`}
             >
               <div className="relative aspect-[4/5] overflow-hidden">
-                <Image
-                  src={p.photos[0]}
-                  alt={p.name}
-                  fill
-                  sizes="(max-width: 1024px) 50vw, 22vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {p.photos[0] && (
+                  <Image
+                    src={p.photos[0]}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 22vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                )}
               </div>
               <div className="p-3">
                 <p className="font-condensed text-xs tracking-widest uppercase text-[var(--grey)]">{p.club}</p>

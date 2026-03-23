@@ -1,4 +1,8 @@
 // src/components/products/ProductsGrid.tsx
+// Note : bien que ce composant n'ait pas de directive 'use client',
+// il est implicitement côté client car ProductCard utilise 'use client'
+// (useState pour le hover d'image). C'est acceptable — les données
+// sont chargées dans le Server Component parent (page.tsx).
 import { ProductCard } from './ProductCard'
 import type { Product } from '@/types/product'
 

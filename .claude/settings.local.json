@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --yes --force --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --turbopack --use-npm)",
+      "Read(//c/Users/noete/Desktop/**)",
+      "Bash(npx create-next-app@latest kitlab-temp --yes --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --turbopack --use-npm)",
+      "Bash(cp -r \"C:/Users/noete/Desktop/kitlab-temp/src\" \"C:/Users/noete/Desktop/Maillot/\")",
+      "Bash(cp -r \"C:/Users/noete/Desktop/kitlab-temp/public\" \"C:/Users/noete/Desktop/Maillot/\")",
+      "Bash(cp \"C:/Users/noete/Desktop/kitlab-temp/package.json\" \"C:/Users/noete/Desktop/Maillot/\")",
+      "Bash(cp \"C:/Users/noete/Desktop/kitlab-temp/package-lock.json\" \"C:/Users/noete/Desktop/Maillot/\")",
+      "Bash(cp \"C:/Users/noete/Desktop/kitlab-temp/next.config.ts\" \"C:/Users/noete/Desktop/Maillot/\")",
+      "Bash(npm install:*)",
+      "Bash(timeout 30 npm run dev)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(git:*)"
+    ]
+  }
+}
