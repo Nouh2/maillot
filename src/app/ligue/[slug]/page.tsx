@@ -19,7 +19,7 @@ export default async function LeaguePage({ params }: Props) {
   const league = leagues.find((l) => l.slug === slug)
   if (!league) notFound()
 
-  const products = await getProducts({ league: slug })
+  const products = await getProducts({ league: league.name })
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
