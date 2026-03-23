@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { proxyImage } from '@/lib/images'
 import type { Product } from '@/types/product'
 
 export function HeroSection({ featured }: { featured: Product[] }) {
@@ -60,9 +61,10 @@ export function HeroSection({ featured }: { featured: Product[] }) {
               <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
                 {product.photos[0] && (
                   <Image
-                    src={product.photos[0]}
+                    src={proxyImage(product.photos[0])}
                     alt={product.name}
                     fill
+                    unoptimized
                     sizes="(max-width: 1024px) 50vw, 20vw"
                     className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
                   />

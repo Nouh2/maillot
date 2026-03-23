@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useCartStore } from '@/store/cart'
+import { proxyImage } from '@/lib/images'
 import type { CartItem as CartItemType } from '@/types/cart'
 
 export function CartItem({ item }: { item: CartItemType }) {
@@ -9,7 +10,7 @@ export function CartItem({ item }: { item: CartItemType }) {
   return (
     <div className="flex gap-4 py-4 border-b border-[var(--cream-3)]">
       <div className="relative w-20 h-24 bg-[var(--cream)] flex-shrink-0">
-        <Image src={item.photo} alt={item.name} fill sizes="80px" className="object-cover" />
+        <Image src={proxyImage(item.photo)} alt={item.name} fill unoptimized sizes="80px" className="object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-condensed text-sm tracking-wide uppercase text-[var(--black)] truncate">{item.name}</p>
