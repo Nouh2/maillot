@@ -73,7 +73,7 @@ export function FilterSidebar({ leagues }: { leagues: League[] }) {
           </button>
 
           {openDropdown === 'league' && (
-            <div className="absolute top-full left-0 mt-2 w-full sm:w-72 bg-white border-2 border-[var(--black)] shadow-[12px_12px_0px_0px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+            <div className="absolute top-full left-0 mt-2 w-[280px] sm:w-72 bg-white border-2 border-[var(--black)] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
               <div className="bg-[#2563EB] text-white px-4 py-3 text-sm font-black font-condensed tracking-[2px] uppercase">
                 CHAMPIONNAT
               </div>
@@ -118,7 +118,7 @@ export function FilterSidebar({ leagues }: { leagues: League[] }) {
           </button>
 
           {openDropdown === 'type' && (
-            <div className="absolute top-full left-0 mt-2 w-full sm:w-64 bg-white border-2 border-[var(--black)] shadow-[12px_12px_0px_0px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+            <div className="absolute top-full right-0 sm:left-0 sm:right-auto mt-2 w-[280px] sm:w-64 bg-white border-2 border-[var(--black)] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-200 z-50">
               <div className="bg-[#2563EB] text-white px-4 py-3 text-sm font-black font-condensed tracking-[2px] uppercase">
                 TYPE DE MAILLOT
               </div>
