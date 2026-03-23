@@ -28,5 +28,6 @@ export function resolveLeagueFilterParam(leagueParam: string | undefined, league
     return NATIONAL_TEAMS_VALUE
   }
 
-  return leagues.some((league) => league.slug === leagueParam) ? leagueParam : undefined
+  const found = leagues.find((league) => league.slug === leagueParam)
+  return found ? found.name : undefined
 }
