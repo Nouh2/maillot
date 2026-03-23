@@ -20,8 +20,13 @@ export async function getProducts(filters?: {
   if (filters?.type) query = query.eq('type', filters.type)
   if (filters?.featured) query = query.eq('is_featured', true)
   if (filters?.q) {
-    const searchTerm = `%${filters.q}%`
-    query = query.or(`name.ilike.${searchTerm},club.ilike.${searchTerm},league.ilike.${searchTerm},country.ilike.${searchTerm},season.ilike.${searchTerm}`)
+    // Découper par mots pour gérer les recherches multi-mots ("ac milan", "real madrid"...)
+    // Chaque mot doit matcher au moins une colonne (AND entre mots, OR entre colonnes)
+    const words = filters.q.trim().split(/\s+/).filter(Boolean)
+    for (const word of words) {
+      const t = `%${word}%`
+      query = query.or(`name.ilike.${t},club.ilike.${t},league.ilike.${t},country.ilike.${t},season.ilike.${t}`)
+    }
   }
   if (filters?.limit) query = query.limit(filters.limit)
 
