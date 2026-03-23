@@ -6,6 +6,8 @@ export interface CartItem {
   size: string
   patch: string | null
   patch_name: string | null
+  flocage_name: string | null
+  flocage_number: string | null
   price: number
   photo: string
   qty: number

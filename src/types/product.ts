@@ -5,6 +5,7 @@ export interface Product {
   club: string
   league: string
   country: string
+  product_kind: 'jersey' | 'goalkeeper' | 'training' | 'pre_match' | 'lifestyle' | 'jacket' | 'pants' | 'shorts' | 'set' | 'vest'
   type: 'domicile' | 'exterieur' | 'third'
   season: string
   price: number

@@ -7,13 +7,24 @@ interface CartState {
   items: CartItem[]
   isOpen: boolean
   addItem: (item: CartItem) => void
-  removeItem: (product_id: string, size: string) => void
-  updateQty: (product_id: string, size: string, qty: number) => void
+  removeItem: (item: CartItem) => void
+  updateQty: (item: CartItem, qty: number) => void
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
   total: () => number
   itemCount: () => number
+}
+
+// Helper to check if two cart items are identical in configuration
+const isSameItem = (a: CartItem, b: CartItem) => {
+  return (
+    a.product_id === b.product_id &&
+    a.size === b.size &&
+    a.patch === b.patch &&
+    a.flocage_name === b.flocage_name &&
+    a.flocage_number === b.flocage_number
+  )
 }
 
 export const useCartStore = create<CartState>()(
@@ -23,13 +34,11 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
 
       addItem: (newItem) => set((state) => {
-        const existing = state.items.find(
-          (i) => i.product_id === newItem.product_id && i.size === newItem.size
-        )
+        const existing = state.items.find((i) => isSameItem(i, newItem))
         if (existing) {
           return {
             items: state.items.map((i) =>
-              i.product_id === newItem.product_id && i.size === newItem.size
+              isSameItem(i, newItem)
                 ? { ...i, qty: i.qty + newItem.qty }
                 : i
             ),
@@ -39,17 +48,15 @@ export const useCartStore = create<CartState>()(
         return { items: [...state.items, newItem], isOpen: true }
       }),
 
-      removeItem: (product_id, size) => set((state) => ({
-        items: state.items.filter(
-          (i) => !(i.product_id === product_id && i.size === size)
-        ),
+      removeItem: (itemToRemove) => set((state) => ({
+        items: state.items.filter((i) => !isSameItem(i, itemToRemove)),
       })),
 
-      updateQty: (product_id, size, qty) => set((state) => ({
+      updateQty: (itemToUpdate, qty) => set((state) => ({
         items: qty <= 0
-          ? state.items.filter((i) => !(i.product_id === product_id && i.size === size))
+          ? state.items.filter((i) => !isSameItem(i, itemToUpdate))
           : state.items.map((i) =>
-              i.product_id === product_id && i.size === size ? { ...i, qty } : i
+              isSameItem(i, itemToUpdate) ? { ...i, qty } : i
             ),
       })),
 

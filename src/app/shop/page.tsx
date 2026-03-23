@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { getProducts, getLeagues } from '@/lib/supabase/queries'
+import { resolveLeagueFilterParam } from '@/lib/catalog'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
 import type { Metadata } from 'next'
@@ -22,10 +23,11 @@ function parseType(value: string | undefined): ProductType | undefined {
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams
-  const [products, leagues] = await Promise.all([
-    getProducts({ league: params.league, type: parseType(params.type) }),
-    getLeagues(),
-  ])
+  const leagues = await getLeagues()
+  const products = await getProducts({
+    league: resolveLeagueFilterParam(params.league, leagues),
+    type: parseType(params.type),
+  })
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -36,19 +38,18 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-        <div className="flex flex-col md:flex-row gap-8">
-          <Suspense fallback={null}>
-            <FilterSidebar leagues={leagues} />
-          </Suspense>
-          <div className="flex-1">
-            {products.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouvé</p>
-              </div>
-            ) : (
-              <ProductsGrid products={products} />
-            )}
-          </div>
+        <Suspense fallback={null}>
+          <FilterSidebar leagues={leagues} />
+        </Suspense>
+
+        <div>
+          {products.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouvé</p>
+            </div>
+          ) : (
+            <ProductsGrid products={products} />
+          )}
         </div>
       </div>
     </div>

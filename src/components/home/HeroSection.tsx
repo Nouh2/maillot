@@ -1,67 +1,83 @@
 // src/components/home/HeroSection.tsx
 import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '@/components/ui/Button'
+import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
 
 export function HeroSection({ featured }: { featured: Product[] }) {
   return (
-    <section className="min-h-[85vh] flex items-center bg-[var(--cream)] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid md:grid-cols-[55fr_45fr] gap-8 md:gap-12 py-12">
-        {/* Left: Text */}
+    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-[var(--cream)]">
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-5">
+        <div className="h-full w-full bg-[radial-gradient(circle_at_center,var(--black)_0%,transparent_100%)] mix-blend-multiply"></div>
+      </div>
+
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[60fr_40fr] lg:gap-8">
         <div className="flex flex-col justify-center">
-          <p className="font-condensed text-sm tracking-[4px] uppercase text-[var(--terra)] mb-4">
-            Maillots Premium · Saison 2024/25
+          <p className="mb-6 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--black)] md:text-sm">
+            <span className="h-[2px] w-8 bg-[var(--terra)]"></span>
+            Saison 2024/25
           </p>
-          <h1 className="font-bebas text-7xl md:text-9xl leading-none text-[var(--black)] mb-6">
-            TOUS LES<br />
-            <span className="text-[var(--terra)]">GRANDS</span><br />
-            CLUBS
+          <h1 className="relative mb-8 font-bebas text-7xl uppercase leading-[0.85] tracking-tighter text-[var(--black)] sm:text-8xl md:text-[9rem] lg:text-[11rem]">
+            L&apos;ELITE
+            <br />
+            DU <span className="relative inline-block text-[var(--terra)]">FOOTBALL</span>
           </h1>
-          <p className="text-[var(--grey)] text-lg leading-relaxed max-w-md mb-8 font-light">
-            390+ maillots officiels pour tous les clubs et championnats. Tailles S à XXL, patchs disponibles, livraison rapide.
+          <p className="mb-10 max-w-lg text-lg font-normal leading-relaxed text-[var(--black-3)] md:text-xl">
+            Plus de 390 maillots officiels des plus grands clubs et championnats. Qualite premium, flocages et patchs officiels.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/shop">
-              <Button size="lg">Explorer la boutique</Button>
+
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link href="/shop" className="group relative inline-flex items-center justify-center overflow-hidden bg-[var(--black)] px-8 py-5 font-condensed text-sm uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:bg-[var(--terra)]">
+              <span className="relative z-10">Decouvrir la collection</span>
             </Link>
-            <Link href="/ligue/premier-league">
-              <Button variant="secondary" size="lg">Premier League</Button>
+            <Link href="/ligue/premier-league" className="group relative inline-flex items-center justify-center border border-[var(--black)] bg-transparent px-8 py-5 font-condensed text-sm uppercase tracking-[0.2em] text-[var(--black)] transition-colors duration-300 hover:bg-[var(--black-2)] hover:text-white">
+              <span className="relative z-10">Premier League</span>
             </Link>
           </div>
-          <div className="flex items-center gap-6 mt-10 pt-8 border-t border-[var(--cream-3)]">
-            {[['390+', 'Maillots'], ['48h', 'Livraison'], ['100%', 'Sécurisé']].map(([n, l]) => (
-              <div key={l}>
-                <p className="font-bebas text-3xl text-[var(--terra)]">{n}</p>
-                <p className="font-condensed text-xs tracking-widest uppercase text-[var(--grey)]">{l}</p>
+
+          <div className="mt-16 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
+            {[
+              ['390+', 'Maillots Premium'],
+              ['48h', 'Livraison Rapide'],
+              ['SSL', 'Paiement Securise'],
+            ].map(([value, label]) => (
+              <div key={label} className="group cursor-default">
+                <p className="mb-1 font-bebas text-4xl text-[var(--black)] transition-colors group-hover:text-[var(--terra)] lg:text-5xl">{value}</p>
+                <p className="font-condensed text-[10px] uppercase tracking-widest text-[var(--grey)] md:text-xs">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right: Featured product cards */}
-        <div className="hidden md:grid grid-cols-2 gap-4 items-start">
-          {featured.slice(0, 4).map((p, i) => (
+        <div className="relative mt-8 grid grid-cols-2 items-start gap-4 lg:mt-0 lg:gap-6">
+          <div className="absolute left-1/2 top-1/2 -z-10 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--terra)]/5 blur-3xl"></div>
+          {featured.slice(0, 4).map((product) => (
             <Link
-              key={p.id}
-              href={`/shop/${p.slug}`}
-              className={`group block bg-white shadow-sm hover:shadow-md transition-all hover:-translate-y-1 hover:border-[var(--terra)] border border-[var(--cream-3)] ${i === 1 ? 'mt-8' : ''}`}
+              key={product.id}
+              href={`/shop/${product.slug}`}
+              className="group relative flex h-full flex-col border border-[var(--black)]/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
             >
-              <div className="relative aspect-[4/5] overflow-hidden">
-                {p.photos[0] && (
+              <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
+                {product.photos[0] && (
                   <Image
-                    src={p.photos[0]}
-                    alt={p.name}
+                    src={product.photos[0]}
+                    alt={product.name}
                     fill
-                    sizes="(max-width: 1024px) 50vw, 22vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 1024px) 50vw, 20vw"
+                    className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
                   />
                 )}
+                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5"></div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="border border-white/30 bg-black/20 px-2 py-1 font-condensed text-xs uppercase tracking-wider text-white backdrop-blur-sm">Apercu rapide</span>
+                </div>
               </div>
-              <div className="p-3">
-                <p className="font-condensed text-xs tracking-widest uppercase text-[var(--grey)]">{p.club}</p>
-                <p className="font-condensed text-sm font-semibold truncate capitalize">{p.type} {p.season}</p>
-                <p className="text-[var(--terra)] font-semibold text-sm mt-1">{p.price.toFixed(2)} €</p>
+              <div className="flex flex-1 flex-col justify-between p-4 transition-colors group-hover:bg-[var(--cream)] sm:p-5">
+                <div>
+                  <p className="mb-1 font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--grey)] sm:mb-2 sm:text-xs">{product.club}</p>
+                  <p className="line-clamp-2 font-condensed text-sm font-bold leading-tight text-[var(--black)] transition-colors group-hover:text-[var(--terra)] sm:text-base">{getProductMetaLine(product)}</p>
+                </div>
+                <p className="mt-3 font-bebas text-xl text-[var(--black)] sm:mt-4 sm:text-2xl">{product.price.toFixed(2)} EUR</p>
               </div>
             </Link>
           ))}

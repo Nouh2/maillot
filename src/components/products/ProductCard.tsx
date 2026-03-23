@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
+import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
 
 export function ProductCard({ product }: { product: Product }) {
@@ -40,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
         <div className="p-4">
           <p className="font-condensed text-xs tracking-widest uppercase text-[var(--grey)] mb-1">{product.club}</p>
-          <p className="font-condensed text-sm font-semibold text-[var(--black)] capitalize">{product.type} {product.season}</p>
+          <p className="font-condensed text-sm font-semibold text-[var(--black)]">{getProductMetaLine(product)}</p>
           <div className="flex items-center justify-between mt-2">
             <p className="font-condensed text-lg font-bold text-[var(--terra)]">{product.price.toFixed(2)} €</p>
             {product.available_patches.length > 0 && (
