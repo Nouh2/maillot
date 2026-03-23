@@ -1,6 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { CartButton } from '@/components/cart/CartButton'
 import { NATIONAL_TEAMS_HREF } from '@/lib/catalog'
 import type { League } from '@/types/product'
@@ -11,7 +12,9 @@ import {
   ShoppingBag, 
   Package, 
   MessageCircle,
-  Menu
+  Menu,
+  Search,
+  ArrowRight
 } from 'lucide-react'
 
 interface NavbarClientProps {
@@ -20,12 +23,25 @@ interface NavbarClientProps {
 }
 
 export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLeagues, setShowLeagues] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const closeMobileMenu = () => {
     setMobileOpen(false)
     setShowLeagues(false)
+  }
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchOpen(false)
+      setSearchQuery('')
+    }
   }
 
   useEffect(() => {
@@ -34,17 +50,21 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
     }
     window.addEventListener('resize', handleResize)
     
-    if (mobileOpen) {
+    if (mobileOpen || searchOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
+    }
+
+    if (searchOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100)
     }
     
     return () => {
       window.removeEventListener('resize', handleResize)
       document.body.style.overflow = ''
     }
-  }, [mobileOpen])
+  }, [mobileOpen, searchOpen])
 
   return (
     <>
@@ -85,7 +105,15 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
+            <button
+               onClick={() => setSearchOpen(true)}
+               className="rounded-full p-2 text-[var(--black)] hover:bg-[var(--cream)] transition-colors group"
+               aria-label="Rechercher"
+            >
+              <Search className="h-6 w-6 group-hover:scale-110 transition-transform" />
+            </button>
+
             <Link
               href="/compte"
               className="hidden rounded-full border border-[var(--black)] px-5 py-2 text-[14px] font-bold text-[var(--black)] transition-all hover:bg-[var(--black)] hover:text-white md:inline-flex"
@@ -103,6 +131,61 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
           </div>
         </nav>
       </header>
+
+      {/* Search Overlay */}
+      <div 
+        className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex items-center justify-between h-20 md:h-24">
+            <span className="font-bebas text-3xl tracking-widest text-[var(--black)]">KITLAB</span>
+            <button 
+              onClick={() => setSearchOpen(false)}
+              className="p-2 transition-transform hover:rotate-90"
+            >
+              <X className="h-8 w-8 text-[var(--black)]" />
+            </button>
+          </div>
+
+          <div className="py-10 md:py-20">
+            <form onSubmit={handleSearch} className="relative group">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="RECHERCHER UN MAILLOT, UNE ÉQUIPE..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent border-b-2 border-[#E5E5E5] pb-4 text-2xl md:text-5xl font-black uppercase tracking-tight text-[var(--black)] placeholder-[#E5E5E5] focus:outline-none focus:border-[var(--black)] transition-colors"
+              />
+              <button 
+                type="submit"
+                className="absolute right-0 bottom-6 p-2 text-[#E5E5E5] group-focus-within:text-[var(--black)] transition-colors"
+              >
+                <ArrowRight className="h-10 w-10 md:h-14 md:w-14" />
+              </button>
+            </form>
+
+            <div className="mt-12">
+              <p className="font-condensed text-sm font-bold uppercase tracking-widest text-[#707072] mb-6">Suggestions</p>
+              <div className="flex flex-wrap gap-3">
+                {['Real Madrid', 'Equipe de France', 'Version Joueur', 'Nouveautés', 'Bons Plans'].map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      setSearchQuery(tag)
+                      router.push(`/shop?q=${encodeURIComponent(tag)}`)
+                      setSearchOpen(false)
+                    }}
+                    className="px-6 py-2 bg-[var(--cream)] hover:bg-[var(--black)] hover:text-white text-[15px] font-bold rounded-full transition-all"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Menu Sidebar */}
       <div 

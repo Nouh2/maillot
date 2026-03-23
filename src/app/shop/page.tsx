@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = { title: 'Tous les Maillots' }
 
 interface ShopPageProps {
-  searchParams: Promise<{ league?: string; type?: string; sort?: string }>
+  searchParams: Promise<{ league?: string; type?: string; sort?: string; q?: string }>
 }
 
 const VALID_TYPES = ['domicile', 'exterieur', 'third'] as const
@@ -27,13 +27,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const products = await getProducts({
     league: resolveLeagueFilterParam(params.league, leagues),
     type: parseType(params.type),
+    q: params.q,
   })
+
+  const title = params.q 
+    ? `Résultats pour "${params.q}"` 
+    : params.league 
+      ? params.league.toUpperCase()
+      : 'TOUS LES MAILLOTS'
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <div className="bg-[var(--black-2)] py-12 text-center">
+      <div className="bg-[var(--black-2)] py-12 text-center px-4">
         <p className="font-condensed text-xs tracking-[4px] uppercase text-[var(--terra)] mb-2">Notre catalogue</p>
-        <h1 className="font-bebas text-6xl md:text-7xl text-white">TOUS LES MAILLOTS</h1>
+        <h1 className="font-bebas text-5xl md:text-7xl text-white break-words max-w-4xl mx-auto">{title}</h1>
         <p className="text-[var(--grey-lt)] mt-2">{products.length} maillots disponibles</p>
       </div>
 
