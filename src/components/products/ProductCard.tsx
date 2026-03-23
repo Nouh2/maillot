@@ -5,11 +5,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { proxyImage } from '@/lib/images'
 import type { Product } from '@/types/product'
 
 export function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false)
-  const photo = hovered && product.photos[1] ? product.photos[1] : product.photos[0]
+  const photo = proxyImage(hovered && product.photos[1] ? product.photos[1] : product.photos[0])
 
   return (
     <Link href={`/shop/${product.slug}`} className="group block">

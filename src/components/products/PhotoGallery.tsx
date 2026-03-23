@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
+import { proxyImage } from '@/lib/images'
 
 export function PhotoGallery({ photos, name }: { photos: string[]; name: string }) {
   const [active, setActive] = useState(0)
@@ -11,7 +12,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
     <div className="flex flex-col gap-4">
       <div className="relative aspect-[4/5] bg-[var(--cream)]">
         <Image
-          src={photos[active]}
+          src={proxyImage(photos[active])}
           alt={name}
           fill
           className="object-cover"
@@ -30,7 +31,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
             }`}
           >
             <Image
-              src={p}
+              src={proxyImage(p)}
               alt={`${name} vue ${i + 1}`}
               fill
               sizes="80px"
