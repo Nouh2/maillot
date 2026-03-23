@@ -2,6 +2,10 @@ import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
+import { Navbar } from '@/components/layout/Navbar'
+import { Footer } from '@/components/layout/Footer'
+import { Ticker } from '@/components/layout/Ticker'
+import { CartDrawer } from '@/components/cart/CartDrawer'
 
 const barlow = Barlow({
   subsets: ['latin'],
@@ -42,7 +46,11 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <Providers>
-          {children}
+          <Navbar />
+          <Ticker />
+          <CartDrawer />
+          <main>{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>
