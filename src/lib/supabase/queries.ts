@@ -74,6 +74,18 @@ export async function getWorldCupProducts(): Promise<Product[]> {
   return data ?? []
 }
 
+export async function getRetroProducts(): Promise<Product[]> {
+  const supabase = await getSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .eq('is_retro', true)
+    .order('season', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
 export async function getPatches(): Promise<Patch[]> {
   const supabase = await getSupabaseServerClient()
   const { data } = await supabase.from('patches').select('*')
