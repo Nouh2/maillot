@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Polices — utiliser des noms uniques pour éviter les boucles CSS infinies */
-  --font-sans: "Barlow", "Barlow Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bebas Neue", "Bebas Neue Fallback", sans-serif;
-  --font-condensed: "Barlow Condensed", "Barlow Condensed Fallback", sans-serif;
+  /* Câblage next/font → Tailwind v4
+     Les noms var() sont DIFFÉRENTS des noms de propriété → pas de boucle infinie */
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bebas), sans-serif;
+  --font-condensed: var(--font-barlow-condensed), sans-serif;
 }
 
 :root {
