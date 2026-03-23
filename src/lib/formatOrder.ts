@@ -25,7 +25,7 @@ Téléphone : ${order.customer_phone ?? 'N/A'}
 📦 <b>COMMANDE</b>
 ${itemLines}
 
-💰 <b>TOTAL : ${order.total_amount?.toFixed(2)} €</b>
+💰 <b>TOTAL : ${order.total_amount != null ? order.total_amount.toFixed(2) : 'N/A'} €</b>
 
 📍 <b>LIVRAISON</b>
 ${addrStr}

@@ -15,12 +15,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 })
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not set')
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
   let event: Stripe.Event
   try {
     event = getStripe().webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (err) {
     console.error('Webhook signature verification failed:', err)
@@ -30,7 +36,14 @@ export async function POST(request: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
 
-    const items: CartItem[] = JSON.parse(session.metadata?.items ?? '[]')
+    let items: CartItem[] = []
+    try {
+      items = JSON.parse(session.metadata?.items ?? '[]')
+    } catch (parseErr) {
+      console.error('Failed to parse items metadata:', parseErr)
+      // Retourner 200 pour éviter les relivraisons Stripe
+      return NextResponse.json({ received: true })
+    }
     const address = session.collected_information?.shipping_details?.address
 
     const order = {
