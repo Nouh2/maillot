@@ -39,23 +39,33 @@ export default async function LeaguePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[var(--cream)]">
       {/* Header ligue */}
-      <div className="bg-[var(--black-2)] py-10 text-center">
-        {banner && (
-          <div className="flex justify-center mb-4">
-            <Image
-              src={banner}
-              alt={league.name}
-              width={120}
-              height={120}
-              className="object-contain"
-              priority
-            />
+      {banner ? (
+        <div className="relative w-full overflow-hidden" style={{ height: 180 }}>
+          <Image
+            src={banner}
+            alt={league.name}
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.80) 0%, rgba(28,23,18,0.2) 60%, transparent 100%)' }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 text-center">
+            <h1 className="font-bebas text-5xl text-white drop-shadow-lg">{league.name}</h1>
+            <p className="mt-1 font-condensed text-xs text-white/70 uppercase tracking-widest">
+              {products.length} maillots disponibles
+            </p>
           </div>
-        )}
-        {!banner && <p className="mb-3 text-4xl">{league.flag_emoji}</p>}
-        <h1 className="font-bebas text-6xl text-white md:text-7xl">{league.name}</h1>
-        <p className="mt-2 text-[var(--grey-lt)]">{products.length} maillots disponibles</p>
-      </div>
+        </div>
+      ) : (
+        <div className="bg-[var(--black-2)] py-12 text-center">
+          <p className="mb-3 text-4xl">{league.flag_emoji}</p>
+          <h1 className="font-bebas text-6xl text-white md:text-7xl">{league.name}</h1>
+          <p className="mt-2 text-[var(--grey-lt)]">{products.length} maillots disponibles</p>
+        </div>
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         {products.length > 0 ? (
