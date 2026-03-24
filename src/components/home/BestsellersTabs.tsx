@@ -74,11 +74,11 @@ export function BestsellersTabs({
       {/* Grille mixte */}
       {featured ? (
         <div className="grid grid-cols-2 gap-2 mt-3">
-          {/* Carte featured — hauteur fixe pour éviter l'écrasement */}
+          {/* Carte featured — s'étire pour remplir exactement les 2 rangées de droite */}
           <Link
             href={`/shop/${featured.slug}`}
             className="row-span-2 relative overflow-hidden bg-[var(--cream-2)] block"
-            style={{ borderRadius: 2, aspectRatio: '2/3' }}
+            style={{ borderRadius: 2, minHeight: 200 }}
           >
             {activeTab === 'Tous' ? (
               <Image
