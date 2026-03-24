@@ -20,7 +20,10 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const [error, setError] = useState('')
   const addItem = useCartStore((s) => s.addItem)
 
-  const availablePatches = patches.filter((p) => product.available_patches.includes(p.code))
+  // Si aucun patch spécifique défini sur le produit, on affiche tous les patchs
+  const availablePatches = product.available_patches.length > 0
+    ? patches.filter((p) => product.available_patches.includes(p.code))
+    : patches
 
   const handleAdd = () => {
     if (!size) {
