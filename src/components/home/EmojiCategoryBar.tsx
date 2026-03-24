@@ -3,11 +3,23 @@
 import Link from 'next/link'
 import type { League } from '@/types/product'
 
-// Catégories spéciales fixes avec fallback slugs pour les images
-const SPECIAL_CATS = [
-  { slug: 'cdm-2026', label: 'CDM 2026', href: '/coupe-du-monde' },
-  { slug: 'retro', label: 'Rétro', href: '/retro' },
+// Catégories spéciales fixes
+const SPECIAL_CATS_START = [
+  { slug: 'cdm-2026', label: 'CDM 2026', href: '/coupe-du-monde', image: '/images/coupe_logo.jpg' },
 ]
+const SPECIAL_CATS_END = [
+  { slug: 'retro', label: 'Rétro', href: '/retro', image: null },
+]
+
+// Mapping slug ligue → image logo
+const LEAGUE_IMAGES: Record<string, string> = {
+  'bundesliga':     '/images/bundes.jpg',
+  'serie-a':        '/images/seria.jpg',
+  'ligue-1':        '/images/ligue1.jpg',
+  'premier-league': '/images/premiere.jpg',
+  'la-liga':        '/images/liga.jpg',
+  'reste-du-monde': '/images/reste_du_monde.jpg',
+}
 
 export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
   // On prend les 6 premières ligues en excluant "Champions League"
@@ -18,9 +30,10 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
       slug: l.slug,
       label: l.name,
       href: `/ligue/${l.slug}`,
+      image: LEAGUE_IMAGES[l.slug] ?? null,
     }))
 
-  const all = [...SPECIAL_CATS, ...leagueCats]
+  const all = [...SPECIAL_CATS_START, ...leagueCats, ...SPECIAL_CATS_END]
 
   return (
     <div
@@ -34,17 +47,15 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
             href={cat.href}
             className="flex items-center gap-2.5 hover:opacity-70 transition-opacity"
           >
-            <div className="w-8 h-8 relative flex-shrink-0 flex items-center justify-center">
-              <img 
-                src={`/logos/${cat.slug}.png`}
-                alt={cat.label}
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  // Fallback: masque l'icône si elle n'est pas encore uploadée dans public/logos
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            </div>
+            {cat.image && (
+              <div className="w-6 h-6 relative flex-shrink-0">
+                <img
+                  src={cat.image}
+                  alt={cat.label}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
             <span className="text-[15px] font-bold text-[var(--black)] whitespace-nowrap">
               {cat.label}
             </span>
