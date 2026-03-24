@@ -40,12 +40,12 @@ export default async function LeaguePage({ params }: Props) {
     <div className="min-h-screen bg-[var(--cream)]">
       {/* Bannière image si disponible */}
       {banner ? (
-        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/7', maxHeight: 260 }}>
+        <div className="relative w-full overflow-hidden bg-[var(--black-2)]" style={{ aspectRatio: '16/7', maxHeight: 260 }}>
           <Image
             src={banner}
             alt={league.name}
             fill
-            className="object-cover object-center"
+            className="object-contain"
             priority
           />
           {/* Gradient overlay pour lisibilité du texte */}
