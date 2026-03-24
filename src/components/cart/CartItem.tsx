@@ -16,7 +16,7 @@ export function CartItem({ item }: { item: CartItemType }) {
         <p className="font-condensed text-sm tracking-wide uppercase text-[var(--black)] truncate">{item.name}</p>
         <p className="text-xs text-[var(--grey)] mt-0.5">
           Taille: {item.size}
-          {item.patch_name && ` · Patch: ${item.patch_name}`}
+          {item.patch_names?.length > 0 && ` · Patch: ${item.patch_names.join(', ')}`}
         </p>
         {(item.flocage_name || item.flocage_number) && (
           <p className="text-xs text-[var(--terra)] mt-0.5 font-medium">

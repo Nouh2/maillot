@@ -41,11 +41,11 @@ function TrustPilotBadge() {
 
 const MESSAGES: ReactNode[] = [
   <span key="1" className="font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white block py-2">
-    🚚 LIVRAISON OFFERTE DÈS 60€ · EXPÉDITION 24/48H
+    LIVRAISON OFFERTE DÈS 60€ · EXPÉDITION 24/48H
   </span>,
   <TrustPilotBadge key="2" />,
   <span key="3" className="font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white block py-2">
-    🏆 390+ MAILLOTS · TOUS LES GRANDS CLUBS
+    390+ MAILLOTS · TOUS LES GRANDS CLUBS
   </span>,
 ]
 

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         product_id: i.product_id,
         name: i.name,
         size: i.size,
-        patch: i.patch,
+        patches: i.patches,
         qty: i.qty,
         price: i.price,
         photo: i.photo,

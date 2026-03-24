@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       product_id: i.product_id,
       name: i.name,
       size: i.size,
-      patch: i.patch ?? null,
-      patch_name: i.patch_name ?? null,
+      patches: i.patches ?? [],
+      patch_names: i.patch_names ?? [],
       qty: i.qty,
       photo: i.photo ?? null,
     }))
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: `${item.name} - Taille ${item.size}${item.patch_name ? ` + Patch ${item.patch_name}` : ''}`,
+              name: `${item.name} - Taille ${item.size}${item.patch_names?.length ? ` + Patch ${item.patch_names.join(', ')}` : ''}`,
               images: item.photo ? [item.photo] : [],
             },
             unit_amount: Math.round(serverPrice * 100),

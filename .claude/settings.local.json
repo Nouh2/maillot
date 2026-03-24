@@ -20,7 +20,12 @@
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__apply_migration",
       "Bash(pip install:*)",
-      "Bash(python scripts/scraper/scrape_yupoo.py --dry-run --limit 5)"
+      "Bash(python scripts/scraper/scrape_yupoo.py --dry-run --limit 5)",
+      "Bash(tail:*)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Bash(gh pr:*)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql"
     ]
   }
 }
