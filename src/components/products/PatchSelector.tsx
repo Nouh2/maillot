@@ -75,7 +75,7 @@ export function PatchSelector({
                 {selectedPatch ? selectedPatch.name : 'Sans patch'}
               </p>
               <p className="text-[11px] text-[#999] mt-0.5">
-                {selectedPatch ? 'Patch sélectionné' : 'Maillot classique'}
+                {selectedPatch ? '+2.50 €' : 'Inclus'}
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function PatchSelector({
                 Patch officiel
               </p>
               <p className="text-[11px] text-[#999] mt-1 uppercase tracking-[0.1em]">
-                {patches.length} patchs disponibles
+                {patches.length} patchs · +2.50 € / patch
               </p>
             </div>
             <button
@@ -201,6 +201,12 @@ export function PatchSelector({
                             style={{ color: isSelected ? 'white' : 'var(--black)' }}
                           >
                             {p.name}
+                          </p>
+                          <p
+                            className="text-[10px] mt-0.5"
+                            style={{ color: isSelected ? 'rgba(255,255,255,0.45)' : '#BBB' }}
+                          >
+                            +2.50 €
                           </p>
                         </div>
                         {isSelected && (

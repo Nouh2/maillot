@@ -7,6 +7,7 @@ import { PatchSelector } from './PatchSelector'
 import type { Product, Patch } from '@/types/product'
 
 const FLOCAGE_PRICE = 15
+const PATCH_PRICE = 2.50
 
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
@@ -34,7 +35,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     const selectedPatch = patches.find((p) => p.code === patch)
     
     // Calculate effective price per unit
-    const effectivePrice = product.price + (hasFlocage ? FLOCAGE_PRICE : 0)
+    const effectivePrice = product.price + (hasFlocage ? FLOCAGE_PRICE : 0) + (patch ? PATCH_PRICE : 0)
 
     addItem({
       product_id: product.id,
@@ -52,7 +53,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     })
   }
 
-  const totalPrice = (product.price + (hasFlocage ? FLOCAGE_PRICE : 0)) * qty
+  const totalPrice = (product.price + (hasFlocage ? FLOCAGE_PRICE : 0) + (patch ? PATCH_PRICE : 0)) * qty
 
   return (
     <div className="space-y-8">
