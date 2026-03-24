@@ -40,7 +40,7 @@ export default async function LeaguePage({ params }: Props) {
     <div className="min-h-screen bg-[var(--cream)]">
       {/* Bannière image si disponible */}
       {banner ? (
-        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/7' }}>
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/7', maxHeight: 260 }}>
           <Image
             src={banner}
             alt={league.name}
