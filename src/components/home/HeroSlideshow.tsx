@@ -16,25 +16,25 @@ const SLIDE_META = [
     smallText: 'Équipes Nationales 2026',
     bigText: 'Coupe du\nMonde',
     cta: 'Voir la collection',
-    href: '/shop/france-maillot-exterieur-2026-2027',
+    href: '/coupe-du-monde',
   },
   {
     smallText: 'Collection Rétro',
     bigText: 'Maillots\nRétro',
     cta: 'Voir la collection',
-    href: '/shop/saison-maillot-domicile-2012-2013',
+    href: '/retro',
   },
   {
     smallText: 'La Liga 25-26',
     bigText: 'Real Madrid\n& Barça',
     cta: 'Voir la collection',
-    href: '/shop/real-madrid-2025-2026',
+    href: '/ligue/la-liga',
   },
   {
-    smallText: 'Chelsea 2026-27',
+    smallText: 'Avant-Match 2026-27',
     bigText: "Maillots\nd'Avant-Match",
     cta: 'Voir la collection',
-    href: '/shop/chelsea-tenue-dentrainement-davant-match-2026-2027',
+    href: '/shop',
   },
 ]
 
