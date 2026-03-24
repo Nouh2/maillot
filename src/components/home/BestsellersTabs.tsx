@@ -74,15 +74,15 @@ export function BestsellersTabs({
       {/* Grille mixte */}
       {featured ? (
         <div className="grid grid-cols-2 gap-2 mt-3">
-          {/* Carte featured — hauteur 2 rangées */}
+          {/* Carte featured — hauteur fixe pour éviter l'écrasement */}
           <Link
             href={`/shop/${featured.slug}`}
-            className="row-span-2 relative overflow-hidden bg-[var(--cream-2)]"
-            style={{ borderRadius: 2 }}
+            className="row-span-2 relative overflow-hidden bg-[var(--cream-2)] block"
+            style={{ borderRadius: 2, aspectRatio: '2/3' }}
           >
             {activeTab === 'Tous' ? (
               <Image
-                src="/images/france-kit.jpg"
+                src="/images/france-kit.png"
                 alt={featured.name}
                 fill
                 className="object-cover object-top"
