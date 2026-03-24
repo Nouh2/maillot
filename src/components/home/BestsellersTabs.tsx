@@ -6,22 +6,25 @@ import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
 import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
-import type { Product } from '@/types/product'
+import type { Product, League } from '@/types/product'
 
-const TABS = ['Tous', 'Ligue 1', 'Premier League', 'La Liga']
+export function BestsellersTabs({
+  allProducts,
+  leagues,
+}: {
+  allProducts: Product[]
+  leagues: League[]
+}) {
+  // Tabs : "Tous" + les 4 premières ligues
+  const topLeagues = leagues.slice(0, 4)
+  const tabs = ['Tous', ...topLeagues.map((l) => l.name)]
 
-const LEAGUE_MAP: Record<string, string> = {
-  'Ligue 1': 'Ligue 1',
-  'Premier League': 'Premier League',
-  'La Liga': 'La Liga',
-}
-
-export function BestsellersTabs({ products }: { products: Product[] }) {
   const [activeTab, setActiveTab] = useState('Tous')
 
-  const filtered = activeTab === 'Tous'
-    ? products.slice(0, 8)
-    : products.filter((p) => p.league === LEAGUE_MAP[activeTab]).slice(0, 6)
+  const filtered =
+    activeTab === 'Tous'
+      ? allProducts.filter((p) => p.is_featured).slice(0, 8)
+      : allProducts.filter((p) => p.league === activeTab).slice(0, 8)
 
   const featured = filtered[0]
   const rest = filtered.slice(1)
@@ -47,8 +50,11 @@ export function BestsellersTabs({ products }: { products: Product[] }) {
       </p>
 
       {/* Tabs */}
-      <div className="flex gap-5 mt-4 overflow-x-auto border-b border-[var(--cream-3)]" style={{ scrollbarWidth: 'none' }}>
-        {TABS.map((tab) => (
+      <div
+        className="flex gap-5 mt-4 border-b border-[var(--cream-3)]"
+        style={{ overflowX: 'auto', scrollbarWidth: 'none' }}
+      >
+        {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -70,7 +76,7 @@ export function BestsellersTabs({ products }: { products: Product[] }) {
           <Link
             href={`/shop/${featured.slug}`}
             className="row-span-2 relative overflow-hidden bg-[var(--cream-2)]"
-            style={{ borderRadius: 2, aspectRatio: 'auto' }}
+            style={{ borderRadius: 2 }}
           >
             {featured.photos[0] && (
               <Image
@@ -116,7 +122,6 @@ export function BestsellersTabs({ products }: { products: Product[] }) {
                     sizes="45vw"
                   />
                 )}
-                {/* Icône panier */}
                 <div
                   className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
                   style={{ width: 28, height: 28, borderRadius: '50%' }}
@@ -133,17 +138,21 @@ export function BestsellersTabs({ products }: { products: Product[] }) {
         </div>
       ) : (
         <p className="font-condensed text-sm text-[var(--grey)] mt-6 text-center py-8">
-          Aucun produit dans cette catégorie
+          Aucun maillot dans cette catégorie
         </p>
       )}
 
-      {/* Voir plus */}
+      {/* Voir plus → lien vers la ligue active */}
       <Link
-        href="/shop"
+        href={
+          activeTab === 'Tous'
+            ? '/shop'
+            : `/ligue/${leagues.find((l) => l.name === activeTab)?.slug ?? 'shop'}`
+        }
         className="block w-full mt-4 py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] border border-[var(--black)] hover:bg-[var(--black)] hover:text-white transition-colors"
         style={{ borderRadius: 2 }}
       >
-        Voir tous les bestsellers
+        Voir tous les maillots {activeTab !== 'Tous' ? activeTab : ''}
       </Link>
     </section>
   )

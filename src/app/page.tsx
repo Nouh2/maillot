@@ -21,31 +21,31 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
+  // On charge assez de produits pour couvrir toutes les ligues dans les tabs
   const [allProducts, leagues] = await Promise.all([
-    getProducts({ concept: false, limit: 32 }),
+    getProducts({ concept: false, limit: 60 }),
     getLeagues(),
   ])
 
-  const featured = allProducts.filter((p) => p.is_featured).slice(0, 8)
-  const products = allProducts
+  const featured = allProducts.filter((p) => p.is_featured)
 
   return (
     <>
-      {/* Section A — Catégories + Hero Slideshow */}
-      <EmojiCategoryBar />
+      {/* Catégories emoji + Hero Slideshow */}
+      <EmojiCategoryBar leagues={leagues} />
       <HeroSlideshow featured={featured.length ? featured : allProducts.slice(0, 4)} />
 
       {/* Barre promo rotative */}
       <PromoStrip />
 
-      {/* Section B — Bestsellers tabbés avec grille mixte */}
-      <BestsellersTabs products={featured.length ? featured : allProducts.slice(0, 8)} />
+      {/* Bestsellers tabbés (ligues réelles) */}
+      <BestsellersTabs allProducts={allProducts} leagues={leagues} />
 
-      {/* Barre trust défilante (Section C) */}
+      {/* Barre trust défilante */}
       <TrustScrollBar />
 
-      {/* Section C — Collections tabbées */}
-      <CollectionsTabs products={products} />
+      {/* Collections tabbées (ligues réelles) */}
+      <CollectionsTabs allProducts={allProducts} leagues={leagues} />
 
       {/* Réassurance 6 icônes */}
       <ReassuranceBar />
@@ -65,7 +65,7 @@ export default async function HomePage() {
       {/* Galerie sociale */}
       <InstagramWall />
 
-      {/* À propos (Section D) */}
+      {/* À propos */}
       <AboutSection />
     </>
   )

@@ -2,21 +2,16 @@
 // src/components/home/CategorySlider.tsx
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { League } from '@/types/product'
 
-const CATEGORIES = [
-  { label: 'Tous', href: '/shop' },
-  { label: 'Ligue 1', href: '/ligue/ligue-1' },
-  { label: 'Premier League', href: '/ligue/premier-league' },
-  { label: 'La Liga', href: '/ligue/la-liga' },
-  { label: 'Bundesliga', href: '/ligue/bundesliga' },
-  { label: 'Serie A', href: '/ligue/serie-a' },
-  { label: 'Champions League', href: '/ligue/champions-league' },
-  { label: 'Équipes Nationales', href: '/ligue/equipes-nationales' },
-  { label: 'Rétro', href: '/retro' },
-]
-
-export function CategorySlider() {
+export function CategorySlider({ leagues }: { leagues: League[] }) {
   const pathname = usePathname()
+
+  const items = [
+    { label: 'Tous', href: '/shop' },
+    ...leagues.map((l) => ({ label: l.name, href: `/ligue/${l.slug}` })),
+    { label: 'Rétro', href: '/retro' },
+  ]
 
   return (
     <div className="bg-[var(--cream)] border-b border-[var(--black)]/5">
@@ -24,7 +19,7 @@ export function CategorySlider() {
         className="flex gap-2 overflow-x-auto px-4 py-3"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {CATEGORIES.map((cat) => {
+        {items.map((cat) => {
           const isActive = pathname === cat.href
           return (
             <Link
