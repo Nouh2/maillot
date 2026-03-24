@@ -1,5 +1,5 @@
 // src/app/page.tsx
-import { getProducts, getLeagues } from '@/lib/supabase/queries'
+import { getProducts, getLeagues, getProductBySlug } from '@/lib/supabase/queries'
 import { EmojiCategoryBar } from '@/components/home/EmojiCategoryBar'
 import { HeroSlideshow } from '@/components/home/HeroSlideshow'
 import { LeaguesStrip } from '@/components/home/LeaguesStrip'
@@ -21,10 +21,15 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  // On charge assez de produits pour couvrir toutes les ligues dans les tabs
-  const [allProducts, leagues] = await Promise.all([
+  const [allProducts, leagues, heroProducts] = await Promise.all([
     getProducts({ concept: false, limit: 60 }),
     getLeagues(),
+    Promise.all([
+      getProductBySlug('france-maillot-exterieur-2026-2027'),
+      getProductBySlug('saison-maillot-domicile-2012-2013'),
+      getProductBySlug('real-madrid-2025-2026'),
+      getProductBySlug('chelsea-tenue-dentrainement-davant-match-2026-2027'),
+    ]),
   ])
 
   const featured = allProducts.filter((p) => p.is_featured)
@@ -33,7 +38,7 @@ export default async function HomePage() {
     <>
       {/* Catégories emoji + Hero Slideshow */}
       <EmojiCategoryBar leagues={leagues} />
-      <HeroSlideshow featured={featured.length ? featured : allProducts.slice(0, 4)} />
+      <HeroSlideshow heroProducts={heroProducts} />
 
       {/* Barre promo rotative */}
       <PromoStrip />

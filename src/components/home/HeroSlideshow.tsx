@@ -10,14 +10,35 @@ import type { Product } from '@/types/product'
 import 'swiper/css'
 import 'swiper/css/pagination'
 
-const SLIDES = [
-  { smallText: 'Premier League 25-26', bigText: 'Maillots\nDomicile', href: '/ligue/premier-league' },
-  { smallText: 'La Liga 25-26', bigText: 'Real Madrid\n& Barcelona', href: '/ligue/la-liga' },
-  { smallText: 'Champions League', bigText: 'Édition\n2025-26', href: '/ligue/champions-league' },
-  { smallText: 'Équipes Nationales', bigText: 'Maillots\nAvant-Match', href: '/shop' },
+// Ordre : Coupe du monde → Rétro → Real & Barça → Avant-match
+const SLIDE_META = [
+  {
+    smallText: 'Équipes Nationales 2026',
+    bigText: 'Coupe du\nMonde',
+    cta: 'Voir la collection',
+    href: '/shop/france-maillot-exterieur-2026-2027',
+  },
+  {
+    smallText: 'Collection Rétro',
+    bigText: 'Maillots\nRétro',
+    cta: 'Voir la collection',
+    href: '/shop/saison-maillot-domicile-2012-2013',
+  },
+  {
+    smallText: 'La Liga 25-26',
+    bigText: 'Real Madrid\n& Barça',
+    cta: 'Voir la collection',
+    href: '/shop/real-madrid-2025-2026',
+  },
+  {
+    smallText: 'Chelsea 2026-27',
+    bigText: "Maillots\nd'Avant-Match",
+    cta: 'Voir la collection',
+    href: '/shop/chelsea-tenue-dentrainement-davant-match-2026-2027',
+  },
 ]
 
-export function HeroSlideshow({ featured }: { featured: Product[] }) {
+export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)[] }) {
   const paginationRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -35,14 +56,14 @@ export function HeroSlideshow({ featured }: { featured: Product[] }) {
         className="w-full"
         style={{ aspectRatio: '3/4' } as React.CSSProperties}
       >
-        {SLIDES.map((slide, i) => {
-          const product = featured[i % featured.length]
+        {SLIDE_META.map((slide, i) => {
+          const product = heroProducts[i]
           const imgSrc = product?.photos[0] ? proxyImage(product.photos[0]) : null
 
           return (
             <SwiperSlide key={i}>
               <div className="relative w-full h-full" style={{ aspectRatio: '3/4' }}>
-                {/* Image de fond */}
+                {/* Image du produit */}
                 {imgSrc ? (
                   <Image
                     src={imgSrc}
@@ -62,7 +83,7 @@ export function HeroSlideshow({ featured }: { featured: Product[] }) {
                   style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.90) 0%, rgba(28,23,18,0.3) 40%, transparent 65%)' }}
                 />
 
-                {/* Texte overlay bas gauche */}
+                {/* Texte overlay bas */}
                 <div className="absolute bottom-0 left-0 right-0 px-5 pb-20">
                   <p
                     className="font-condensed uppercase mb-2"
@@ -81,7 +102,7 @@ export function HeroSlideshow({ featured }: { featured: Product[] }) {
                     className="flex items-center justify-center font-condensed font-bold uppercase bg-white text-[var(--black)] hover:bg-[var(--cream)] transition-colors"
                     style={{ fontSize: 13, height: 44, borderRadius: 2, letterSpacing: '0.08em', width: '100%' }}
                   >
-                    Explorer la Collection
+                    {slide.cta}
                   </Link>
                 </div>
               </div>
