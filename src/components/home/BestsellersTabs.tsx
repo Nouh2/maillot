@@ -80,7 +80,15 @@ export function BestsellersTabs({
             className="row-span-2 relative overflow-hidden bg-[var(--cream-2)]"
             style={{ borderRadius: 2 }}
           >
-            {featured.photos[0] && (
+            {activeTab === 'Tous' ? (
+              <Image
+                src="/images/france-kit.jpg"
+                alt={featured.name}
+                fill
+                className="object-cover object-top"
+                sizes="45vw"
+              />
+            ) : featured.photos[0] ? (
               <Image
                 src={proxyImage(featured.photos[0])}
                 alt={featured.name}
@@ -89,7 +97,7 @@ export function BestsellersTabs({
                 className="object-cover"
                 sizes="45vw"
               />
-            )}
+            ) : null}
             <div
               className="absolute inset-0"
               style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }}
