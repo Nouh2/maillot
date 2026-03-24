@@ -17,24 +17,28 @@ const SLIDE_META = [
     bigText: 'Coupe du\nMonde',
     cta: 'Voir la collection',
     href: '/coupe-du-monde',
+    staticImage: '/images/coupe_du_monde.jpg',
   },
   {
     smallText: 'Collection Rétro',
     bigText: 'Maillots\nRétro',
     cta: 'Voir la collection',
     href: '/retro',
+    staticImage: '/images/retro.jpg',
   },
   {
     smallText: 'La Liga 25-26',
     bigText: 'Real Madrid\n& Barça',
     cta: 'Voir la collection',
     href: '/ligue/la-liga',
+    staticImage: '/images/real_barça.jpg',
   },
   {
     smallText: 'Avant-Match 2026-27',
     bigText: "Maillots\nd'Avant-Match",
     cta: 'Voir la collection',
     href: '/shop',
+    staticImage: null,
   },
 ]
 
@@ -58,7 +62,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
       >
         {SLIDE_META.map((slide, i) => {
           const product = heroProducts[i]
-          const imgSrc = product?.photos[0] ? proxyImage(product.photos[0]) : null
+          const imgSrc = slide.staticImage ?? (product?.photos[0] ? proxyImage(product.photos[0]) : null)
 
           return (
             <SwiperSlide key={i}>
@@ -69,7 +73,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                     src={imgSrc}
                     alt={slide.bigText}
                     fill
-                    unoptimized
+                    unoptimized={!slide.staticImage}
                     className="object-cover"
                     priority={i === 0}
                   />

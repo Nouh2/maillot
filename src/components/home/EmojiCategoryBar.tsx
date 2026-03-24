@@ -6,17 +6,19 @@ import type { League } from '@/types/product'
 // Catégories spéciales fixes avec fallback slugs pour les images
 const SPECIAL_CATS = [
   { slug: 'cdm-2026', label: 'CDM 2026', href: '/coupe-du-monde' },
-  { slug: 'nouveautes', label: 'Nouveautés', href: '/shop' },
   { slug: 'retro', label: 'Rétro', href: '/retro' },
 ]
 
 export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
-  // On prend les 6 premières ligues 
-  const leagueCats = leagues.slice(0, 6).map((l) => ({
-    slug: l.slug,
-    label: l.name,
-    href: `/ligue/${l.slug}`,
-  }))
+  // On prend les 6 premières ligues en excluant "Champions League"
+  const leagueCats = leagues
+    .filter(l => !l.slug.includes('champions-league'))
+    .slice(0, 6)
+    .map((l) => ({
+      slug: l.slug,
+      label: l.name,
+      href: `/ligue/${l.slug}`,
+    }))
 
   const all = [...SPECIAL_CATS, ...leagueCats]
 
