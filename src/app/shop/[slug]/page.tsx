@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   return (
-    <div className="min-h-screen bg-[var(--cream)] pb-20 md:pb-0">
+    <div className="min-h-screen bg-[var(--cream)] pb-32 md:pb-0">
       <StickyAddToCart productName={product.name} price={product.price} />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
