@@ -4,8 +4,10 @@ import Link from 'next/link'
 import type { League } from '@/types/product'
 
 // Catégories spéciales fixes
-const SPECIAL_CATS = [
+const SPECIAL_CATS_START = [
   { slug: 'cdm-2026', label: 'CDM 2026', href: '/coupe-du-monde', image: '/images/coupe_logo.jpg' },
+]
+const SPECIAL_CATS_END = [
   { slug: 'retro', label: 'Rétro', href: '/retro', image: null },
 ]
 
@@ -31,7 +33,7 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
       image: LEAGUE_IMAGES[l.slug] ?? null,
     }))
 
-  const all = [...SPECIAL_CATS, ...leagueCats]
+  const all = [...SPECIAL_CATS_START, ...leagueCats, ...SPECIAL_CATS_END]
 
   return (
     <div
@@ -46,11 +48,11 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
             className="flex items-center gap-2.5 hover:opacity-70 transition-opacity"
           >
             {cat.image && (
-              <div className="w-8 h-8 relative flex-shrink-0">
+              <div className="w-6 h-6 relative flex-shrink-0">
                 <img
                   src={cat.image}
                   alt={cat.label}
-                  className="w-full h-full object-cover rounded-sm"
+                  className="w-full h-full object-contain"
                 />
               </div>
             )}
