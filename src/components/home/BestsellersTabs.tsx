@@ -11,9 +11,11 @@ import type { Product, League } from '@/types/product'
 export function BestsellersTabs({
   allProducts,
   leagues,
+  topProducts = [],
 }: {
   allProducts: Product[]
   leagues: League[]
+  topProducts?: (Product | null)[]
 }) {
   // Tabs : "Tous" + les 4 premières ligues
   const topLeagues = leagues.slice(0, 4)
@@ -23,7 +25,7 @@ export function BestsellersTabs({
 
   const filtered =
     activeTab === 'Tous'
-      ? allProducts.filter((p) => p.is_featured).slice(0, 8)
+      ? (topProducts.filter(Boolean) as Product[])
       : allProducts.filter((p) => p.league === activeTab).slice(0, 8)
 
   const featured = filtered[0]

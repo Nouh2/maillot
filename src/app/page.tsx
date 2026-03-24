@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [allProducts, leagues, heroProducts] = await Promise.all([
+  const [allProducts, leagues, heroProducts, topProducts] = await Promise.all([
     getProducts({ concept: false, limit: 60 }),
     getLeagues(),
     Promise.all([
@@ -29,6 +29,11 @@ export default async function HomePage() {
       getProductBySlug('saison-maillot-domicile-2012-2013'),
       getProductBySlug('real-madrid-2025-2026'),
       getProductBySlug('chelsea-tenue-dentrainement-davant-match-2026-2027'),
+    ]),
+    Promise.all([
+      getProductBySlug('france-maillot-exterieur-2026-2027'),
+      getProductBySlug('bresil-gardien-2026-2027'),
+      getProductBySlug('saison-maillot-domicile-blanc-manches-longues-2012-2013'),
     ]),
   ])
 
@@ -44,7 +49,7 @@ export default async function HomePage() {
       <PromoStrip />
 
       {/* Bestsellers tabbés (ligues réelles) */}
-      <BestsellersTabs allProducts={allProducts} leagues={leagues} />
+      <BestsellersTabs allProducts={allProducts} leagues={leagues} topProducts={topProducts} />
 
       {/* Barre trust défilante */}
       <TrustScrollBar />
