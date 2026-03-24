@@ -4,8 +4,8 @@ export interface CartItem {
   name: string
   club: string
   size: string
-  patch: string | null
-  patch_name: string | null
+  patches: string[]
+  patch_names: string[]
   flocage_name: string | null
   flocage_number: string | null
   price: number

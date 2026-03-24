@@ -21,7 +21,7 @@ const isSameItem = (a: CartItem, b: CartItem) => {
   return (
     a.product_id === b.product_id &&
     a.size === b.size &&
-    a.patch === b.patch &&
+    JSON.stringify([...a.patches].sort()) === JSON.stringify([...b.patches].sort()) &&
     a.flocage_name === b.flocage_name &&
     a.flocage_number === b.flocage_number
   )

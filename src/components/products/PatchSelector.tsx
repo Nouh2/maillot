@@ -22,11 +22,10 @@ export function PatchSelector({
   onSelect,
 }: {
   patches: Patch[]
-  selected: string | null
-  onSelect: (code: string | null) => void
+  selected: string[]
+  onSelect: (codes: string[]) => void
 }) {
   const [open, setOpen] = useState(false)
-  const selectedPatch = patches.find((p) => p.code === selected)
 
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden'
@@ -36,9 +35,12 @@ export function PatchSelector({
 
   if (patches.length === 0) return null
 
-  const handleSelect = (code: string | null) => {
-    onSelect(code)
-    setTimeout(() => setOpen(false), 200)
+  const toggle = (code: string) => {
+    if (selected.includes(code)) {
+      onSelect(selected.filter((c) => c !== code))
+    } else {
+      onSelect([...selected, code])
+    }
   }
 
   const patchMap = Object.fromEntries(patches.map((p) => [p.code, p]))
@@ -51,12 +53,12 @@ export function PatchSelector({
           <p className="text-[11px] font-bold text-[var(--black)] uppercase tracking-[0.12em]">
             Patch officiel
           </p>
-          {selected && (
+          {selected.length > 0 && (
             <button
-              onClick={() => onSelect(null)}
+              onClick={() => onSelect([])}
               className="text-[11px] text-[var(--grey)] underline underline-offset-2 hover:text-[var(--black)] transition-colors"
             >
-              Retirer
+              Tout retirer
             </button>
           )}
         </div>
@@ -68,14 +70,18 @@ export function PatchSelector({
           <div className="flex items-center gap-3">
             <div
               className="w-[3px] self-stretch rounded-full flex-shrink-0"
-              style={{ background: selected ? 'var(--terra)' : '#E0E0E0', minHeight: 28 }}
+              style={{ background: selected.length > 0 ? 'var(--terra)' : '#E0E0E0', minHeight: 28 }}
             />
             <div className="text-left">
               <p className="text-[14px] font-bold text-[var(--black)] leading-tight">
-                {selectedPatch ? selectedPatch.name : 'Sans patch'}
+                {selected.length === 0
+                  ? 'Sans patch'
+                  : selected.length === 1
+                  ? patches.find((p) => p.code === selected[0])?.name ?? '1 patch'
+                  : `${selected.length} patchs sélectionnés`}
               </p>
               <p className="text-[11px] text-[#999] mt-0.5">
-                {selectedPatch ? '+2.50 €' : 'Inclus'}
+                {selected.length > 0 ? `+${(selected.length * 2.5).toFixed(2)} €` : 'Inclus'}
               </p>
             </div>
           </div>
@@ -117,10 +123,10 @@ export function PatchSelector({
           <div className="flex items-end justify-between">
             <div>
               <p className="font-bebas text-[28px] tracking-wide text-[var(--black)] leading-none">
-                Patch officiel
+                Patchs officiels
               </p>
               <p className="text-[11px] text-[#999] mt-1 uppercase tracking-[0.1em]">
-                {patches.length} patchs · +2.50 € / patch
+                {patches.length} patchs · +2.50 € / patch · cumul possible
               </p>
             </div>
             <button
@@ -138,29 +144,29 @@ export function PatchSelector({
 
           {/* Option sans patch */}
           <button
-            onClick={() => handleSelect(null)}
+            onClick={() => onSelect([])}
             className="w-full flex items-center justify-between px-4 py-3 mb-5 border transition-all"
             style={{
               borderRadius: 2,
-              borderColor: selected === null ? 'var(--black)' : '#E8E8E8',
-              background: selected === null ? 'var(--black)' : 'white',
+              borderColor: selected.length === 0 ? 'var(--black)' : '#E8E8E8',
+              background: selected.length === 0 ? 'var(--black)' : 'white',
             }}
           >
             <div className="text-left">
               <p
                 className="text-[13px] font-bold uppercase tracking-[0.06em]"
-                style={{ color: selected === null ? 'white' : 'var(--black)' }}
+                style={{ color: selected.length === 0 ? 'white' : 'var(--black)' }}
               >
                 Sans patch
               </p>
               <p
                 className="text-[11px] mt-0.5"
-                style={{ color: selected === null ? 'rgba(255,255,255,0.5)' : '#999' }}
+                style={{ color: selected.length === 0 ? 'rgba(255,255,255,0.5)' : '#999' }}
               >
                 Maillot classique
               </p>
             </div>
-            {selected === null && (
+            {selected.length === 0 && (
               <div
                 className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                 style={{ background: 'var(--terra)' }}
@@ -182,11 +188,11 @@ export function PatchSelector({
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {groupPatches.map((p) => {
-                    const isSelected = selected === p.code
+                    const isSelected = selected.includes(p.code)
                     return (
                       <button
                         key={p.code}
-                        onClick={() => handleSelect(p.code)}
+                        onClick={() => toggle(p.code)}
                         className="flex items-center gap-2.5 px-3 py-2.5 border text-left transition-all"
                         style={{
                           borderRadius: 2,
