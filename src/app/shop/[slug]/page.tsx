@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getProductBySlug, getPatches } from '@/lib/supabase/queries'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
+import { StickyAddToCart } from '@/components/products/StickyAddToCart'
 import { Badge } from '@/components/ui/Badge'
 import { Truck, ShieldCheck, Undo } from 'lucide-react'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
@@ -35,7 +36,9 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   return (
-    <div className="min-h-screen bg-[var(--cream)]">
+    <div className="min-h-screen bg-[var(--cream)] pb-20 md:pb-0">
+      <StickyAddToCart productName={product.name} price={product.price} />
+
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
         <div className="grid gap-10 md:grid-cols-2 md:gap-16">
           <PhotoGallery photos={product.photos} name={product.name} />
@@ -68,6 +71,8 @@ export default async function ProductPage({ params }: Props) {
               )
             })()}
 
+            {/* Sentinel pour le sticky CTA mobile */}
+            <div id="product-cta-sentinel" />
             <AddToCartForm product={product} patches={patches} />
 
             <div className="mt-12 space-y-4 border-t-2 border-[var(--black)] pt-8">

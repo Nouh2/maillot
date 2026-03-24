@@ -1,13 +1,18 @@
 // src/app/page.tsx
 import { getProducts, getLeagues } from '@/lib/supabase/queries'
-import { HeroSection } from '@/components/home/HeroSection'
+import { EmojiCategoryBar } from '@/components/home/EmojiCategoryBar'
+import { HeroSlideshow } from '@/components/home/HeroSlideshow'
 import { LeaguesStrip } from '@/components/home/LeaguesStrip'
-import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { BestsellersTabs } from '@/components/home/BestsellersTabs'
+import { TrustScrollBar } from '@/components/home/TrustScrollBar'
+import { CollectionsTabs } from '@/components/home/CollectionsTabs'
 import { WhyUsSection } from '@/components/home/WhyUsSection'
 import { ReassuranceBar } from '@/components/home/ReassuranceBar'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
+import { InstagramWall } from '@/components/home/InstagramWall'
+import { CountdownBanner } from '@/components/home/CountdownBanner'
+import { AboutSection } from '@/components/home/AboutSection'
 import { PromoStrip } from '@/components/home/PromoStrip'
-import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -16,32 +21,52 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [featured, leagues] = await Promise.all([
-    getProducts({ featured: true, concept: false, limit: 8 }),
+  const [allProducts, leagues] = await Promise.all([
+    getProducts({ concept: false, limit: 32 }),
     getLeagues(),
   ])
 
+  const featured = allProducts.filter((p) => p.is_featured).slice(0, 8)
+  const products = allProducts
+
   return (
     <>
-      <HeroSection featured={featured} />
+      {/* Section A — Catégories + Hero Slideshow */}
+      <EmojiCategoryBar />
+      <HeroSlideshow featured={featured.length ? featured : allProducts.slice(0, 4)} />
+
+      {/* Barre promo rotative */}
       <PromoStrip />
-      <LeaguesStrip leagues={leagues} />
+
+      {/* Section B — Bestsellers tabbés avec grille mixte */}
+      <BestsellersTabs products={featured.length ? featured : allProducts.slice(0, 8)} />
+
+      {/* Barre trust défilante (Section C) */}
+      <TrustScrollBar />
+
+      {/* Section C — Collections tabbées */}
+      <CollectionsTabs products={products} />
+
+      {/* Réassurance 6 icônes */}
       <ReassuranceBar />
 
-      <section className="py-10 bg-[var(--cream)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <ScrollReveal>
-            <ProductsGrid
-              products={featured.slice(0, 8)}
-              title="BESTSELLERS"
-              sub="Les plus populaires"
-            />
-          </ScrollReveal>
-        </div>
-      </section>
+      {/* Championnats */}
+      <LeaguesStrip leagues={leagues} />
 
+      {/* Countdown offre */}
+      <CountdownBanner />
+
+      {/* La différence KITLAB */}
       <WhyUsSection />
+
+      {/* Avis carrousel */}
       <ReviewsSection />
+
+      {/* Galerie sociale */}
+      <InstagramWall />
+
+      {/* À propos (Section D) */}
+      <AboutSection />
     </>
   )
 }

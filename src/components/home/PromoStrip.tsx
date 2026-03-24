@@ -1,24 +1,36 @@
+'use client'
 // src/components/home/PromoStrip.tsx
-import Link from 'next/link'
-import { ArrowRight, Flame } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+const MESSAGES = [
+  '🚚 LIVRAISON OFFERTE DÈS 60€ · EXPÉDITION 24/48H',
+  '⭐ 4.9/5 · PLUS DE 1 000 CLIENTS SATISFAITS',
+  '🏆 390+ MAILLOTS · TOUS LES GRANDS CLUBS',
+]
 
 export function PromoStrip() {
+  const [index, setIndex] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % MESSAGES.length)
+        setVisible(true)
+      }, 300)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <div className="bg-[var(--terra)] py-3 px-4">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-center">
-        <div className="flex items-center gap-2 text-white">
-          <Flame className="w-4 h-4 shrink-0" />
-          <span className="font-condensed text-sm font-bold uppercase tracking-[0.15em]">
-            Livraison offerte dès 60&nbsp;€ · Flocage disponible · Tous les grands clubs
-          </span>
-        </div>
-        <Link
-          href="/shop"
-          className="flex items-center gap-1 font-condensed text-sm uppercase tracking-widest text-white/80 underline-offset-4 hover:text-white hover:underline transition-colors whitespace-nowrap"
-        >
-          En profiter <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
+    <div className="bg-[var(--terra)] py-2.5 px-4 overflow-hidden">
+      <p
+        className="text-center font-condensed text-xs font-bold uppercase tracking-[0.05em] text-white transition-opacity duration-300"
+        style={{ opacity: visible ? 1 : 0 }}
+      >
+        {MESSAGES[index]}
+      </p>
     </div>
   )
 }
