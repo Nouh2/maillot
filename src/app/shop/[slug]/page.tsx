@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   return (
-    <div className="min-h-screen bg-[var(--cream)] pb-32 md:pb-0">
+    <div className="min-h-screen bg-[var(--cream)] md:pb-0">
       <StickyAddToCart productName={product.name} price={product.price} />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
@@ -74,6 +74,8 @@ export default async function ProductPage({ params }: Props) {
             {/* Sentinel pour le sticky CTA mobile */}
             <div id="product-cta-sentinel" />
             <AddToCartForm product={product} patches={patches} />
+            {/* Espace pour le sticky bar mobile */}
+            <div className="h-28 md:hidden" />
 
             <div className="mt-12 space-y-4 border-t-2 border-[var(--black)] pt-8">
               <div className="flex items-start gap-4">
