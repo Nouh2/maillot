@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const [allProducts, leagues, heroProducts, topProducts] = await Promise.all([
-    getProducts({ concept: false, limit: 60 }),
+    getProducts({ concept: false }),
     getLeagues(),
     Promise.all([
       getProductBySlug('france-maillot-exterieur-2026-2027'),
