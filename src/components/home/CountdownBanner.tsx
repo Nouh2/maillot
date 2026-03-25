@@ -19,10 +19,9 @@ function Pad({ n }: { n: number }) {
 }
 
 export function CountdownBanner() {
-  const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
+  const [time, setTime] = useState(getTimeUntilMidnight)
 
   useEffect(() => {
-    setTime(getTimeUntilMidnight())
     const id = setInterval(() => setTime(getTimeUntilMidnight()), 1000)
     return () => clearInterval(id)
   }, [])

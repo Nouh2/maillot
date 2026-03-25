@@ -1,6 +1,7 @@
 'use client'
 // src/components/home/EmojiCategoryBar.tsx
 import Link from 'next/link'
+import Image from 'next/image'
 import type { League } from '@/types/product'
 
 // Catégories spéciales fixes
@@ -49,10 +50,12 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
           >
             {cat.image && (
               <div className="w-6 h-6 relative flex-shrink-0">
-                <img
+                <Image
                   src={cat.image}
                   alt={cat.label}
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="24px"
+                  className="object-contain"
                 />
               </div>
             )}

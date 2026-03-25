@@ -7,7 +7,9 @@ export interface Order {
   customer_phone?: string | null
   shipping_address?: {
     street?: string | null
+    line2?: string | null
     city?: string | null
+    state?: string | null
     postal_code?: string | null
     country?: string | null
   } | null
@@ -15,7 +17,10 @@ export interface Order {
     product_id: string
     name: string
     size: string
-    patch?: string | null
+    patches?: string[] | null
+    patch_names?: string[] | null
+    flocage_name?: string | null
+    flocage_number?: string | null
     qty: number
     price: number
     photo?: string | null

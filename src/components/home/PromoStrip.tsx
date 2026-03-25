@@ -1,7 +1,6 @@
 'use client'
 // src/components/home/PromoStrip.tsx
 import { useState, useEffect, ReactNode } from 'react'
-import { Star } from 'lucide-react'
 
 function TrustPilotBadge() {
   const StarIcon = () => (

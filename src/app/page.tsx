@@ -36,9 +36,6 @@ export default async function HomePage() {
       getProductBySlug('saison-maillot-domicile-blanc-manches-longues-2012-2013'),
     ]),
   ])
-
-  const featured = allProducts.filter((p) => p.is_featured)
-
   return (
     <>
       {/* Catégories emoji + Hero Slideshow */}

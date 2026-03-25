@@ -2,12 +2,10 @@
 import { useState } from 'react'
 import { Plus, Minus, Check } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
+import { FLOCAGE_PRICE, calculateCartItemUnitPrice } from '@/lib/cartPricing'
 import { SizeSelector } from './SizeSelector'
 import { PatchSelector } from './PatchSelector'
 import type { Product, Patch } from '@/types/product'
-
-const FLOCAGE_PRICE = 15
-const PATCH_PRICE = 2.50
 
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
@@ -34,9 +32,11 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     setError('')
     const selectedPatchObjects = patches.filter((p) => selectedPatches.includes(p.code))
 
-    const effectivePrice = product.price
-      + (hasFlocage ? FLOCAGE_PRICE : 0)
-      + selectedPatches.length * PATCH_PRICE
+    const effectivePrice = calculateCartItemUnitPrice({
+      basePrice: product.price,
+      patchCount: selectedPatches.length,
+      hasFlocage,
+    })
 
     addItem({
       product_id: product.id,
@@ -54,11 +54,11 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     })
   }
 
-  const totalPrice = (
-    product.price
-    + (hasFlocage ? FLOCAGE_PRICE : 0)
-    + selectedPatches.length * PATCH_PRICE
-  ) * qty
+  const totalPrice = calculateCartItemUnitPrice({
+    basePrice: product.price,
+    patchCount: selectedPatches.length,
+    hasFlocage,
+  }) * qty
 
   return (
     <div className="space-y-8">
