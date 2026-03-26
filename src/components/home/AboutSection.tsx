@@ -3,7 +3,7 @@ import { Star } from 'lucide-react'
 
 const LIST_ITEMS = [
   { icon: '🎽', text: '+390 maillots disponibles' },
-  { icon: '⭐', text: '4.9/5 sur nos avis clients' },
+  { icon: '⭐', text: '4.5/5 sur nos avis clients' },
   { icon: '🚚', text: 'Livraison gratuite dès 60€' },
 ]
 
@@ -57,11 +57,11 @@ export function AboutSection() {
               <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <p className="font-condensed text-[11px] text-[var(--grey)] mt-1">+1 000 clients satisfaits</p>
+          <p className="font-condensed text-[11px] text-[var(--grey)] mt-1">+1 200 clients satisfaits</p>
         </div>
         <div className="ml-auto text-right">
           <p className="font-condensed text-[13px] font-bold text-[var(--black)]">Excellent</p>
-          <p className="font-condensed text-[12px] text-[var(--grey)]">4.9 / 5</p>
+          <p className="font-condensed text-[12px] text-[var(--grey)]">4.5 / 5</p>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export function AboutSection() {
           className="font-condensed font-black text-[var(--black)] leading-none"
           style={{ fontSize: 52 }}
         >
-          +1 000
+          +1 200
         </p>
         <p
           className="font-condensed uppercase text-[var(--grey)] mt-2"

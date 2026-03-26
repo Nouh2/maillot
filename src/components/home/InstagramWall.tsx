@@ -22,7 +22,7 @@ export function InstagramWall() {
           Communauté KITLAB
         </p>
         <h2 className="font-bebas text-4xl text-[var(--black)]">
-          1 000+ CLIENTS SATISFAITS
+          1 200+ CLIENTS SATISFAITS
         </h2>
         <p className="font-condensed text-sm text-[var(--grey)] mt-1">Merci pour vos photos ! 📸</p>
       </div>

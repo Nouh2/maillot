@@ -152,7 +152,7 @@ export function ReviewsSection() {
 
             {/* Score compact (toujours visible) */}
             <div className="flex-shrink-0 text-center pb-1">
-              <p className="font-bebas text-[3.5rem] sm:text-[4.5rem] leading-none text-[var(--terra)]">4.9</p>
+              <p className="font-bebas text-[3.5rem] sm:text-[4.5rem] leading-none text-[var(--terra)]">4.5</p>
               <div className="flex justify-center gap-0.5 mb-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-amber-400 text-amber-400" />

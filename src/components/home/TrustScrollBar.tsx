@@ -1,6 +1,6 @@
 // src/components/home/TrustScrollBar.tsx
 const ITEMS = [
-  '✓ 1 000+ Clients Satisfaits',
+  '✓ 1 200+ Clients Satisfaits',
   '✓ Paiement Sécurisé',
   '✓ Livraison 24/48h',
   '✓ Satisfait ou Remboursé',

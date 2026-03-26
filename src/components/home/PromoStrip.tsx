@@ -31,7 +31,7 @@ function TrustPilotBadge() {
         </span>
         <span className="text-white/60 text-[10px] sm:text-[12px]">|</span>
         <span className="text-[11px] sm:text-[13px] font-medium text-white tracking-wide">
-          +1 000 clients satisfaits
+          +1 200 clients satisfaits
         </span>
       </div>
     </div>

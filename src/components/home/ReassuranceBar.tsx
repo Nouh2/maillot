@@ -5,7 +5,7 @@ const ITEMS = [
   { icon: ShieldCheck, label: 'Paiement sécurisé', sub: 'Stripe certifié PCI' },
   { icon: Truck, label: 'Livraison 24/48h', sub: 'Suivi inclus' },
   { icon: RotateCcw, label: 'Satisfait ou remboursé', sub: 'Retour sous 14 jours' },
-  { icon: Package, label: '4.9/5 Avis clients', sub: '1 000+ commandes' },
+  { icon: Package, label: '4.5/5 Avis clients', sub: '1 200+ commandes' },
   { icon: MessageCircle, label: 'SAV réactif', sub: 'Réponse sous 24h' },
   { icon: Shirt, label: 'Flocage disponible', sub: 'Nom + numéro + patchs' },
 ] as const
