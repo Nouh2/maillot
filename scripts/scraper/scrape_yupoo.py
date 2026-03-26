@@ -1,1036 +1,415 @@
-"""
-Yupoo product scraper for KITLAB.
-Fetches gallery listings, album photos, and translates Chinese album titles to French.
-Usage: python scrape_yupoo.py --limit 10 --dry-run
-"""
+from __future__ import annotations
+
 import argparse
+import mimetypes
 import os
 import re
 import sys
 import time
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
-sys.stdout.reconfigure(encoding="utf-8")
-
+import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from supabase import create_client
+
+from catalog_config import CATEGORY_DEFINITIONS, ENTITY_ALIASES, LEAGUE_COUNTRY, PATCHES_BY_LEAGUE, REST_OF_WORLD_LEAGUE
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 load_dotenv(dotenv_path=Path(__file__).parent.parent.parent / ".env.local")
 
 SUPABASE_URL = os.environ["NEXT_PUBLIC_SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-BASE_URL = "https://svip-1688.x.yupoo.com"
 PHOTO_BASE_URL = "https://photo.yupoo.com"
-REST_OF_WORLD_LEAGUE = "Reste du monde"
+DEFAULT_BUCKET = os.getenv("SUPABASE_PRODUCT_IMAGES_BUCKET", "product-images")
+DEFAULT_PROVIDER = os.getenv("YUPOO_SUPPLIER_NAME", "yupoo-category-supplier")
+DEFAULT_PRICE = float(os.getenv("YUPOO_DEFAULT_PRICE", "34.90"))
+DEFAULT_DELAY = float(os.getenv("YUPOO_REQUEST_DELAY", "0.5"))
 DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"]
 SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"]
-SIZE_RANGE_SEPARATORS = r"(?:-|–|—|~|～|一|到|至|--)"
-CHINESE_CHAR_PATTERN = re.compile(r"[\u3400-\u9fff]+")
-AC_MILAN_VARIANT_PATTERN = re.compile(r"AC\s*[\u3400-\u9fff]|[\u3400-\u9fff]+\s*AC|赛季\s*AC|AC特别版|AC客场|AC主场")
-EDITORIAL_TRIGGER_PATTERN = re.compile(
-    r"veste baseball|Hollywood gardien|edition edition|lifestyle top|t-shirt lifestyle lifestyle|"
-    r"retro lifestyle|collaboration maillot|(?:^|\s)\d{2}\s+\d{2}(?:\s|$)|S\s*"
-    + SIZE_RANGE_SEPARATORS
-    + r"\s*(?:2XL|3XL|4XL|5XL|XXL|XL)|\bTokyo\b|\bGoku\b|\bSaiyan\b|\bCaptain Tsubasa\b",
-    re.IGNORECASE,
-)
-
-ENTITY_CATALOG = {
-    "巴黎圣日耳曼": {"name": "Paris Saint-Germain", "country": "France", "league": "A categoriser"},
-    "巴黎": {"name": "Paris Saint-Germain", "country": "France", "league": "A categoriser"},
-    "皇家马德里": {"name": "Real Madrid", "country": "Espagne", "league": "A categoriser"},
-    "皇马": {"name": "Real Madrid", "country": "Espagne", "league": "A categoriser"},
-    "巴塞罗那": {"name": "FC Barcelone", "country": "Espagne", "league": "A categoriser"},
-    "巴萨": {"name": "FC Barcelone", "country": "Espagne", "league": "A categoriser"},
-    "曼彻斯特联": {"name": "Manchester United", "country": "Angleterre", "league": "A categoriser"},
-    "曼联": {"name": "Manchester United", "country": "Angleterre", "league": "A categoriser"},
-    "曼彻斯特城": {"name": "Manchester City", "country": "Angleterre", "league": "A categoriser"},
-    "曼城": {"name": "Manchester City", "country": "Angleterre", "league": "A categoriser"},
-    "切尔西": {"name": "Chelsea", "country": "Angleterre", "league": "A categoriser"},
-    "利物浦": {"name": "Liverpool", "country": "Angleterre", "league": "A categoriser"},
-    "热刺": {"name": "Tottenham", "country": "Angleterre", "league": "A categoriser"},
-    "纽卡斯尔": {"name": "Newcastle", "country": "Angleterre", "league": "A categoriser"},
-    "纽卡斯": {"name": "Newcastle", "country": "Angleterre", "league": "A categoriser"},
-    "阿森纳": {"name": "Arsenal", "country": "Angleterre", "league": "A categoriser"},
-    "阿斯顿维拉": {"name": "Aston Villa", "country": "Angleterre", "league": "A categoriser"},
-    "国际米兰": {"name": "Inter Milan", "country": "Italie", "league": "A categoriser"},
-    "国米": {"name": "Inter Milan", "country": "Italie", "league": "A categoriser"},
-    "米兰": {"name": "AC Milan", "country": "Italie", "league": "A categoriser"},
-    "尤文图斯": {"name": "Juventus", "country": "Italie", "league": "A categoriser"},
-    "尤文": {"name": "Juventus", "country": "Italie", "league": "A categoriser"},
-    "罗马": {"name": "AS Rome", "country": "Italie", "league": "A categoriser"},
-    "那不勒斯": {"name": "Naples", "country": "Italie", "league": "A categoriser"},
-    "威尼斯": {"name": "Venezia", "country": "Italie", "league": "A categoriser"},
-    "科莫": {"name": "Como", "country": "Italie", "league": "A categoriser"},
-    "巴里": {"name": "Bari", "country": "Italie", "league": "A categoriser"},
-    "拜仁": {"name": "Bayern Munich", "country": "Allemagne", "league": "A categoriser"},
-    "多特蒙德": {"name": "Borussia Dortmund", "country": "Allemagne", "league": "A categoriser"},
-    "多特": {"name": "Borussia Dortmund", "country": "Allemagne", "league": "A categoriser"},
-    "门兴格拉德巴赫": {"name": "Borussia Monchengladbach", "country": "Allemagne", "league": "A categoriser"},
-    "门兴": {"name": "Borussia Monchengladbach", "country": "Allemagne", "league": "A categoriser"},
-    "斯图加特": {"name": "Stuttgart", "country": "Allemagne", "league": "A categoriser"},
-    "美因茨": {"name": "Mayence", "country": "Allemagne", "league": "A categoriser"},
-    "汉堡": {"name": "Hambourg", "country": "Allemagne", "league": "A categoriser"},
-    "费耶诺德": {"name": "Feyenoord", "country": "Pays-Bas", "league": "A categoriser"},
-    "本菲卡": {"name": "Benfica", "country": "Portugal", "league": "A categoriser"},
-    "波尔图": {"name": "FC Porto", "country": "Portugal", "league": "A categoriser"},
-    "里斯本竞技": {"name": "Sporting CP", "country": "Portugal", "league": "A categoriser"},
-    "巴列卡诺": {"name": "Rayo Vallecano", "country": "Espagne", "league": "A categoriser"},
-    "洛杉矶": {"name": "Los Angeles", "country": "Etats-Unis", "league": "A categoriser"},
-    "芝华士": {"name": "Chivas", "country": "Mexique", "league": "A categoriser"},
-    "弗拉门戈": {"name": "Flamengo", "country": "Bresil", "league": "A categoriser"},
-    "米内罗": {"name": "Atletico Mineiro", "country": "Bresil", "league": "A categoriser"},
-    "美国队": {"name": "Etats-Unis", "country": "Etats-Unis", "league": "Selections nationales"},
-    "美国": {"name": "Etats-Unis", "country": "Etats-Unis", "league": "Selections nationales"},
-    "法国": {"name": "France", "country": "France", "league": "Selections nationales"},
-    "英格兰": {"name": "Angleterre", "country": "Angleterre", "league": "Selections nationales"},
-    "德国": {"name": "Allemagne", "country": "Allemagne", "league": "Selections nationales"},
-    "西班牙": {"name": "Espagne", "country": "Espagne", "league": "Selections nationales"},
-    "葡萄牙": {"name": "Portugal", "country": "Portugal", "league": "Selections nationales"},
-    "意大利": {"name": "Italie", "country": "Italie", "league": "Selections nationales"},
-    "荷兰": {"name": "Pays-Bas", "country": "Pays-Bas", "league": "Selections nationales"},
-    "比利时": {"name": "Belgique", "country": "Belgique", "league": "Selections nationales"},
-    "巴西": {"name": "Bresil", "country": "Bresil", "league": "Selections nationales"},
-    "阿根廷": {"name": "Argentine", "country": "Argentine", "league": "Selections nationales"},
-    "哥伦比亚": {"name": "Colombie", "country": "Colombie", "league": "Selections nationales"},
-    "秘鲁": {"name": "Perou", "country": "Perou", "league": "Selections nationales"},
-    "奥地利": {"name": "Autriche", "country": "Autriche", "league": "Selections nationales"},
-    "新西兰": {"name": "Nouvelle-Zelande", "country": "Nouvelle-Zelande", "league": "Selections nationales"},
-    "加拿大": {"name": "Canada", "country": "Canada", "league": "Selections nationales"},
-    "墨西哥": {"name": "Mexique", "country": "Mexique", "league": "Selections nationales"},
-    "日本": {"name": "Japon", "country": "Japon", "league": "Selections nationales"},
-    "摩洛哥": {"name": "Maroc", "country": "Maroc", "league": "Selections nationales"},
-    "突尼斯": {"name": "Tunisie", "country": "Tunisie", "league": "Selections nationales"},
-    "阿尔及利亚": {"name": "Algerie", "country": "Algerie", "league": "Selections nationales"},
-    "埃尔及利亚": {"name": "Algerie", "country": "Algerie", "league": "Selections nationales"},
-    "挪威": {"name": "Norvege", "country": "Norvege", "league": "Selections nationales"},
-    "厄瓜多尔": {"name": "Equateur", "country": "Equateur", "league": "Selections nationales"},
-    "牙买加": {"name": "Jamaique", "country": "Jamaique", "league": "Selections nationales"},
-    "卡塔尔": {"name": "Qatar", "country": "Qatar", "league": "Selections nationales"},
-    "刚果": {"name": "Congo", "country": "Congo", "league": "Selections nationales"},
-    "海地": {"name": "Haiti", "country": "Haiti", "league": "Selections nationales"},
-    "马里": {"name": "Mali", "country": "Mali", "league": "Selections nationales"},
-    "哥伦比亚": {"name": "Colombie", "country": "Colombie", "league": "Selections nationales"},
-    "乌拉圭": {"name": "Uruguay", "country": "Uruguay", "league": "Selections nationales"},
-    "尼日利亚": {"name": "Nigeria", "country": "Nigeria", "league": "Selections nationales"},
-    "阿贾克斯": {"name": "Ajax", "country": "Pays-Bas", "league": "A categoriser"},
-    "阿贾克斯队": {"name": "Ajax", "country": "Pays-Bas", "league": "A categoriser"},
-    "桑托斯": {"name": "Santos", "country": "Bresil", "league": "A categoriser"},
-    "圣保罗": {"name": "Sao Paulo", "country": "Bresil", "league": "A categoriser"},
-    "佛拉门戈": {"name": "Flamengo", "country": "Bresil", "league": "A categoriser"},
-    "克鲁赛罗": {"name": "Cruzeiro", "country": "Bresil", "league": "A categoriser"},
-    "福塔莱萨": {"name": "Fortaleza", "country": "Bresil", "league": "A categoriser"},
-    "格雷米奥": {"name": "Gremio", "country": "Bresil", "league": "A categoriser"},
-    "国际": {"name": "Internacional", "country": "Bresil", "league": "A categoriser"},
-    "里斯本": {"name": "Sporting CP", "country": "Portugal", "league": "A categoriser"},
-    "利雅得胜利": {"name": "Al-Nassr", "country": "Arabie saoudite", "league": "A categoriser"},
-    "利雅得新月": {"name": "Al-Hilal", "country": "Arabie saoudite", "league": "A categoriser"},
-    "利雅得": {"name": "Riyadh", "country": "Arabie saoudite", "league": "A categoriser"},
-    "波希米亚人": {"name": "Bohemians", "country": "Irlande", "league": "A categoriser"},
-    "爱超波希米亚人": {"name": "Bohemians", "country": "Irlande", "league": "A categoriser"},
-    "派桑杜": {"name": "Paysandu", "country": "Bresil", "league": "A categoriser"},
-    "巴勒莫": {"name": "Palerme", "country": "Italie", "league": "A categoriser"},
-    "博卡": {"name": "Boca Juniors", "country": "Argentine", "league": "A categoriser"},
-    "巴塞": {"name": "FC Barcelone", "country": "Espagne", "league": "A categoriser"},
-    "马赛": {"name": "Olympique de Marseille", "country": "France", "league": "A categoriser"},
-    "马竞": {"name": "Atletico Madrid", "country": "Espagne", "league": "A categoriser"},
-    "美洲": {"name": "Club America", "country": "Mexique", "league": "A categoriser"},
-    "利兹联": {"name": "Leeds United", "country": "Angleterre", "league": "A categoriser"},
-    "凯尔特人": {"name": "Celtic", "country": "Ecosse", "league": "A categoriser"},
-    "布莱顿": {"name": "Brighton", "country": "Angleterre", "league": "A categoriser"},
-    "梅西": {"name": "Lionel Messi", "country": "Argentine", "league": "A categoriser"},
-    "C罗": {"name": "Cristiano Ronaldo", "country": "Portugal", "league": "A categoriser"},
-    "科特迪瓦": {"name": "Cote d'Ivoire", "country": "Cote d'Ivoire", "league": "Selections nationales"},
-    "塞内加尔": {"name": "Senegal", "country": "Senegal", "league": "Selections nationales"},
-    "克罗地亚": {"name": "Croatie", "country": "Croatie", "league": "Selections nationales"},
-    "苏格兰": {"name": "Ecosse", "country": "Ecosse", "league": "Selections nationales"},
-    "威尔士": {"name": "Pays de Galles", "country": "Pays de Galles", "league": "Selections nationales"},
-    "爱尔兰": {"name": "Irlande", "country": "Irlande", "league": "Selections nationales"},
-    "瑞士": {"name": "Suisse", "country": "Suisse", "league": "Selections nationales"},
-    "沙特阿拉伯": {"name": "Arabie saoudite", "country": "Arabie saoudite", "league": "Selections nationales"},
-    "喀麦隆": {"name": "Cameroun", "country": "Cameroun", "league": "Selections nationales"},
-    "巴勒斯坦": {"name": "Palestine", "country": "Palestine", "league": "Selections nationales"},
-}
-
-TERM_TRANSLATIONS = {
-    "球衣": "maillot",
-    "赛前训练服": "tenue d'entrainement d'avant-match",
-    "第五客场": "cinquieme maillot exterieur",
-    "第四客场": "quatrieme maillot exterieur",
-    "第三客场": "third",
-    "第二客场": "deuxieme maillot exterieur",
-    "第四赛前服": "quatrieme tenue d'avant-match",
-    "第三赛前服": "troisieme tenue d'avant-match",
-    "第二赛前服": "deuxieme tenue d'avant-match",
-    "赛前服": "tenue d'avant-match",
-    "训练服": "tenue d'entrainement",
-    "守门员长袖": "gardien manches longues",
-    "守门员": "gardien",
-    "门将": "gardien",
-    "休闲长袖": "lifestyle manches longues",
-    "休闲": "lifestyle",
-    "球员版": "version joueur",
-    "球迷版": "version supporter",
-    "女款": "femme",
-    "女子": "femme",
-    "童装": "enfant",
-    "儿童": "enfant",
-    "套装": "ensemble",
-    "外套": "veste",
-    "夹克": "veste",
-    "风衣": "coupe-vent",
-    "卫衣": "sweat",
-    "连帽": "a capuche",
-    "无帽": "sans capuche",
-    "拉链": "zippe",
-    "棉服": "doudoune",
-    "羽绒服": "doudoune",
-    "长裤": "pantalon",
-    "短裤": "short",
-    "裤": "pantalon",
-    "T恤": "t-shirt",
-    "T裇": "t-shirt",
-    "polo": "polo",
-    "纪念版": "edition commemorative",
-    "特别版": "edition speciale",
-    "复古版": "edition retro",
-    "联名版": "collaboration",
-    "漫威": "Marvel",
-    "刺绣版": "brodee",
-    "带星": "avec etoiles",
-    "长袖": "manches longues",
-    "短袖": "manches courtes",
-    "背心": "debardeur",
-    "主": "maillot domicile",
-    "客": "maillot exterieur",
-    "棒球服": "veste baseball",
-    "迷彩": "camouflage",
-    "正确版提花布1:1": "version jacquard 1:1",
-    "正确版": "version authentique",
-    "悟空": "Goku",
-    "太阳小悟空": "Petit Goku solaire",
-    "赛亚人": "Saiyan",
-    "东京城市版": "edition Tokyo City",
-    "东京": "Tokyo",
-    "火龙": "dragon de feu",
-    "好莱坞": "Hollywood",
-    "女神": "deesse",
-    "叶子版": "edition feuilles",
-    "龙年": "annee du Dragon",
-    "复古体恤": "t-shirt retro",
-    "复古": "retro",
-    "游戏浅": "edition gaming clair",
-    "游戏上青": "edition gaming turquoise",
-    "上青色": "turquoise",
-    "上青": "turquoise",
-    "浅": "clair",
-    "深": "fonce",
-    "十字": "croix",
-    "概念版渐变粉": "edition concept rose degrade",
-    "概念版": "edition concept",
-    "圆广告": "sponsor rond",
-    "联名款": "collaboration",
-    "联名": "collaboration",
-    "欧冠板": "version Ligue des champions",
-    "联赛版": "version championnat",
-    "款": "edition",
-    "文化衫": "t-shirt lifestyle",
-    "酒": "bordeaux",
-    "云朵": "nuages",
-    "海贼王": "One Piece",
-    "啤酒节": "Oktoberfest",
-    "万圣节": "Halloween",
-    "泥王": "roi de la boue",
-    "龙版": "edition dragon",
-    "龙纹": "motif dragon",
-    "彩兰": "bleu irise",
-    "衫": "top",
-    "宝": "joyau",
-    "慕尼": "Munich",
-    "青龙": "dragon azur",
-    "星海": "mer d'etoiles",
-    "足球小将": "Captain Tsubasa",
-    "卡通版": "edition cartoon",
-    "龙开筒": "dragon",
-    "詹姆斯联名": "collaboration James",
-    "体恤": "t-shirt",
-    "墨": "encre",
-    "老鹰": "aigle",
-    "豹": "leopard",
-    "NTS联名": "collaboration NTS",
-    "Polo衫": "polo",
-    "有带广告和无广告": "avec ou sans sponsor",
-    "第": "",
-    "队": "",
-    "主场": "maillot domicile",
-    "客场": "maillot exterieur",
-    "二客": "deuxieme maillot exterieur",
-    "三客": "third",
-    "四客": "quatrieme maillot exterieur",
-    "五客": "cinquieme maillot exterieur",
-    "赛季": "saison",
-    "世界杯": "Coupe du monde",
-    "周年": "anniversaire",
-    "马年": "annee du Cheval",
-    "深苔绿": "vert mousse fonce",
-    "天蓝色": "bleu ciel",
-    "粉色": "rose",
-    "黄色": "jaune",
-    "紫色": "violet",
-    "橙色": "orange",
-    "金色": "or",
-    "银色": "argent",
-    "棕色": "marron",
-    "深蓝色": "bleu marine",
-    "浅蓝色": "bleu clair",
-    "荧光绿": "vert fluo",
-    "草绿色": "vert prairie",
-    "灰色": "gris",
-    "黑色": "noir",
-    "白色": "blanc",
-    "蓝色": "bleu",
-    "绿色": "vert",
-    "红色": "rouge",
-    "黑": "noir",
-    "白": "blanc",
-    "蓝": "bleu",
-    "绿": "vert",
-    "红": "rouge",
-    "灰": "gris",
-    "黄": "jaune",
-    "紫": "violet",
-    "橙": "orange",
-    "金": "or",
-    "银": "argent",
-    "棕": "marron",
-}
-
-ENTITY_KEYS = sorted(ENTITY_CATALOG, key=len, reverse=True)
-TERM_KEYS = sorted(TERM_TRANSLATIONS, key=len, reverse=True)
-PRODUCT_KIND_RULES = [
-    (("守门员", "门将"), "goalkeeper"),
-    (("赛前训练服", "赛前服"), "pre_match"),
-    (("训练服",), "training"),
-    (("棒球服",), "jacket"),
-    (("外套", "夹克", "风衣", "卫衣", "棉服", "羽绒服"), "jacket"),
-    (("长裤",), "pants"),
-    (("短裤",), "shorts"),
-    (("套装",), "set"),
-    (("背心",), "vest"),
-    (("休闲", "T恤", "T裇", "体恤", "文化衫", "Polo衫", "polo"), "lifestyle"),
+ALLOWED_PRODUCT_KINDS = {"jersey", "goalkeeper"}
+TYPE_LABELS = {"domicile": "Domicile", "exterieur": "Exterieur", "third": "Third"}
+SKIP_AUDIENCE = re.compile(r"\b(kids?|kid|youth|infant|baby|womens?|ladies|female|woman)\b", re.I)
+SIZE_RANGE = re.compile(r"\b(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\s*[-/~]\s*(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\b", re.I)
+SIZE_TOKENS = re.compile(r"\b(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\b", re.I)
+DESCRIPTOR_SPLIT = re.compile(r"\b(home|away|third|goalkeeper|jersey|shirt|retro|training|jacket|windbreaker|hoodie|pants|shorts|kit|set)\b", re.I)
+TYPE_PATTERNS = [(re.compile(r"\b(third|3rd)\b", re.I), "third"), (re.compile(r"\b(away|exterieur)\b", re.I), "exterieur")]
+KIND_PATTERNS = [
+    (re.compile(r"\b(goalkeeper|keeper|gardien)\b|\u95e8\u5c06|\u5b88\u95e8\u5458", re.I), "goalkeeper"),
+    (re.compile(r"\b(pre[- ]?match|avant[- ]match)\b|\u8d5b\u524d", re.I), "pre_match"),
+    (re.compile(r"\b(training|drill|entrai)\b|\u8bad\u7ec3", re.I), "training"),
+    (re.compile(r"\b(jacket|windbreaker|track top|hoodie|coat|sweat)\b|\u5916\u5957|\u5939\u514b|\u98ce\u8863|\u536b\u8863", re.I), "jacket"),
+    (re.compile(r"\b(pants|trousers)\b|\u957f\u88e4", re.I), "pants"),
+    (re.compile(r"\b(shorts)\b|\u77ed\u88e4", re.I), "shorts"),
+    (re.compile(r"\b(set|kit|suit|ensemble)\b|\u5957\u88c5", re.I), "set"),
+    (re.compile(r"\b(vest|tank)\b|\u80cc\u5fc3", re.I), "vest"),
+    (re.compile(r"\b(lifestyle|tee|t-shirt|polo|casual|street)\b", re.I), "lifestyle"),
+]
+MODIFIER_PATTERNS = [
+    (re.compile(r"\b(player version|authentic|player issue)\b", re.I), "Version Joueur"),
+    (re.compile(r"\b(fan version|supporter)\b", re.I), "Version Supporter"),
+    (re.compile(r"\b(long sleeve|long sleeves|ls)\b|\u957f\u8896", re.I), "Manches Longues"),
+    (re.compile(r"\b(special edition|limited edition|anniversary|commemorative)\b", re.I), "Edition Speciale"),
 ]
 
-LEAGUE_BY_CLUB = {
-    "Paris Saint-Germain": "Ligue 1",
-    "Olympique de Marseille": "Ligue 1",
-    "Manchester United": "Premier League",
-    "Manchester City": "Premier League",
-    "Liverpool": "Premier League",
-    "Tottenham": "Premier League",
-    "Newcastle": "Premier League",
-    "Arsenal": "Premier League",
-    "Aston Villa": "Premier League",
-    "Chelsea": "Premier League",
-    "Brighton": "Premier League",
-    "Real Madrid": "La Liga",
-    "FC Barcelone": "La Liga",
-    "Atletico Madrid": "La Liga",
-    "Rayo Vallecano": "La Liga",
-    "Inter Milan": "Serie A",
-    "AC Milan": "Serie A",
-    "Juventus": "Serie A",
-    "AS Rome": "Serie A",
-    "Naples": "Serie A",
-    "Como": "Serie A",
-    "Venezia": "Serie A",
-    "Bayern Munich": "Bundesliga",
-    "Borussia Dortmund": "Bundesliga",
-    "Borussia Monchengladbach": "Bundesliga",
-    "Stuttgart": "Bundesliga",
-    "Mayence": "Bundesliga",
-    "Hambourg": "Bundesliga",
-}
 
-
-def clean_spaces(text: str) -> str:
-    text = re.sub(r"[._/]+", " ", text)
-    text = re.sub(r"\s+", " ", text)
-    text = re.sub(r"\s+([,)\]])", r"\1", text)
-    text = re.sub(r"([(\[])\s+", r"\1", text)
-    return text.strip(" -_,")
-
-
-def normalize_text(text: str) -> str:
+def norm(text: str) -> str:
     text = unicodedata.normalize("NFKC", text or "")
-    text = text.replace("·", " ").replace("＊", " ").replace("，", " ").replace("。", " ")
-    text = text.replace("（", "(").replace("）", ")")
-    return clean_spaces(text)
+    text = text.replace("·", " ").replace("—", "-").replace("–", "-")
+    return re.sub(r"\s+", " ", re.sub(r"[._/]+", " ", text)).strip(" -_,")
+
+
+def ascii_norm(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode("ascii").lower()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", text)).strip()
 
 
 def slugify(text: str) -> str:
-    """Convert product name to URL-friendly slug."""
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-    text = text.lower().strip()
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s_-]+", "-", text)
-    return text.strip("-")
+    text = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode("ascii").lower()
+    return re.sub(r"[\s_-]+", "-", re.sub(r"[^\w\s-]", "", text)).strip("-")
 
 
-def normalize_size_token(token: str) -> str:
-    token = token.upper()
-    mapping = {
-        "2XL": "XXL",
-        "XXXL": "3XL",
-        "XXXXL": "4XL",
-        "5X": "5XL",
-        "4X": "4XL",
-        "3X": "3XL",
-    }
-    return mapping.get(token, token)
+def with_page(url: str, page: int) -> str:
+    parsed = urlparse(url)
+    params = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    params["page"] = str(page)
+    return urlunparse(parsed._replace(query=urlencode(params)))
 
 
-def remove_chinese_fragments(text: str) -> str:
-    return clean_spaces(CHINESE_CHAR_PATTERN.sub(" ", text or ""))
+def absolute(base_url: str, url: str | None) -> str:
+    if not url:
+        return ""
+    if url.startswith("//"):
+        return f"https:{url}"
+    return urljoin(base_url, url)
 
 
-def normalize_compact_season_token(start: str, end: str) -> str:
-    start_year = 2000 + int(start)
-    end_year = 2000 + int(end)
-    if start_year <= end_year <= start_year + 1:
-        return f"{start_year}-{end_year}"
-    return f"{start} {end}"
+def original_photo_url(data_path: str | None) -> str:
+    if not data_path:
+        return ""
+    if data_path.startswith("//"):
+        return f"https:{data_path}"
+    return f"{PHOTO_BASE_URL}/{data_path.lstrip('/')}" if not data_path.startswith("/") else f"{PHOTO_BASE_URL}{data_path}"
 
 
-def polish_display_name(text: str) -> str:
-    polished = clean_spaces(text)
-    polished = re.sub(r"(?<!\d)(\d{2})\s+(\d{2})(?!\d)", lambda m: normalize_compact_season_token(m.group(1), m.group(2)), polished)
-    polished = re.sub(rf"\b(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\s*{SIZE_RANGE_SEPARATORS}\s*(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL|3X|4X|5X)\b", "", polished, flags=re.IGNORECASE)
-    polished = polished.replace("veste baseball", "blouson baseball")
-    polished = polished.replace("edition edition", "edition")
-    polished = polished.replace("lifestyle t-shirt lifestyle", "t-shirt lifestyle")
-    polished = polished.replace("retro lifestyle t-shirt lifestyle", "t-shirt lifestyle retro")
-    polished = polished.replace("retro lifestyle top", "top lifestyle retro")
-    polished = polished.replace("lifestyle top", "top lifestyle")
-    polished = polished.replace("t-shirt top", "t-shirt")
-    polished = polished.replace("top lifestyle lifestyle", "top lifestyle")
-    polished = polished.replace("Hollywood gardien", "gardien edition Hollywood")
-    polished = polished.replace("collaboration maillot", "maillot collaboration")
-    polished = polished.replace("lv collaboration maillot", "maillot collaboration LV")
-    polished = polished.replace("lv maillot collaboration", "maillot collaboration LV")
-    polished = polished.replace("Y3 collaboration", "collaboration Y-3")
-    polished = polished.replace("NTS collaboration", "collaboration NTS")
-    polished = polished.replace("Marvel collaboration", "collaboration Marvel")
-    polished = polished.replace("One Piece collaboration", "collaboration One Piece")
-    polished = polished.replace("collaboration James", "edition James")
-    polished = polished.replace("edition Tokyo City", "edition Tokyo City")
-    polished = polished.replace(" 25-", " 25 ")
-    polished = re.sub(r"\b([A-Za-z]+)\s+croix\s+(maillot (?:domicile|exterieur|third))\b", r"\2 \1 croix", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\b(maillot (?:domicile|exterieur|third))\s+(?:version )?authentique\b", r"\1 version authentique", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\b([A-Za-z][A-Za-z -]+?)\s+edition speciale\b", r"\1 edition speciale", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\b([A-Za-z][A-Za-z -]+?)\s+edition commemorative\b", r"\1 edition commemorative", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\b([A-Za-z][A-Za-z -]+?)\s+edition retro\b", r"\1 edition retro", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\btop lifestyle manches longues\b", "top lifestyle manches longues", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\bretro t-shirt\b", "t-shirt retro", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\bretro top\b", "top retro", polished, flags=re.IGNORECASE)
-    polished = re.sub(r"\s+\(\s*\)", "", polished)
-    polished = re.sub(r"\b2025-2025\b", "2025", polished)
-    polished = re.sub(r"\b([A-Za-z][A-Za-z -]+?)\s+(\d{2})\s+(?=edition|maillot|blouson|t-shirt|top|gardien|tenue|lifestyle)", lambda m: f"{m.group(1)} 20{m.group(2)}", polished)
-    return clean_spaces(polished)
+def get_total_pages(soup: BeautifulSoup) -> int:
+    page_input = soup.select_one(".pagination__jumpwrap input[name='page']")
+    if page_input and page_input.get("max", "").isdigit():
+        return int(page_input["max"])
+    values = []
+    for item in soup.select(".pagination__number"):
+        try:
+            values.append(int(item.get_text(strip=True)))
+        except ValueError:
+            pass
+    return max(values) if values else 1
 
 
-def postprocess_translated_text(text: str) -> str:
-    text = remove_chinese_fragments(text)
-    text = re.sub(r"\bsaison\b", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"\btop top\b", "top", text, flags=re.IGNORECASE)
-    text = re.sub(r"\bmaillot domicile maillot domicile\b", "maillot domicile", text, flags=re.IGNORECASE)
-    text = re.sub(r"\bmaillot exterieur maillot exterieur\b", "maillot exterieur", text, flags=re.IGNORECASE)
-    return polish_display_name(text)
+def normalize_size(token: str) -> str:
+    return {"2XL": "XXL", "XXXL": "3XL", "XXXXL": "4XL"}.get(token.upper(), token.upper())
 
 
-def extract_sizes(raw_name: str) -> list[str]:
-    compact = raw_name.upper().replace(" ", "")
-    range_match = re.search(
-        rf"(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\s*{SIZE_RANGE_SEPARATORS}\s*(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL|3X|4X|5X)",
-        compact,
-    )
-    if range_match:
-        start = normalize_size_token(range_match.group(1))
-        end = normalize_size_token(range_match.group(2))
+def extract_sizes(title: str) -> list[str]:
+    upper = norm(title).upper()
+    match = SIZE_RANGE.search(upper)
+    if match:
+        start = normalize_size(match.group(1))
+        end = normalize_size(match.group(2))
         if start in SIZE_ORDER and end in SIZE_ORDER:
-            start_index = SIZE_ORDER.index(start)
-            end_index = SIZE_ORDER.index(end)
-            if start_index <= end_index:
-                return SIZE_ORDER[start_index : end_index + 1]
-
+            return SIZE_ORDER[SIZE_ORDER.index(start) : SIZE_ORDER.index(end) + 1]
     found = []
-    for token in re.findall(r"(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)", compact):
-        normalized = normalize_size_token(token)
+    for token in SIZE_TOKENS.findall(upper):
+        normalized = normalize_size(token)
         if normalized not in found:
             found.append(normalized)
     return found or DEFAULT_SIZES
 
 
-def parse_season(raw_name: str) -> str:
-    full_match = re.search(r"(20\d{2})\s*[-/]\s*(20\d{2})", raw_name)
-    if full_match:
-        return f"{full_match.group(1)}-{full_match.group(2)}"
-
-    compact_match = re.search(r"(?<!\d)(\d{2})(\d{2})(?!\d)", raw_name)
-    if compact_match:
-        start = 2000 + int(compact_match.group(1))
-        end = 2000 + int(compact_match.group(2))
-        if start <= end <= start + 1:
-            return f"{start}-{end}"
-
-    short_match = re.search(r"(?<!\d)(\d{2})\s*[-/]\s*(\d{2})(?!\d)", raw_name)
-    if short_match:
-        start = 2000 + int(short_match.group(1))
-        end = 2000 + int(short_match.group(2))
+def parse_season(title: str) -> str:
+    text = norm(title)
+    match = re.search(r"\b(19\d{2}|20\d{2})\s*[-/ ]\s*(19\d{2}|20\d{2}|\d{2})\b", text)
+    if match:
+        start = int(match.group(1))
+        end_raw = match.group(2)
+        end = int(end_raw) if len(end_raw) == 4 else 2000 + int(end_raw)
         return f"{start}-{end}"
-
-    single_year = re.search(r"(20\d{2})", raw_name)
-    if single_year:
-        return single_year.group(1)
-
-    return "A definir"
-
-
-def infer_product_type(raw_name: str) -> str:
-    lowered = raw_name.lower()
-    if any(token in raw_name for token in ["第三客场", "三客"]) or "third" in lowered:
-        return "third"
-    if any(token in raw_name for token in ["客场", "二客", "四客", "五客"]) or "away" in lowered or "exterieur" in lowered:
-        return "exterieur"
-    return "domicile"
+    match = re.search(r"\b(\d{2})\s*[-/ ]\s*(\d{2})\b", text)
+    if match:
+        return f"{2000 + int(match.group(1))}-{2000 + int(match.group(2))}"
+    match = re.search(r"\b(19\d{2}|20\d{2})\b", text)
+    return match.group(1) if match else "A definir"
 
 
-def infer_product_kind(raw_name: str) -> str:
-    lowered = raw_name.lower()
-    for tokens, kind in PRODUCT_KIND_RULES:
-        if any(token in raw_name for token in tokens):
-            return kind
-        if any(token.lower() in lowered for token in tokens if token.isascii()):
-            return kind
+def infer_kind(title: str) -> str:
+    for pattern, label in KIND_PATTERNS:
+        if pattern.search(title):
+            return label
     return "jersey"
 
 
-def strip_structured_tokens(raw_name: str) -> str:
-    text = normalize_text(raw_name)
-    text = re.sub(r"(20\d{2})\s*[-/]\s*(20\d{2})", " ", text, count=1)
-    text = re.sub(r"(?<!\d)(\d{2})(\d{2})(?!\d)", " ", text, count=1)
-    text = re.sub(r"(?<!\d)(\d{2})\s*[-/]\s*(\d{2})(?!\d)", " ", text, count=1)
-    text = re.sub(r"(20\d{2})", " ", text, count=1)
-    text = re.sub(
-        rf"(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL)\s*{SIZE_RANGE_SEPARATORS}\s*(XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL|3X|4X|5X)",
-        " ",
-        text,
-        count=1,
-        flags=re.IGNORECASE,
-    )
-    return clean_spaces(text)
+def infer_type(title: str) -> str:
+    for pattern, label in TYPE_PATTERNS:
+        if pattern.search(title):
+            return label
+    return "domicile"
 
 
-def match_entity(text: str) -> tuple[str | None, dict | None]:
-    for chinese_name in ENTITY_KEYS:
-        if chinese_name in text:
-            return chinese_name, ENTITY_CATALOG[chinese_name]
-    return None, None
-
-
-def translate_fragment(text: str) -> str:
-    translated = normalize_text(text)
-    for chinese_name in ENTITY_KEYS:
-        translated = translated.replace(chinese_name, f" {ENTITY_CATALOG[chinese_name]['name']} ")
-    for chinese_term in TERM_KEYS:
-        translated = translated.replace(chinese_term, f" {TERM_TRANSLATIONS[chinese_term]} ")
-    return postprocess_translated_text(translated)
-
-
-def build_description(raw_name: str, album_url: str, album_date: str | None) -> str:
-    details = [f"Titre source Yupoo: {raw_name}", f"Album Yupoo: {album_url}"]
-    if album_date:
-        details.append(f"Date album Yupoo: {album_date}")
-    details.append("Produit importe automatiquement depuis Yupoo.")
-    return " | ".join(details)
-
-
-def infer_supported_league(club_name: str, current_league: str | None = None) -> str:
-    if club_name in LEAGUE_BY_CLUB:
-        return LEAGUE_BY_CLUB[club_name]
-    if current_league == "Selections nationales":
-        return current_league
-    if current_league in {"Ligue 1", "Premier League", "La Liga", "Serie A", "Bundesliga", REST_OF_WORLD_LEAGUE}:
-        return current_league
-    return REST_OF_WORLD_LEAGUE
-
-
-def infer_special_entity(raw_name: str, translated_text: str) -> dict | None:
-    normalized_raw = normalize_text(raw_name)
-    if "AC" in normalized_raw and CHINESE_CHAR_PATTERN.search(normalized_raw):
-        return {"name": "AC Milan", "country": "Italie", "league": "Serie A"}
-    if AC_MILAN_VARIANT_PATTERN.search(normalized_raw):
-        return {"name": "AC Milan", "country": "Italie", "league": "Serie A"}
-    if re.search(r"\bAC\b", translated_text) and any(token in normalized_raw for token in ["特别版", "客场", "主场", "二客", "赛季"]):
-        return {"name": "AC Milan", "country": "Italie", "league": "Serie A"}
+def entity_from_title(title: str):
+    normalized = ascii_norm(title)
+    for alias, entity in sorted(ENTITY_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
+        if alias in normalized:
+            return entity
     return None
 
 
-def extract_source_title(description: str | None) -> str | None:
-    if not description:
+def fallback_club(title: str) -> str:
+    text = ascii_norm(title)
+    split = DESCRIPTOR_SPLIT.search(text)
+    candidate = text[: split.start()] if split else text
+    candidate = re.sub(r"\b(19\d{2}|20\d{2}|\d{2}|retro|mens|men|adult|player|version|fan)\b", " ", candidate)
+    candidate = re.sub(r"\s+", " ", candidate).strip()
+    return candidate.title() if candidate else "A definir"
+
+
+def modifiers_from_title(title: str, is_retro: bool) -> list[str]:
+    found = []
+    for pattern, label in MODIFIER_PATTERNS:
+        if pattern.search(title) and label not in found:
+            found.append(label)
+    if is_retro and "Retro" not in found:
+        found.append("Retro")
+    return found
+
+
+def parse_product(title: str, category: dict) -> dict | None:
+    title = norm(title)
+    if not title or SKIP_AUDIENCE.search(ascii_norm(title)):
         return None
-    match = re.search(r"Titre source Yupoo:\s*(.*?)\s*\|\s*Album Yupoo:", description)
-    return match.group(1).strip() if match else None
-
-
-def extract_album_url_from_description(description: str | None) -> str:
-    if not description:
-        return ""
-    match = re.search(r"Album Yupoo:\s*(.*?)\s*(?:\||$)", description)
-    return match.group(1).strip() if match else ""
-
-
-def extract_album_date_from_description(description: str | None) -> str | None:
-    if not description:
+    kind = infer_kind(title)
+    if kind not in ALLOWED_PRODUCT_KINDS:
         return None
-    match = re.search(r"Date album Yupoo:\s*(.*?)\s*(?:\||$)", description)
-    return match.group(1).strip() if match else None
-
-
-def parse_product_name(raw_name: str, album_url: str, album_date: str | None) -> dict:
-    """
-    Parse raw album name into structured product data.
-    Supports Yupoo Chinese album titles and translates them to French.
-    """
-    normalized_name = normalize_text(raw_name)
-    season = parse_season(normalized_name)
-    sizes = extract_sizes(normalized_name)
-    product_type = infer_product_type(normalized_name)
-    product_kind = infer_product_kind(normalized_name)
-    core_name = strip_structured_tokens(normalized_name)
-    translated_core_name = translate_fragment(core_name)
-
-    entity_key, entity = match_entity(core_name)
-    if not entity:
-        entity = infer_special_entity(normalized_name, translated_core_name)
-        if entity:
-            entity_key = "AC"
-
-    club_name = entity["name"] if entity else postprocess_translated_text(core_name) or "A definir"
-    country = entity["country"] if entity else "A definir"
-    league = infer_supported_league(club_name, entity["league"] if entity else "A categoriser")
-
-    remainder = core_name.replace(entity_key, " ", 1) if entity_key else core_name
-    translated_remainder = translate_fragment(remainder)
-    translated_full = translated_core_name
-
-    if entity and entity["name"] == "AC Milan":
-        translated_remainder = re.sub(r"\bAC\b", " ", translated_remainder).strip()
-        translated_full = re.sub(r"\bAC\b", " ", translated_full).strip()
-
-    name_parts = []
-    if entity:
-        name_parts.append(entity["name"])
-    if translated_remainder:
-        name_parts.append(translated_remainder)
-    elif not entity:
-        name_parts.append(translated_full)
+    entity = entity_from_title(title)
+    club = entity[0] if entity else fallback_club(title)
+    league = category["league"] or (entity[2] if entity else REST_OF_WORLD_LEAGUE)
+    country = (entity[1] if entity else None) or category["country"] or LEAGUE_COUNTRY.get(league) or "A definir"
+    season = parse_season(title)
+    product_type = infer_type(title)
+    is_retro = category["is_retro"] or "retro" in ascii_norm(title)
+    modifiers = modifiers_from_title(title, is_retro)
+    display_kind = "Gardien" if kind == "goalkeeper" else "Maillot"
+    name_parts = [club, display_kind, TYPE_LABELS[product_type], *modifiers]
     if season != "A definir":
         name_parts.append(season)
-
-    translated_name = postprocess_translated_text(" ".join(part for part in name_parts if part))
-    if not translated_name:
-        translated_name = postprocess_translated_text(normalized_name)
-
+    description = f"{display_kind} {TYPE_LABELS[product_type].lower()} de {club}"
+    if is_retro:
+        description += " retro"
+    if season != "A definir":
+        description += f" saison {season}"
+    description += ". Produit importe automatiquement depuis le catalogue fournisseur et heberge sur KITLAB."
     return {
-        "name": translated_name,
-        "raw_name": normalized_name,
-        "club": club_name,
+        "name": " ".join(part for part in name_parts if part).strip(),
+        "club": club,
         "league": league,
         "country": country,
-        "product_kind": product_kind,
+        "product_kind": kind,
         "type": product_type,
         "season": season,
-        "sizes": sizes,
-        "description": build_description(normalized_name, album_url, album_date),
+        "sizes": extract_sizes(title),
+        "is_retro": is_retro,
+        "available_patches": PATCHES_BY_LEAGUE.get(league, PATCHES_BY_LEAGUE[REST_OF_WORLD_LEAGUE]),
+        "description": description,
     }
 
 
-def repair_existing_titles(limit: int = None, dry_run: bool = False):
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    rows = supabase.table("products").select("id,slug,name,description").limit(1000).execute().data or []
-    candidates = [row for row in rows if CHINESE_CHAR_PATTERN.search(row.get("name") or "")]
-    if limit:
-        candidates = candidates[:limit]
-
-    print(f"Found {len(candidates)} products with remaining Chinese fragments.")
-    repaired = 0
-
-    for row in candidates:
-        raw_name = extract_source_title(row.get("description"))
-        album_url = extract_album_url_from_description(row.get("description"))
-        album_date = extract_album_date_from_description(row.get("description"))
-
-        if not raw_name:
-            print(f"  Skipping {row['slug']} - missing source title in description")
-            continue
-
-        parsed = parse_product_name(raw_name, album_url, album_date)
-        updated_name = parsed["name"]
-        if CHINESE_CHAR_PATTERN.search(updated_name):
-            print(f"  Warning: {row['slug']} still contains Chinese after repair -> {updated_name}")
-
-        payload = {
-            "name": updated_name,
-            "club": parsed["club"],
-            "league": parsed["league"],
-            "country": parsed["country"],
-            "product_kind": parsed["product_kind"],
-            "type": parsed["type"],
-            "season": parsed["season"],
-            "sizes": parsed["sizes"],
-            "description": parsed["description"],
-        }
-
-        if dry_run:
-            print(f"  [DRY RUN] {row['name']} -> {updated_name}")
-        else:
-            supabase.table("products").update(payload).eq("id", row["id"]).execute()
-            print(f"  Repaired: {updated_name}")
-
-        repaired += 1
-
-    print(f"\nDone. {repaired} products repaired.")
+def headers(content_type: str | None = None) -> dict[str, str]:
+    base = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+    if content_type:
+        base["Content-Type"] = content_type
+    return base
 
 
-def polish_existing_titles(limit: int = None, dry_run: bool = False):
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    rows = supabase.table("products").select("id,slug,name").limit(1000).execute().data or []
-    candidates = [row for row in rows if EDITORIAL_TRIGGER_PATTERN.search(row.get("name") or "")]
-    if limit:
-        candidates = candidates[:limit]
-
-    print(f"Found {len(candidates)} products needing editorial polish.")
-    polished_count = 0
-
-    for row in candidates:
-        current_name = row.get("name") or ""
-        polished_name = polish_display_name(current_name)
-        if polished_name == current_name:
-            continue
-
-        if dry_run:
-            print(f"  [DRY RUN] {current_name} -> {polished_name}")
-        else:
-            supabase.table("products").update({"name": polished_name}).eq("id", row["id"]).execute()
-            print(f"  Polished: {polished_name}")
-
-        polished_count += 1
-
-    print(f"\nDone. {polished_count} products polished.")
+def ensure_bucket(bucket: str) -> None:
+    check = requests.get(f"{SUPABASE_URL}/storage/v1/bucket/{bucket}", headers=headers(), timeout=30)
+    if check.ok:
+        return
+    create = requests.post(f"{SUPABASE_URL}/storage/v1/bucket", headers=headers("application/json"), json={"id": bucket, "name": bucket, "public": True}, timeout=30)
+    create.raise_for_status()
 
 
-def repair_existing_leagues(limit: int = None, dry_run: bool = False):
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    rows = supabase.table("products").select("id,slug,club,league").limit(1000).execute().data or []
-    candidates = []
-    for row in rows:
-        target_league = infer_supported_league(row.get("club") or "", row.get("league"))
-        if target_league != (row.get("league") or ""):
-            candidates.append((row, target_league))
-
-    if limit:
-        candidates = candidates[:limit]
-
-    print(f"Found {len(candidates)} products with repairable league assignment.")
-    updated = 0
-
-    for row, target_league in candidates:
-        if dry_run:
-            print(f"  [DRY RUN] {row['slug']} | {row.get('club')} | {row.get('league')} -> {target_league}")
-        else:
-            supabase.table("products").update({"league": target_league}).eq("id", row["id"]).execute()
-            print(f"  Repaired: {row['slug']} -> {target_league}")
-        updated += 1
-
-    print(f"\nDone. {updated} league assignments repaired.")
-
-
-def repair_ac_milan_variants(limit: int = None, dry_run: bool = False):
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    rows = supabase.table("products").select("id,slug,club,name,description").limit(1000).execute().data or []
-    candidates = [
-        row
-        for row in rows
-        if AC_MILAN_VARIANT_PATTERN.search(row.get("club") or "")
-        or row.get("club") == "AC"
-        or ("AC" in (row.get("name") or "") and CHINESE_CHAR_PATTERN.search(row.get("name") or ""))
-        or (
-            row.get("club") == "AC Milan"
-            and re.search(r"saison\s+AC|\bAC Milan\b.*\bAC\b", row.get("name") or "", re.IGNORECASE)
-        )
-    ]
-    if limit:
-        candidates = candidates[:limit]
-
-    print(f"Found {len(candidates)} AC Milan variants to repair.")
-    repaired = 0
-
-    for row in candidates:
-        raw_name = extract_source_title(row.get("description")) or row.get("name") or ""
-        album_url = extract_album_url_from_description(row.get("description"))
-        album_date = extract_album_date_from_description(row.get("description"))
-        parsed = parse_product_name(raw_name, album_url, album_date)
-
-        payload = {
-            "name": parsed["name"],
-            "club": "AC Milan",
-            "league": "Serie A",
-            "country": "Italie",
-            "product_kind": parsed["product_kind"],
-            "type": parsed["type"],
-            "season": parsed["season"],
-            "sizes": parsed["sizes"],
-            "description": parsed["description"],
-        }
-
-        if dry_run:
-            print(f"  [DRY RUN] {row['club']} | {row['name']} -> AC Milan | {payload['name']}")
-        else:
-            supabase.table("products").update(payload).eq("id", row["id"]).execute()
-            print(f"  Repaired: {row['slug']} -> {payload['name']}")
-        repaired += 1
-
-    print(f"\nDone. {repaired} AC Milan variants repaired.")
-
-
-def absolutize_url(url: str | None) -> str:
-    if not url:
-        return ""
-    if url.startswith("//"):
-        return f"https:{url}"
-    return urljoin(BASE_URL, url)
-
-
-def upgrade_image_url(image_url: str) -> str:
-    if not image_url:
-        return ""
-    return re.sub(r"/small(\.[a-zA-Z0-9]+)$", r"/medium\1", image_url)
-
-
-def build_original_photo_url(data_path: str | None) -> str:
-    if not data_path:
-        return ""
-    if data_path.startswith("//"):
-        return f"https:{data_path}"
-    if data_path.startswith("/"):
-        return f"{PHOTO_BASE_URL}{data_path}"
-    return f"{PHOTO_BASE_URL}/{data_path.lstrip('/')}"
-
-
-def unique_non_empty(items: list[str]) -> list[str]:
-    seen = set()
-    result = []
-    for item in items:
-        if not item or item in seen:
-            continue
-        seen.add(item)
-        result.append(item)
-    return result
-
-
-def extract_photo_token(url: str | None) -> str:
-    if not url:
-        return ""
-    match = re.search(r"/svip-1688/([^/]+)/", url)
-    return match.group(1) if match else ""
-
-
-def reorder_photos_with_cover(photos: list[str], cover_url: str | None) -> list[str]:
-    if not photos or not cover_url:
-        return photos
-
-    cover_token = extract_photo_token(cover_url)
-    if not cover_token:
-        return photos
-
-    ordered = []
-    for photo in photos:
-        if extract_photo_token(photo) == cover_token:
-            ordered.append(photo)
-            break
-
-    ordered.extend(photo for photo in photos if photo not in ordered)
-    return ordered
-
-
-def fetch_soup(session, url: str):
-    import requests
-    from bs4 import BeautifulSoup
-
-    response = session.get(url, timeout=30)
+def upload_image(session: requests.Session, image_url: str, bucket: str, object_prefix: str) -> str:
+    response = session.get(image_url, timeout=60)
     response.raise_for_status()
-    return BeautifulSoup(response.text, "html.parser")
+    content_type = response.headers.get("content-type", "image/jpeg").split(";")[0].strip() or "image/jpeg"
+    ext = Path(urlparse(image_url).path).suffix.lower() or mimetypes.guess_extension(content_type) or ".jpg"
+    object_path = f"{object_prefix}{'.jpg' if ext == '.jpe' else ext}"
+    upload = requests.post(f"{SUPABASE_URL}/storage/v1/object/{bucket}/{object_path}", headers={**headers(content_type), "x-upsert": "true"}, data=response.content, timeout=60)
+    upload.raise_for_status()
+    return f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{object_path}"
 
 
-def get_total_pages(soup) -> int:
-    page_input = soup.select_one(".pagination__jumpwrap input[name='page']")
-    if page_input and page_input.get("max", "").isdigit():
-        return int(page_input["max"])
+def fetch_all(supabase, columns: str, provider: str | None = None) -> list[dict]:
+    rows, offset, size = [], 0, 1000
+    while True:
+        query = supabase.table("products").select(columns).order("created_at").range(offset, offset + size - 1)
+        if provider:
+            query = query.eq("source_provider", provider)
+        batch = query.execute().data or []
+        rows.extend(batch)
+        if len(batch) < size:
+            return rows
+        offset += size
 
-    page_numbers = []
-    for link in soup.select(".pagination__number"):
-        try:
-            page_numbers.append(int(link.get_text(strip=True)))
-        except ValueError:
+
+def resolve_categories(selected: list[str], overrides: dict[str, str]) -> list[dict]:
+    wanted = set(selected or [item["key"] for item in CATEGORY_DEFINITIONS])
+    categories, missing = [], []
+    for definition in CATEGORY_DEFINITIONS:
+        if definition["key"] not in wanted:
             continue
-    return max(page_numbers) if page_numbers else 1
+        url = overrides.get(definition["key"]) or os.getenv(definition["env_var"], "").strip()
+        if not url:
+            missing.append(f"{definition['key']} ({definition['env_var']})")
+            continue
+        categories.append({**definition, "url": url})
+    if missing:
+        raise RuntimeError("Missing category URLs: " + ", ".join(missing))
+    return categories
 
 
-def extract_album_images(album_soup) -> tuple[list[str], str | None]:
-    images = []
-    for image in album_soup.select(".image__img"):
-        src = absolutize_url(image.get("src"))
-        best_image = build_original_photo_url(image.get("data-path")) or upgrade_image_url(src) or src
-        images.append(best_image)
-
-    if not images:
-        for thumb in album_soup.select(".viewer__thumbnail img"):
-            images.append(absolutize_url(thumb.get("data-src")))
-
-    dates = [tag.get_text(strip=True) for tag in album_soup.select(".image__decwrap time") if tag.get_text(strip=True)]
-    album_date = dates[0] if dates else None
-    return unique_non_empty(images), album_date
+def chunked(values: list[str], size: int = 100) -> list[list[str]]:
+    return [values[index : index + size] for index in range(0, len(values), size)]
 
 
-def extract_album_id(album_href: str) -> str | None:
-    match = re.search(r"/albums/(\d+)", album_href or "")
-    return match.group(1) if match else None
-
-
-def scrape_albums(limit: int = None, dry_run: bool = False):
-    """Main scraper function."""
-    import requests
-
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Referer": f"{BASE_URL}/albums?tab=gallery",
-        }
-    )
-
-    first_page_url = f"{BASE_URL}/albums?tab=gallery&page=1"
-    print(f"Fetching albums from {first_page_url}...")
-    first_soup = fetch_soup(session, first_page_url)
-    total_pages = get_total_pages(first_soup)
-    print(f"Detected {total_pages} gallery pages.")
-
-    products_processed = 0
-
-    for page in range(1, total_pages + 1):
-        if limit and products_processed >= limit:
-            break
-
-        page_url = f"{BASE_URL}/albums?tab=gallery&page={page}"
-        soup = first_soup if page == 1 else fetch_soup(session, page_url)
-        albums = soup.select(".album__main")
-        print(f"Page {page}/{total_pages}: {len(albums)} albums found.")
-
-        for album in albums:
-            if limit and products_processed >= limit:
-                break
-
-            try:
-                title_el = album.select_one(".album__title")
-                album_href = album.get("href")
-                if not title_el or not album_href:
-                    continue
-
-                raw_name = title_el.get_text(strip=True)
-                album_url = absolutize_url(album_href)
-                album_id = extract_album_id(album_href)
-
-                cover_img = album.select_one(".album__img")
-                cover_src = absolutize_url(cover_img.get("src")) if cover_img else ""
-
-                album_soup = fetch_soup(session, album_url)
-                album_photos, album_date = extract_album_images(album_soup)
-                photos = album_photos or unique_non_empty([upgrade_image_url(cover_src), cover_src])
-                photos = reorder_photos_with_cover(photos, cover_src)
-
-                if not photos:
-                    print(f"  Skipping {raw_name} - no photos found")
-                    continue
-
-                parsed = parse_product_name(raw_name, album_url, album_date)
-                slug_source = parsed["name"] or raw_name or (album_id or "")
-                slug = slugify(slug_source) or f"album-{album_id or products_processed + 1}"
-
-                product_data = {
-                    "slug": slug,
-                    "name": parsed["name"],
-                    "club": parsed["club"],
-                    "league": parsed["league"],
-                    "country": parsed["country"],
-                    "product_kind": parsed["product_kind"],
-                    "type": parsed["type"],
-                    "season": parsed["season"],
-                    "price": 34.90,
-                    "description": parsed["description"],
-                    "photos": photos,
-                    "sizes": parsed["sizes"],
-                    "available_patches": [],
-                    "stock": 100,
-                }
-
-                existing = supabase.table("products").select("is_active,is_featured").eq("slug", slug).limit(1).execute()
-                existing_row = existing.data[0] if existing.data else None
-                if existing_row:
-                    product_data["is_active"] = existing_row.get("is_active", False)
-                    product_data["is_featured"] = existing_row.get("is_featured", False)
-                else:
-                    product_data["is_active"] = False
-                    product_data["is_featured"] = False
-
-                if dry_run:
-                    print(
-                        f"  [DRY RUN] {raw_name} -> {product_data['name']} | "
-                        f"{len(photos)} photos | sizes={','.join(product_data['sizes'])}"
-                    )
-                else:
-                    supabase.table("products").upsert(product_data, on_conflict="slug").execute()
-                    print(f"  Inserted: {product_data['name']}")
-
-                products_processed += 1
-                time.sleep(0.5)
-
-            except requests.RequestException as exc:
-                print(f"  Error fetching {album_href}: {exc}")
-            except Exception as exc:
-                print(f"  Error parsing {album_href}: {exc}")
-
-    print(f"\nDone. {products_processed} products processed.")
-
-
-if __name__ == "__main__":
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--repair-existing-titles", action="store_true")
-    parser.add_argument("--polish-existing-titles", action="store_true")
-    parser.add_argument("--repair-existing-leagues", action="store_true")
-    parser.add_argument("--repair-ac-milan-variants", action="store_true")
+    parser.add_argument("--category", action="append", choices=[item["key"] for item in CATEGORY_DEFINITIONS])
+    parser.add_argument("--category-url", action="append", default=[])
+    parser.add_argument("--provider", default=DEFAULT_PROVIDER)
+    parser.add_argument("--bucket", default=DEFAULT_BUCKET)
+    parser.add_argument("--delay", type=float, default=DEFAULT_DELAY)
+    parser.add_argument("--skip-image-upload", action="store_true")
+    parser.add_argument("--deactivate-missing", action="store_true")
+    parser.add_argument("--cutover", action="store_true")
     args = parser.parse_args()
-    if args.repair_existing_titles:
-        repair_existing_titles(limit=args.limit, dry_run=args.dry_run)
-    elif args.polish_existing_titles:
-        polish_existing_titles(limit=args.limit, dry_run=args.dry_run)
-    elif args.repair_existing_leagues:
-        repair_existing_leagues(limit=args.limit, dry_run=args.dry_run)
-    elif args.repair_ac_milan_variants:
-        repair_ac_milan_variants(limit=args.limit, dry_run=args.dry_run)
-    else:
-        scrape_albums(limit=args.limit, dry_run=args.dry_run)
+
+    overrides = {}
+    for value in args.category_url:
+        if "=" not in value:
+            raise ValueError(f"Invalid category override: {value}")
+        key, url = value.split("=", 1)
+        overrides[key.strip()] = url.strip()
+    categories = resolve_categories(args.category or [], overrides)
+
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    if not args.dry_run and not args.skip_image_upload:
+        ensure_bucket(args.bucket)
+
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0", "Referer": "https://www.yupoo.com/"})
+
+    provider_rows = fetch_all(supabase, "id,slug,is_active,is_featured,source_album_id", args.provider)
+    existing_by_album = {row["source_album_id"]: row for row in provider_rows if row.get("source_album_id")}
+    all_slugs = {row["slug"] for row in fetch_all(supabase, "slug") if row.get("slug")}
+    seen, processed, inserted, updated, skipped = set(), 0, 0, 0, 0
+
+    for category in categories:
+        if args.limit and processed >= args.limit:
+            break
+        first_url = with_page(category["url"], 1)
+        first_soup = BeautifulSoup(session.get(first_url, timeout=30).text, "html.parser")
+        total_pages = get_total_pages(first_soup)
+        print(f"{category['key']}: {total_pages} pages")
+        for page in range(1, total_pages + 1):
+            if args.limit and processed >= args.limit:
+                break
+            soup = first_soup if page == 1 else BeautifulSoup(session.get(with_page(category["url"], page), timeout=30).text, "html.parser")
+            for album in soup.select(".album__main"):
+                if args.limit and processed >= args.limit:
+                    break
+                title_el = album.select_one(".album__title")
+                href = album.get("href")
+                if not title_el or not href:
+                    continue
+                album_id_match = re.search(r"/albums/(\d+)", href)
+                album_id = album_id_match.group(1) if album_id_match else ""
+                if not album_id or album_id in seen:
+                    continue
+                title = norm(title_el.get_text(strip=True))
+                parsed = parse_product(title, category)
+                if not parsed:
+                    skipped += 1
+                    continue
+                album_url = absolute(category["url"], href)
+                album_soup = BeautifulSoup(session.get(album_url, timeout=30).text, "html.parser")
+                if "access code" in " ".join(album_soup.stripped_strings).lower():
+                    print(f"  locked album skipped: {album_url}")
+                    skipped += 1
+                    continue
+                photos = []
+                for image in album_soup.select(".image__img"):
+                    source = original_photo_url(image.get("data-path")) or absolute(album_url, image.get("src"))
+                    if source and source not in photos:
+                        photos.append(source)
+                if not photos:
+                    skipped += 1
+                    continue
+                existing = existing_by_album.get(album_id)
+                slug = existing["slug"] if existing else slugify(parsed["name"]) or f"album-{album_id}"
+                if not existing and slug in all_slugs:
+                    slug = f"{slug}-{album_id}"
+                all_slugs.add(slug)
+                final_photos = photos if args.dry_run or args.skip_image_upload else [upload_image(session, photo, args.bucket, f"{args.provider}/{category['key']}/{album_id}/{index:02d}") for index, photo in enumerate(photos, start=1)]
+                payload = {
+                    **parsed,
+                    "slug": slug,
+                    "price": DEFAULT_PRICE,
+                    "photos": final_photos,
+                    "stock": 100,
+                    "is_featured": existing.get("is_featured", False) if existing else False,
+                    "is_active": existing.get("is_active", False) if existing else False,
+                    "source_provider": args.provider,
+                    "source_album_id": album_id,
+                    "source_album_url": album_url,
+                    "source_category_key": category["key"],
+                    "source_title": title,
+                    "last_synced_at": datetime.now(timezone.utc).isoformat(),
+                }
+                if args.dry_run:
+                    print(f"  [DRY RUN] {category['key']} | {title} -> {payload['name']} | {payload['league']}")
+                elif existing:
+                    supabase.table("products").update(payload).eq("id", existing["id"]).execute()
+                    updated += 1
+                else:
+                    supabase.table("products").insert(payload).execute()
+                    inserted += 1
+                processed += 1
+                seen.add(album_id)
+                time.sleep(args.delay)
+
+    if not args.dry_run and args.deactivate_missing:
+        stale_ids = [row["id"] for row in provider_rows if row.get("source_album_id") and row["source_album_id"] not in seen]
+        for chunk in chunked(stale_ids):
+            supabase.table("products").update({"is_active": False}).in_("id", chunk).execute()
+        print(f"Deactivated missing provider products: {len(stale_ids)}")
+
+    if not args.dry_run and args.cutover:
+        rows = fetch_all(supabase, "id,source_provider")
+        provider_ids = [row["id"] for row in rows if row.get("source_provider") == args.provider]
+        other_ids = [row["id"] for row in rows if row.get("source_provider") != args.provider]
+        for chunk in chunked(other_ids):
+            supabase.table("products").update({"is_active": False}).in_("id", chunk).execute()
+        for chunk in chunked(provider_ids):
+            supabase.table("products").update({"is_active": True}).in_("id", chunk).execute()
+        print(f"Cutover complete: {len(provider_ids)} active provider rows, {len(other_ids)} deactivated rows.")
+
+    print(f"Done. processed={processed} inserted={inserted} updated={updated} skipped={skipped}")
+
+
+if __name__ == "__main__":
+    main()
