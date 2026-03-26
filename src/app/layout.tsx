@@ -29,8 +29,8 @@ const bebasNeue = Bebas_Neue({
 
 export const metadata: Metadata = {
   title: {
-    default: "MAILLOT 90' — Maillots de Football Premium",
-    template: "%s | MAILLOT 90'",
+    default: "MAILLOT ADDICT — Maillots de Football Premium",
+    template: "%s | MAILLOT ADDICT",
   },
   description: 'Maillots de football premium pour tous les clubs. Livraison rapide en France et en Europe.',
 }
