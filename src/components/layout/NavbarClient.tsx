@@ -72,7 +72,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
       <header className="sticky top-0 z-50 border-b border-[var(--cream-3)] bg-white/95 backdrop-blur-sm">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="transition-transform hover:scale-[1.02]">
-            <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
+            <svg width="135" height="30" viewBox="0 0 135 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
               <text x="0" y="26"
                 fontFamily="'Barlow Condensed', sans-serif"
                 fontWeight="900"
@@ -86,7 +86,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
                 fontWeight="900"
                 fontSize="22"
                 fill="#C1440E">
-                '
+                &apos;
               </text>
             </svg>
           </Link>
@@ -160,7 +160,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
       <div className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between md:h-24">
-            <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
+            <svg width="135" height="30" viewBox="0 0 135 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
               <text x="0" y="26"
                 fontFamily="'Barlow Condensed', sans-serif"
                 fontWeight="900"
@@ -174,7 +174,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
                 fontWeight="900"
                 fontSize="22"
                 fill="#C1440E">
-                '
+                &apos;
               </text>
             </svg>
             <button onClick={() => setSearchOpen(false)} className="p-2 transition-transform hover:rotate-90">
