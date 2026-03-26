@@ -71,8 +71,24 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--cream-3)] bg-white/95 backdrop-blur-sm">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="font-bebas text-3xl tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-            KITLAB
+          <Link href="/" className="transition-transform hover:scale-[1.02]">
+            <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
+              <text x="0" y="26"
+                fontFamily="'Barlow Condensed', sans-serif"
+                fontWeight="900"
+                fontSize="28"
+                fill="#1C1712"
+                letterSpacing="0.3">
+                MAILLOT 90
+              </text>
+              <text x="110" y="22"
+                fontFamily="'Barlow Condensed', sans-serif"
+                fontWeight="900"
+                fontSize="22"
+                fill="#C1440E">
+                '
+              </text>
+            </svg>
           </Link>
 
           <div className="hidden items-center gap-8 md:flex">
@@ -144,7 +160,23 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
       <div className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between md:h-24">
-            <span className="font-bebas text-3xl tracking-widest text-[var(--black)]">KITLAB</span>
+            <svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
+              <text x="0" y="26"
+                fontFamily="'Barlow Condensed', sans-serif"
+                fontWeight="900"
+                fontSize="28"
+                fill="#1C1712"
+                letterSpacing="0.3">
+                MAILLOT 90
+              </text>
+              <text x="110" y="22"
+                fontFamily="'Barlow Condensed', sans-serif"
+                fontWeight="900"
+                fontSize="22"
+                fill="#C1440E">
+                '
+              </text>
+            </svg>
             <button onClick={() => setSearchOpen(false)} className="p-2 transition-transform hover:rotate-90">
               <X className="h-8 w-8 text-[var(--black)]" />
             </button>
@@ -248,7 +280,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
 
             <div className="mb-10 flex flex-col gap-8 border-t border-[var(--cream-3)] pt-10">
               <p className="text-[16px] leading-relaxed text-[#707072]">
-                Deviens membre <span className="font-bold text-[var(--black)]">KITLAB</span> pour acceder au meilleur des produits et profiter d&apos;offres exclusives. <span className="cursor-pointer font-bold text-[var(--black)] underline">En savoir plus</span>
+                Deviens membre <span className="font-bold text-[var(--black)]">MAILLOT 90&apos;</span> pour acceder au meilleur des produits et profiter d&apos;offres exclusives. <span className="cursor-pointer font-bold text-[var(--black)] underline">En savoir plus</span>
               </p>
               <div className="flex gap-3">
                 <Link

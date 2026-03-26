@@ -19,6 +19,7 @@ const LEAGUE_IMAGES: Record<string, string> = {
   'ligue-1':        '/images/ligue1.jpg',
   'premier-league': '/images/premiere.jpg',
   'la-liga':        '/images/liga.jpg',
+  'liga-portugal':  '/globe.svg',
   'reste-du-monde': '/images/reste_du_monde.jpg',
 }
 

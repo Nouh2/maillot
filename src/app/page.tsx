@@ -1,5 +1,4 @@
-// src/app/page.tsx
-import { getProducts, getLeagues, getProductBySlug } from '@/lib/supabase/queries'
+import type { Metadata } from 'next'
 import { EmojiCategoryBar } from '@/components/home/EmojiCategoryBar'
 import { HeroSlideshow } from '@/components/home/HeroSlideshow'
 import { LeaguesStrip } from '@/components/home/LeaguesStrip'
@@ -13,66 +12,58 @@ import { InstagramWall } from '@/components/home/InstagramWall'
 import { CountdownBanner } from '@/components/home/CountdownBanner'
 import { AboutSection } from '@/components/home/AboutSection'
 import { PromoStrip } from '@/components/home/PromoStrip'
-import type { Metadata } from 'next'
+import { getFeaturedProducts, getLeagues, getProducts } from '@/lib/supabase/queries'
+import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
-  title: 'Accueil | KITLAB — Maillots de Football Premium',
-  description: 'Plus de 390 maillots de football premium — grands clubs, toutes années. Flocage et patchs disponibles. Livraison rapide.',
+  title: 'Accueil | KITLAB - Maillots de Football Premium',
+  description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
+}
+
+function dedupeProducts(...groups: Product[][]): Product[] {
+  const seen = new Set<string>()
+  const products: Product[] = []
+
+  for (const group of groups) {
+    for (const product of group) {
+      if (seen.has(product.id)) continue
+      seen.add(product.id)
+      products.push(product)
+    }
+  }
+
+  return products
 }
 
 export default async function HomePage() {
-  const [allProducts, leagues, heroProducts, topProducts] = await Promise.all([
-    getProducts({ concept: false }),
-    getLeagues(),
-    Promise.all([
-      getProductBySlug('france-maillot-exterieur-2026-2027'),
-      getProductBySlug('saison-maillot-domicile-2012-2013'),
-      getProductBySlug('real-madrid-2025-2026'),
-      getProductBySlug('chelsea-tenue-dentrainement-davant-match-2026-2027'),
-    ]),
-    Promise.all([
-      getProductBySlug('france-maillot-exterieur-2026-2027'),
-      getProductBySlug('bresil-gardien-2026-2027'),
-      getProductBySlug('saison-maillot-domicile-blanc-manches-longues-2012-2013'),
-    ]),
+  const leagues = (await getLeagues()).filter((league) => league.slug !== 'champions-league')
+  const homeLeagues = leagues.slice(0, 4)
+
+  const [featuredProducts, recentProducts, leagueProducts] = await Promise.all([
+    getFeaturedProducts(12),
+    getProducts({ concept: false, limit: 12 }),
+    Promise.all(homeLeagues.map((league) => getProducts({ league: league.name, concept: false, limit: 8 }))),
   ])
+
+  const homepagePool = dedupeProducts(featuredProducts, recentProducts, ...leagueProducts)
+  const homeCatalogProducts = dedupeProducts(...leagueProducts)
+  const heroProducts = Array.from({ length: 4 }, (_, index) => homepagePool[index] ?? null)
+  const topProducts = homepagePool.slice(0, 3)
+
   return (
     <>
-      {/* Catégories emoji + Hero Slideshow */}
       <EmojiCategoryBar leagues={leagues} />
       <HeroSlideshow heroProducts={heroProducts} />
-
-      {/* Barre promo rotative */}
       <PromoStrip />
-
-      {/* Bestsellers tabbés (ligues réelles) */}
-      <BestsellersTabs allProducts={allProducts} leagues={leagues} topProducts={topProducts} />
-
-      {/* Barre trust défilante */}
+      <BestsellersTabs allProducts={homeCatalogProducts} leagues={homeLeagues} topProducts={topProducts} />
       <TrustScrollBar />
-
-      {/* Collections tabbées (ligues réelles) */}
-      <CollectionsTabs allProducts={allProducts} leagues={leagues} />
-
-      {/* Réassurance 6 icônes */}
+      <CollectionsTabs allProducts={homeCatalogProducts} leagues={homeLeagues} />
       <ReassuranceBar />
-
-      {/* Championnats */}
       <LeaguesStrip leagues={leagues} />
-
-      {/* Countdown offre */}
       <CountdownBanner />
-
-      {/* La différence KITLAB */}
       <WhyUsSection />
-
-      {/* Avis carrousel */}
       <ReviewsSection />
-
-      {/* Galerie sociale */}
       <InstagramWall />
-
-      {/* À propos */}
       <AboutSection />
     </>
   )

@@ -16,7 +16,7 @@ const barlow = Barlow({
 })
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
+  weight: ['400', '600', '700', '900'],
   variable: '--font-barlow-condensed',
   display: 'swap',
 })
@@ -29,8 +29,8 @@ const bebasNeue = Bebas_Neue({
 
 export const metadata: Metadata = {
   title: {
-    default: 'KITLAB — Maillots de Football Premium',
-    template: '%s | KITLAB',
+    default: "MAILLOT 90' — Maillots de Football Premium",
+    template: "%s | MAILLOT 90'",
   },
   description: 'Maillots de football premium pour tous les clubs. Livraison rapide en France et en Europe.',
 }

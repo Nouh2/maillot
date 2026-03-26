@@ -38,6 +38,14 @@ export async function getProducts(filters?: {
   return data ?? []
 }
 
+export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
+  return getProducts({
+    featured: true,
+    concept: false,
+    limit,
+  })
+}
+
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = await getSupabaseServerClient()
   const { data, error } = await supabase

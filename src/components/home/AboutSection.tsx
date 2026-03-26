@@ -1,22 +1,19 @@
-// src/components/home/AboutSection.tsx
 import { Star } from 'lucide-react'
 
 const LIST_ITEMS = [
-  { icon: '🎽', text: '+390 maillots disponibles' },
-  { icon: '⭐', text: '4.5/5 sur nos avis clients' },
-  { icon: '🚚', text: 'Livraison gratuite dès 60€' },
+  { icon: 'Catalogue', text: 'Selection premium mise a jour en continu' },
+  { icon: 'Avis', text: '4.5/5 sur nos avis clients' },
+  { icon: 'Livraison', text: 'Livraison gratuite des 60EUR' },
 ]
 
 export function AboutSection() {
   return (
     <section className="px-4 py-10 bg-[var(--cream)]">
-      {/* Petit label */}
-      <p className="font-condensed text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--terra)] mb-3">
+      <p className="mb-3 font-condensed text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--terra)]">
         KITLAB
       </p>
 
-      {/* Titre avec mot souligné */}
-      <h2 className="font-condensed text-[26px] font-bold text-[var(--black)] leading-snug">
+      <h2 className="font-condensed text-[26px] font-bold leading-snug text-[var(--black)]">
         Des maillots qui font{' '}
         <span
           style={{
@@ -26,38 +23,37 @@ export function AboutSection() {
             textUnderlineOffset: 5,
           }}
         >
-          la différence.
+          la difference.
         </span>
       </h2>
 
-      {/* Description */}
-      <p className="text-[14px] text-[var(--grey)] mt-3 leading-relaxed">
-        On sélectionne les maillots les plus demandés et on te guide pour choisir vite — sans te perdre
-        dans un catalogue. Livraison rapide, offre pack, et vraie preuve sociale grâce à vous.
+      <p className="mt-3 text-[14px] leading-relaxed text-[var(--grey)]">
+        On selectionne les maillots les plus demandes et on te guide pour choisir vite sans te perdre
+        dans un catalogue. Livraison rapide, offre pack, et vraie preuve sociale grace a vous.
       </p>
 
-      {/* Liste icônes */}
       <ul className="mt-5 space-y-3">
-        {LIST_ITEMS.map((item, i) => (
-          <li key={i} className="flex items-center gap-3 font-condensed text-[14px] text-[var(--black)]">
-            <span style={{ fontSize: 18 }}>{item.icon}</span>
+        {LIST_ITEMS.map((item) => (
+          <li key={item.icon} className="flex items-center gap-3 font-condensed text-[14px] text-[var(--black)]">
+            <span className="min-w-20 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--terra)]">
+              {item.icon}
+            </span>
             {item.text}
           </li>
         ))}
       </ul>
 
-      {/* Widget rating */}
       <div
-        className="mt-6 bg-white rounded-xl p-4 flex items-center gap-4"
+        className="mt-6 flex items-center gap-4 rounded-xl bg-white p-4"
         style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
       >
         <div>
           <div className="flex gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star key={index} className="h-4 w-4 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <p className="font-condensed text-[11px] text-[var(--grey)] mt-1">+1 200 clients satisfaits</p>
+          <p className="mt-1 font-condensed text-[11px] text-[var(--grey)]">+1 200 clients satisfaits</p>
         </div>
         <div className="ml-auto text-right">
           <p className="font-condensed text-[13px] font-bold text-[var(--black)]">Excellent</p>
@@ -65,19 +61,13 @@ export function AboutSection() {
         </div>
       </div>
 
-      {/* Grand chiffre */}
       <div className="mt-8 text-center">
+        <p className="font-condensed text-[52px] font-black leading-none text-[var(--black)]">+1 200</p>
         <p
-          className="font-condensed font-black text-[var(--black)] leading-none"
-          style={{ fontSize: 52 }}
-        >
-          +1 200
-        </p>
-        <p
-          className="font-condensed uppercase text-[var(--grey)] mt-2"
+          className="mt-2 font-condensed uppercase text-[var(--grey)]"
           style={{ fontSize: 12, letterSpacing: '0.12em' }}
         >
-          Maillots livrés
+          Maillots livres
         </p>
       </div>
     </section>
