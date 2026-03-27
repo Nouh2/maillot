@@ -4,8 +4,8 @@ import { getProductBySlug, getPatches } from '@/lib/supabase/queries'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
-import { Badge } from '@/components/ui/Badge'
-import { Truck, ShieldCheck, Undo, Star } from 'lucide-react'
+import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
+import { Star } from 'lucide-react'
 import Link from 'next/link'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 
@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: Props) {
                 ))}
               </div>
               <p className="font-condensed text-[13px] font-bold text-[var(--black)] whitespace-nowrap">
-                Noté 4.5/5 sur +62 000 clients
+                Noté 4.5/5 sur plus de 1200 clients
               </p>
             </div>
           </div>
@@ -106,35 +106,12 @@ export default async function ProductPage({ params }: Props) {
 
             {/* Sentinel pour le sticky CTA mobile */}
             <div id="product-cta-sentinel" />
+            <div className="mb-8">
+              <ProductTrustBadges />
+            </div>
             <AddToCartForm product={product} patches={patches} />
             {/* Espace pour le sticky bar mobile */}
             <div className="h-28 md:hidden" />
-
-            <div className="mt-12 space-y-4 border-t-2 border-[var(--black)] pt-8">
-              <div className="flex items-start gap-4">
-                <Truck className="h-6 w-6 shrink-0 text-[var(--black)]" strokeWidth={1.5} />
-                <div>
-                  <h4 className="font-condensed font-bold uppercase tracking-wider text-[var(--black)]">Livraison Express</h4>
-                  <p className="mt-0.5 text-sm text-[var(--grey)]">Offerte des 60 EUR d&apos;achat. Expedition sous 24-48h.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <ShieldCheck className="h-6 w-6 shrink-0 text-[var(--black)]" strokeWidth={1.5} />
-                <div>
-                  <h4 className="font-condensed font-bold uppercase tracking-wider text-[var(--black)]">Paiement securise</h4>
-                  <p className="mt-0.5 text-sm text-[var(--grey)]">Transactions 100% securisees via Stripe.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Undo className="h-6 w-6 shrink-0 text-[var(--black)]" strokeWidth={1.5} />
-                <div>
-                  <h4 className="font-condensed font-bold uppercase tracking-wider text-[var(--black)]">Retours simplifies</h4>
-                  <p className="mt-0.5 text-sm text-[var(--grey)]">Echanges ou remboursements sous 14 jours.</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,12 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { SizeGuideModal } from './SizeGuideModal'
+import { ChevronDown, Check } from 'lucide-react'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
 
@@ -15,47 +20,94 @@ export function SizeSelector({
   onSelect: (size: string) => void
 }) {
   const [isGuideOpen, setIsGuideOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <>
-      <div>
-        <div className="flex items-end justify-between mb-4">
-          <p className="text-[16px] font-bold text-[var(--black)] uppercase">
-            Choisir une Taille
+      <div className="space-y-4" ref={containerRef}>
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[17px] font-bold text-[var(--black)]">
+            Taille: <span className="text-[var(--grey)] font-normal">{selected || 'Sélectionner'}</span>
           </p>
           <button 
+            type="button"
             onClick={() => setIsGuideOpen(true)}
-            className="text-[14px] text-[#707072] underline hover:text-[var(--black)] transition-colors"
+            className="text-[13px] text-[#707072] underline hover:text-[var(--black)] transition-colors uppercase font-bold tracking-tight"
           >
             Guide des tailles
           </button>
         </div>
-        <div className="grid grid-cols-5 gap-2">
-          {SIZES.map((size) => {
-            const avail = available.includes(size)
-            return (
-              <button
-                key={size}
-                onClick={() => avail && onSelect(size)}
-                disabled={!avail}
-                aria-label={`Taille ${size}${!avail ? ' — indisponible' : ''}`}
-                aria-pressed={selected === size}
-                className={`relative h-12 border transition-all flex items-center justify-center text-[15px] font-bold
-                  ${
-                    selected === size
-                      ? 'border-[var(--black)] ring-1 ring-[var(--black)] bg-white text-[var(--black)]'
-                      : avail
-                        ? 'border-[#E5E5E5] bg-white hover:border-[var(--black)] text-[var(--black)]'
-                        : 'border-[#F5F5F5] bg-[#F5F5F5] text-[#CCCCCC] cursor-not-allowed'
-                  }`}
-              >
-                {size}
-                {!avail && (
-                  <div className="absolute inset-0 w-full h-[1px] bg-[#CCCCCC] top-1/2 -rotate-45 transform origin-center" />
-                )}
-              </button>
-            )
-          })}
+        
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className={cn(
+              "w-full flex items-center justify-between bg-white border-2 border-[var(--cream-3)] rounded-2xl px-6 py-4.5 text-[16px] font-bold text-[var(--black)] cursor-pointer transition-all hover:border-[var(--black)] shadow-sm text-left",
+              isOpen && "border-[var(--black)] ring-4 ring-[var(--black)]/5"
+            )}
+          >
+            <span className={cn(!selected && "text-[var(--grey)]")}>
+              {selected ? `Taille ${selected}` : 'Choisir une taille'}
+            </span>
+            <ChevronDown className={cn("w-5 h-5 transition-transform duration-300", isOpen && "rotate-180")} />
+          </button>
+
+          {/* Custom Dropdown Menu */}
+          <div 
+            className={cn(
+              "absolute left-0 right-0 mt-2 bg-white border-2 border-[var(--black)] rounded-2xl overflow-hidden z-50 shadow-2xl transition-all duration-200 origin-top",
+              isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
+            )}
+          >
+            <div className="max-h-[300px] overflow-y-auto overflow-x-hidden scrollbar-hide py-2">
+              <div className="px-6 py-2 border-b border-[var(--cream-3)] mb-1">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--grey)]">Tailles disponibles</span>
+              </div>
+              {SIZES.map((size) => {
+                const isAvailable = available.includes(size)
+                const isSelected = selected === size
+
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    disabled={!isAvailable}
+                    onClick={() => {
+                      onSelect(size)
+                      setIsOpen(false)
+                    }}
+                    className={cn(
+                      "w-full flex items-center justify-between px-6 py-4 transition-colors text-left",
+                      isAvailable ? "hover:bg-[var(--cream)]" : "opacity-40 cursor-not-allowed",
+                      isSelected && "bg-[var(--cream)]"
+                    )}
+                  >
+                    <div className="flex flex-col">
+                      <span className={cn("text-[17px] font-bold", isAvailable ? "text-[var(--black)]" : "text-[var(--grey)]")}>
+                        {size}
+                      </span>
+                      {!isAvailable && (
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-red-500">Épuisé</span>
+                      )}
+                    </div>
+                    {isSelected && <Check className="w-5 h-5 text-[var(--black)]" strokeWidth={3} />}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </div>
       

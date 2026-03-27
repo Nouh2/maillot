@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Minus, Check } from 'lucide-react'
+import { Plus, Minus, Check, ShieldCheck } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { FLOCAGE_PRICE, calculateCartItemUnitPrice } from '@/lib/cartPricing'
 import { SizeSelector } from './SizeSelector'
@@ -98,64 +98,100 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         {hasFlocage && (
           <div className="grid grid-cols-6 gap-3 animate-in slide-in-from-top-2 fade-in duration-300">
             <div className="col-span-4 space-y-2">
-              <label className="text-[13px] font-bold text-[var(--black)] uppercase tracking-wide">Nom personnalisé</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Nom</label>
               <input
                 type="text"
+                maxLength={15}
                 value={flocageName}
                 onChange={(e) => setFlocageName(e.target.value)}
-                maxLength={12}
-                className="w-full bg-white border border-[#E5E5E5] px-4 py-3 text-[16px] font-bold uppercase focus:border-[var(--black)] focus:outline-none rounded-none transition-colors"
-                placeholder="EX: MBAPPÉ"
+                placeholder="Ex: ZIDANE"
+                className="w-full bg-white border-2 border-[var(--cream-3)] rounded-xl px-4 py-3 font-condensed text-lg focus:border-[var(--black)] outline-none transition-colors uppercase"
               />
             </div>
             <div className="col-span-2 space-y-2">
-              <label className="text-[13px] font-bold text-[var(--black)] uppercase tracking-wide text-center block">N°</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Numéro</label>
               <input
                 type="text"
+                maxLength={2}
                 value={flocageNumber}
-                onChange={(e) => setFlocageNumber(e.target.value.replace(/\D/g, '').slice(0, 2))}
-                className="w-full bg-white border border-[#E5E5E5] px-4 py-3 text-[16px] font-bold text-center focus:border-[var(--black)] focus:outline-none rounded-none transition-colors"
+                onChange={(e) => setFlocageNumber(e.target.value.replace(/\D/g, ''))}
                 placeholder="10"
+                className="w-full bg-white border-2 border-[var(--cream-3)] rounded-xl px-4 py-3 font-condensed text-lg text-center focus:border-[var(--black)] outline-none transition-colors"
               />
             </div>
           </div>
         )}
       </div>
 
-      <div className="space-y-6 pt-4">
+      <div className="pt-4 border-t border-[var(--cream-3)]">
         {error && (
-          <div className="flex items-center gap-3 p-4 bg-[#FFDADA] border-l-4 border-[#FF0000] text-[#CC0000] text-[15px] font-bold">
+          <p className="mb-4 text-xs font-bold text-red-500 tracking-widest text-center animate-pulse">
             {error}
-          </div>
+          </p>
         )}
 
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between border-y border-[#E5E5E5] py-4">
-            <span className="text-[16px] font-bold text-[var(--black)] uppercase">Quantité</span>
-            <div className="flex items-center border border-[#E5E5E5] rounded-full overflow-hidden">
+          <div className="flex items-center">
+            {/* Modern Quantity Selector */}
+            <div className="flex items-center bg-white border-2 border-[var(--cream-3)] rounded-xl h-[56px] px-2 shadow-sm">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-30"
-                disabled={qty <= 1}
+                className="w-10 h-10 flex items-center justify-center text-[var(--grey)] hover:text-[var(--black)] transition-colors"
               >
-                <Minus className="w-5 h-5 text-[var(--black)]" />
+                <Minus size={18} />
               </button>
-              <span className="font-bold text-[18px] min-w-[50px] text-center">{qty}</span>
+              <span className="w-8 text-center font-bebas text-xl text-[var(--black)]">{qty}</span>
               <button
                 onClick={() => setQty(qty + 1)}
-                className="p-3 hover:bg-gray-50 transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-[var(--grey)] hover:text-[var(--black)] transition-colors"
               >
-                <Plus className="w-5 h-5 text-[var(--black)]" />
+                <Plus size={18} />
               </button>
             </div>
+
+            <button
+              onClick={handleAdd}
+              className="flex-1 ml-4 h-[56px] bg-[var(--black)] text-white text-[16px] font-bold uppercase tracking-wider rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.98]"
+            >
+              Ajouter au panier — {totalPrice.toFixed(2)} €
+            </button>
           </div>
 
-          <button
-            onClick={handleAdd}
-            className="w-full py-5 bg-[var(--black)] text-white text-[18px] font-bold rounded-full hover:opacity-80 transition-all flex items-center justify-center gap-2"
-          >
-            Ajouter au panier — {totalPrice.toFixed(2)} €
-          </button>
+          {/* New Payment Section */}
+          <div className="space-y-4">
+            <div className="w-full py-3.5 bg-[#4ADE80] text-white text-center font-bebas text-2xl tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-sm">
+              <ShieldCheck className="w-6 h-6 text-white" />
+              Paiement 100 % Sécurisé
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-3 py-2 opacity-80 transition-opacity hover:opacity-100">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 object-contain" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4 object-contain" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 object-contain" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 object-contain" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" alt="Amex" className="h-5 object-contain" />
+            </div>
+
+            <div className="bg-[#F0F4FF] p-6 rounded-2xl border border-blue-50 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/30 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700"></div>
+              
+              <h3 className="relative font-bold text-[18px] text-[var(--black)] italic mb-4 inline-block">
+                Paiement & Sécurité
+                <div className="absolute -bottom-1 left-0 w-full h-2 bg-[#4BFF00] -z-10 opacity-60 rounded-full"></div>
+              </h3>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                <div className="px-2 py-1 bg-white rounded border border-blue-100 shadow-xs flex items-center justify-center">
+                  <ShieldCheck className="w-3 h-3 text-blue-500 mr-1" />
+                  <span className="text-[10px] font-bold text-blue-900 uppercase tracking-tighter">SSL Securing</span>
+                </div>
+              </div>
+
+              <p className="text-[14px] leading-relaxed text-[#555555] relative z-10">
+                Vos informations de paiement sont traitées de manière sécurisée. Nous ne stockons pas les informations de carte bancaire et n&apos;y avons pas accès.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
