@@ -19,11 +19,16 @@ function Pad({ n }: { n: number }) {
 }
 
 export function CountdownBanner() {
-  const [time, setTime] = useState(() => getTimeUntilMidnight())
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
 
   useEffect(() => {
-    const id = setInterval(() => setTime(getTimeUntilMidnight()), 1000)
-    return () => clearInterval(id)
+    const syncTime = () => setTime(getTimeUntilMidnight())
+    const timeoutId = window.setTimeout(syncTime, 0)
+    const intervalId = window.setInterval(syncTime, 1000)
+    return () => {
+      window.clearTimeout(timeoutId)
+      window.clearInterval(intervalId)
+    }
   }, [])
 
   return (
