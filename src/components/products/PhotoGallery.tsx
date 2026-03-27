@@ -38,19 +38,19 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
-        className="relative flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden bg-[var(--cream)] scrollbar-hide sm:cursor-zoom-in"
+        className="relative flex aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden bg-white scrollbar-hide sm:aspect-[4/5] sm:cursor-zoom-in"
       >
         {photos.map((p, i) => (
           <div 
             key={i} 
-            className="relative h-full w-full flex-shrink-0 snap-center"
+            className="relative h-full w-full flex-shrink-0 snap-center bg-white"
           >
             <Image
               src={proxyImage(p)}
               alt={`${name} - Photo ${i + 1}`}
               fill
               unoptimized
-              className="object-cover"
+              className="object-contain p-3 sm:p-4"
               priority={i === 0}
               sizes="(max-width: 768px) 100vw, 50vw"
             />
