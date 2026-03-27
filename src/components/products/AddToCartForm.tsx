@@ -96,8 +96,8 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         </label>
 
         {hasFlocage && (
-          <div className="grid grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-300">
-            <div className="col-span-3 space-y-2">
+          <div className="grid grid-cols-6 gap-3 animate-in slide-in-from-top-2 fade-in duration-300">
+            <div className="col-span-4 space-y-2">
               <label className="text-[13px] font-bold text-[var(--black)] uppercase tracking-wide">Nom personnalisé</label>
               <input
                 type="text"
@@ -108,7 +108,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 placeholder="EX: MBAPPÉ"
               />
             </div>
-            <div className="col-span-1 space-y-2">
+            <div className="col-span-2 space-y-2">
               <label className="text-[13px] font-bold text-[var(--black)] uppercase tracking-wide text-center block">N°</label>
               <input
                 type="text"

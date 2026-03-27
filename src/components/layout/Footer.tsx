@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="bg-[var(--black-2)] text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
         <div>
-          <p className="font-bebas text-3xl tracking-widest mb-4">KITLAB</p>
+          <p className="font-bebas text-3xl tracking-widest mb-4">MAILLOT ADDICT</p>
           <p className="text-[var(--grey-lt)] text-sm leading-relaxed">
             Maillots de football premium pour tous les clubs et toutes les ligues.
           </p>
@@ -36,7 +36,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p className="text-xs text-[var(--grey-lt)]">© {new Date().getFullYear()} KITLAB — Tous droits réservés</p>
+        <p className="text-xs text-[var(--grey-lt)]">© {new Date().getFullYear()} MAILLOT ADDICT — Tous droits réservés</p>
         <div className="flex items-center gap-3">
           {['Visa', 'Mastercard', 'CB', 'PayPal'].map((p) => (
             <span key={p} className="text-xs font-condensed tracking-wider text-[var(--grey-lt)] border border-white/20 px-2 py-0.5">{p}</span>

@@ -28,12 +28,12 @@ export function StickyAddToCart({ productName, price }: Props) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[var(--cream-3)]"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[var(--cream-3)] w-full max-w-full overflow-hidden"
       style={{ transform: visible ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease' }}
     >
-      <div className="px-4 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <p className="font-condensed text-sm font-bold uppercase tracking-wide text-[var(--black)] truncate pr-4">
+      <div className="px-4 py-3 w-full max-w-full overflow-hidden" style={{ height: '104px' }}>
+        <div className="flex items-center justify-between mb-2 w-full overflow-hidden">
+          <p className="font-condensed text-sm font-bold uppercase tracking-wide text-[var(--black)] truncate pr-4 min-w-0 flex-1">
             {productName}
           </p>
           <p className="font-condensed text-base font-bold text-[var(--terra)] shrink-0">

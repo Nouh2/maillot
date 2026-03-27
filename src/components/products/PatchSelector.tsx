@@ -113,7 +113,7 @@ export function PatchSelector({
           transform: open ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
           maxHeight: '82vh',
-          display: 'flex',
+          display: 'none',
           flexDirection: 'column',
         }}
       >

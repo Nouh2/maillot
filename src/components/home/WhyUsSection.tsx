@@ -23,7 +23,7 @@ export function WhyUsSection() {
             <h2 className="font-bebas text-6xl leading-none md:text-8xl">
               LA DIFFÉRENCE
               <br />
-              KITLAB
+              MAILLOT ADDICT
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">

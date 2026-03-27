@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
@@ -27,6 +27,11 @@ const bebasNeue = Bebas_Neue({
   display: 'swap',
 })
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export const metadata: Metadata = {
   title: {
     default: "MAILLOT ADDICT — Maillots de Football Premium",
@@ -45,14 +50,16 @@ export default function RootLayout({
       lang="fr"
       className={`${barlow.variable} ${barlowCondensed.variable} ${bebasNeue.variable}`}
     >
-      <body className="antialiased">
+      <body className="antialiased overflow-x-hidden">
         <Providers>
-          <CustomCursor />
-          <Navbar />
-          <Ticker />
-          <CartDrawer />
-          <main>{children}</main>
-          <Footer />
+          <div className="flex min-h-screen flex-col overflow-x-hidden">
+            <CustomCursor />
+            <Navbar />
+            <Ticker />
+            <CartDrawer />
+            <main className="flex-1 overflow-x-hidden">{children}</main>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

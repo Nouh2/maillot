@@ -6,7 +6,7 @@ export default function CGVPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 prose prose-sm">
         <h1 className="font-bebas text-5xl text-[var(--black)] not-prose mb-8">CONDITIONS GÉNÉRALES DE VENTE</h1>
         <p className="text-[var(--grey)]">
-          <strong>KITLAB</strong> — En cours de rédaction. Ces CGV seront complétées avant le lancement.
+          <strong>MAILLOT ADDICT</strong> — En cours de rédaction. Ces CGV seront complétées avant le lancement.
         </p>
       </div>
     </div>

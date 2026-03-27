@@ -16,7 +16,7 @@ import { getFeaturedProducts, getLeagues, getProducts } from '@/lib/supabase/que
 import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
-  title: 'Accueil | KITLAB - Maillots de Football Premium',
+  title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
   description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
 }
 

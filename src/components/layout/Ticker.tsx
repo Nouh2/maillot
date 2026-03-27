@@ -9,11 +9,11 @@ export function Ticker() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
   return (
     <div
-      className="overflow-hidden py-3 bg-[var(--terra)]"
+      className="overflow-hidden py-3 bg-[var(--terra)] w-full max-w-full"
       role="region"
       aria-label="Informations du site"
     >
-      <div className="ticker-track flex gap-12 whitespace-nowrap w-max">
+      <div className="ticker-track flex gap-8 md:gap-12 whitespace-nowrap w-max">
         {items.map((item, i) => (
           <span key={i} className="font-condensed text-sm tracking-[3px] uppercase text-white flex items-center gap-4">
             {item}

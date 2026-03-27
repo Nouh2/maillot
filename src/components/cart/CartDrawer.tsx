@@ -14,7 +14,7 @@ export function CartDrawer() {
       )}
 
       {/* Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col transition-all duration-300 ${isOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'}`}>
         <div className="flex items-center justify-between p-6 border-b border-[var(--cream-3)]">
           <h2 className="font-bebas text-2xl tracking-widest">Mon Panier</h2>
           <button onClick={closeCart} aria-label="Fermer le panier" className="text-[var(--grey)] hover:text-[var(--black)]">

@@ -41,7 +41,7 @@ const REVIEWS = [
     date: 'il y a 1 semaine',
     product: 'PSG Third 2024-25 + Flocage',
     title: 'Deuxième commande, toujours aussi satisfait',
-    text: 'C\'est ma deuxième commande chez KITLAB. J\'avais pris le France domicile la dernière fois et j\'étais déjà conquis. Ce coup-ci j\'ai ajouté un flocage — rendu impeccable, lettres bien fixées.',
+    text: 'C\'est ma deuxième commande chez MAILLOT ADDICT. J\'avais pris le France domicile la dernière fois et j\'étais déjà conquis. Ce coup-ci j\'ai ajouté un flocage — rendu impeccable, lettres bien fixées.',
     helpful: 31,
     verified: true,
   },
@@ -147,7 +147,7 @@ export function ReviewsSection() {
           {/* Titre + score : côte à côte dès mobile */}
           <div className="flex items-end justify-between gap-4">
             <h2 className="font-bebas text-5xl leading-none text-[var(--black)] sm:text-7xl md:text-8xl">
-              ILS PARLENT<br />DE KITLAB
+              ILS PARLENT<br />DE MAILLOT ADDICT
             </h2>
 
             {/* Score compact (toujours visible) */}

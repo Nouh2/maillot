@@ -10,7 +10,7 @@ export function AboutSection() {
   return (
     <section className="px-4 py-10 bg-[var(--cream)]">
       <p className="mb-3 font-condensed text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--terra)]">
-        KITLAB
+        MAILLOT ADDICT
       </p>
 
       <h2 className="font-condensed text-[26px] font-bold leading-snug text-[var(--black)]">

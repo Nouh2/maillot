@@ -154,7 +154,7 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
         </nav>
       </header>
 
-      <div className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
+      <div className={`fixed inset-0 z-[100] bg-white transition-all duration-500 ease-in-out ${searchOpen ? 'translate-y-0 opacity-100 visible' : '-translate-y-full opacity-0 invisible'}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-20 items-center justify-between md:h-24">
             <svg height="26" viewBox="0 0 160 26" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-[26px] w-auto sm:h-[30px]">
@@ -213,10 +213,10 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
         </div>
       </div>
 
-      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 md:hidden ${mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
+      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 md:hidden ${mobileOpen ? 'opacity-100 visible' : 'pointer-events-none opacity-0 invisible'}`}>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeMobileMenu} />
 
-        <div className={`absolute right-0 top-0 flex h-full w-[85%] max-w-sm transform flex-col bg-white shadow-2xl transition-transform duration-500 ease-out ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute right-0 top-0 flex h-full w-[85%] max-w-sm transform flex-col bg-white shadow-2xl transition-all duration-500 ease-out ${mobileOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'}`}>
           <div className="flex items-center justify-end p-4">
             <button onClick={closeMobileMenu} className="p-2 transition-transform hover:rotate-90">
               <X className="h-7 w-7 text-[var(--black)]" />

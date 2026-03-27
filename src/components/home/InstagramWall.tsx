@@ -19,7 +19,7 @@ export function InstagramWall() {
     <section className="bg-[var(--cream-2)] py-10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 text-center">
         <p className="font-condensed text-xs uppercase tracking-[0.25em] text-[var(--terra)] mb-2">
-          Communauté KITLAB
+          Communauté MAILLOT ADDICT
         </p>
         <h2 className="font-bebas text-4xl text-[var(--black)]">
           1 200+ CLIENTS SATISFAITS
@@ -57,7 +57,7 @@ export function InstagramWall() {
           rel="noopener noreferrer"
           className="font-condensed text-xs text-[var(--grey)] hover:text-[var(--terra)] transition-colors tracking-widest uppercase"
         >
-          @KITLAB_officiel
+          @MAILLOTADDICT_officiel
         </Link>
       </div>
 
