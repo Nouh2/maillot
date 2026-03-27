@@ -31,6 +31,7 @@ DEFAULT_PRICE = float(os.getenv("YUPOO_DEFAULT_PRICE", "34.90"))
 DEFAULT_DELAY = float(os.getenv("YUPOO_REQUEST_DELAY", "0.5"))
 DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"]
 SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"]
+SOURCE_MARKER_PREFIX = "Ref catalogue"
 ALLOWED_PRODUCT_KINDS = {"jersey", "goalkeeper"}
 TYPE_LABELS = {"domicile": "Domicile", "exterieur": "Exterieur", "third": "Third"}
 SKIP_AUDIENCE = re.compile(r"\b(kids?|kid|youth|infant|baby|womens?|ladies|female|woman)\b", re.I)
@@ -94,6 +95,57 @@ def original_photo_url(data_path: str | None) -> str:
     if data_path.startswith("//"):
         return f"https:{data_path}"
     return f"{PHOTO_BASE_URL}/{data_path.lstrip('/')}" if not data_path.startswith("/") else f"{PHOTO_BASE_URL}{data_path}"
+
+
+def photo_candidates(base_url: str, image) -> list[str]:
+    candidates = [
+        absolute(base_url, image.get("data-src")),
+        absolute(base_url, image.get("data-origin-src")),
+        original_photo_url(image.get("data-path")),
+        absolute(base_url, image.get("src")),
+    ]
+    unique = []
+    for candidate in candidates:
+        if candidate and candidate not in unique:
+            unique.append(candidate)
+    return unique
+
+
+def photo_signature(url: str) -> str:
+    parts = [part for part in urlparse(url).path.split("/") if part]
+    if len(parts) >= 2:
+        return parts[-2]
+    return parts[-1] if parts else ""
+
+
+def prioritize_cover_photo(photos: list[list[str]], cover_candidates: list[str]) -> list[list[str]]:
+    cover_signatures = {photo_signature(url) for url in cover_candidates if photo_signature(url)}
+    if not cover_signatures:
+        return photos
+
+    leading = []
+    trailing = []
+    for photo in photos:
+        signatures = {photo_signature(url) for url in photo if photo_signature(url)}
+        if signatures & cover_signatures:
+            leading.append(photo)
+        else:
+            trailing.append(photo)
+    return leading + trailing if leading else photos
+
+
+def fetch_text(session: requests.Session, url: str, timeout: int | tuple[int, int] = 30, retries: int = 4) -> str:
+    last_error = None
+    for attempt in range(retries):
+        try:
+            response = session.get(url, timeout=timeout)
+            response.raise_for_status()
+            return response.text
+        except requests.RequestException as exc:
+            last_error = exc
+            if attempt < retries - 1:
+                time.sleep(1 + attempt * 2)
+    raise RuntimeError(f"Failed to fetch {url}: {last_error}")
 
 
 def get_total_pages(soup: BeautifulSoup) -> int:
@@ -161,7 +213,7 @@ def infer_type(title: str) -> str:
 def entity_from_title(title: str):
     normalized = ascii_norm(title)
     for alias, entity in sorted(ENTITY_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
-        if alias in normalized:
+        if re.search(rf"(?<![a-z0-9]){re.escape(alias)}(?![a-z0-9])", normalized):
             return entity
     return None
 
@@ -240,22 +292,85 @@ def ensure_bucket(bucket: str) -> None:
     create.raise_for_status()
 
 
-def upload_image(session: requests.Session, image_url: str, bucket: str, object_prefix: str) -> str:
-    response = session.get(image_url, timeout=60)
-    response.raise_for_status()
-    content_type = response.headers.get("content-type", "image/jpeg").split(";")[0].strip() or "image/jpeg"
-    ext = Path(urlparse(image_url).path).suffix.lower() or mimetypes.guess_extension(content_type) or ".jpg"
-    object_path = f"{object_prefix}{'.jpg' if ext == '.jpe' else ext}"
-    upload = requests.post(f"{SUPABASE_URL}/storage/v1/object/{bucket}/{object_path}", headers={**headers(content_type), "x-upsert": "true"}, data=response.content, timeout=60)
-    upload.raise_for_status()
-    return f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{object_path}"
+def ensure_league(supabase, *, slug: str, name: str, country: str, flag_emoji: str, display_order: int) -> None:
+    existing = supabase.table("leagues").select("id").eq("slug", slug).limit(1).execute().data or []
+    payload = {
+        "slug": slug,
+        "name": name,
+        "country": country,
+        "flag_emoji": flag_emoji,
+        "display_order": display_order,
+    }
+    if existing:
+        supabase.table("leagues").update(payload).eq("slug", slug).execute()
+    else:
+        supabase.table("leagues").insert(payload).execute()
 
 
-def fetch_all(supabase, columns: str, provider: str | None = None) -> list[dict]:
+def supports_source_columns(supabase) -> bool:
+    try:
+        supabase.table("products").select("id,source_provider,source_album_id").limit(1).execute()
+        return True
+    except Exception:
+        return False
+
+
+def build_source_marker(provider: str, album_id: str) -> str:
+    return f"{SOURCE_MARKER_PREFIX}:{provider}:{album_id}"
+
+
+def extract_source_album_id(description: str | None, provider: str) -> str | None:
+    for part in (description or "").split("|"):
+        token = part.strip()
+        if not token.lower().startswith(f"{SOURCE_MARKER_PREFIX.lower()}:"):
+            continue
+        pieces = token.split(":", 2)
+        if len(pieces) != 3:
+            continue
+        _, parsed_provider, album_id = pieces
+        if parsed_provider == provider and album_id:
+            return album_id
+    return None
+
+
+def apply_source_marker(description: str, provider: str, album_id: str) -> str:
+    parts = [part.strip() for part in (description or "").split("|") if part.strip()]
+    cleaned = [part for part in parts if not part.lower().startswith(f"{SOURCE_MARKER_PREFIX.lower()}:")]
+    cleaned.append(build_source_marker(provider, album_id))
+    return " | ".join(cleaned)
+
+
+def upload_image(session: requests.Session, image_urls: str | list[str], bucket: str, object_prefix: str) -> str:
+    last_error = None
+    urls = [image_urls] if isinstance(image_urls, str) else image_urls
+    for image_url in urls:
+        for attempt in range(3):
+            try:
+                response = session.get(image_url, timeout=(30, 120))
+                response.raise_for_status()
+                content_type = response.headers.get("content-type", "image/jpeg").split(";")[0].strip() or "image/jpeg"
+                ext = Path(urlparse(image_url).path).suffix.lower() or mimetypes.guess_extension(content_type) or ".jpg"
+                object_path = f"{object_prefix}{'.jpg' if ext == '.jpe' else ext}"
+                upload = requests.post(
+                    f"{SUPABASE_URL}/storage/v1/object/{bucket}/{object_path}",
+                    headers={**headers(content_type), "x-upsert": "true"},
+                    data=response.content,
+                    timeout=(30, 120),
+                )
+                upload.raise_for_status()
+                return f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{object_path}"
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt < 2:
+                    time.sleep(1 + attempt * 2)
+    raise RuntimeError(f"Image upload failed for {urls[0]}: {last_error}")
+
+
+def fetch_all(supabase, columns: str, provider: str | None = None, use_source_columns: bool = False) -> list[dict]:
     rows, offset, size = [], 0, 1000
     while True:
         query = supabase.table("products").select(columns).order("created_at").range(offset, offset + size - 1)
-        if provider:
+        if provider and use_source_columns:
             query = query.eq("source_provider", provider)
         batch = query.execute().data or []
         rows.extend(batch)
@@ -293,7 +408,10 @@ def main() -> None:
     parser.add_argument("--provider", default=DEFAULT_PROVIDER)
     parser.add_argument("--bucket", default=DEFAULT_BUCKET)
     parser.add_argument("--delay", type=float, default=DEFAULT_DELAY)
+    parser.add_argument("--page-from", type=int, default=1)
+    parser.add_argument("--page-to", type=int, default=None)
     parser.add_argument("--skip-image-upload", action="store_true")
+    parser.add_argument("--reuse-existing-photos", action="store_true")
     parser.add_argument("--deactivate-missing", action="store_true")
     parser.add_argument("--cutover", action="store_true")
     args = parser.parse_args()
@@ -307,13 +425,34 @@ def main() -> None:
     categories = resolve_categories(args.category or [], overrides)
 
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    source_columns = supports_source_columns(supabase)
+    ensure_league(
+        supabase,
+        slug="liga-portugal",
+        name="Liga Portugal",
+        country="Portugal",
+        flag_emoji="🇵🇹",
+        display_order=6,
+    )
+    supabase.table("leagues").update({"display_order": 7}).eq("slug", "champions-league").execute()
     if not args.dry_run and not args.skip_image_upload:
         ensure_bucket(args.bucket)
 
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0", "Referer": "https://www.yupoo.com/"})
 
-    provider_rows = fetch_all(supabase, "id,slug,is_active,is_featured,source_album_id", args.provider)
+    row_columns = "id,slug,is_active,is_featured,description,season,photos"
+    if source_columns:
+        row_columns += ",source_album_id"
+    all_rows = fetch_all(supabase, row_columns, args.provider if source_columns else None, source_columns)
+    if source_columns:
+        provider_rows = all_rows
+    else:
+        provider_rows = []
+        for row in all_rows:
+            source_album_id = extract_source_album_id(row.get("description"), args.provider)
+            if source_album_id:
+                provider_rows.append({**row, "source_album_id": source_album_id})
     existing_by_album = {row["source_album_id"]: row for row in provider_rows if row.get("source_album_id")}
     all_slugs = {row["slug"] for row in fetch_all(supabase, "slug") if row.get("slug")}
     seen, processed, inserted, updated, skipped = set(), 0, 0, 0, 0
@@ -322,75 +461,100 @@ def main() -> None:
         if args.limit and processed >= args.limit:
             break
         first_url = with_page(category["url"], 1)
-        first_soup = BeautifulSoup(session.get(first_url, timeout=30).text, "html.parser")
+        first_soup = BeautifulSoup(fetch_text(session, first_url), "html.parser")
         total_pages = get_total_pages(first_soup)
-        print(f"{category['key']}: {total_pages} pages")
-        for page in range(1, total_pages + 1):
+        start_page = max(1, args.page_from)
+        end_page = min(total_pages, args.page_to) if args.page_to else total_pages
+        if start_page > total_pages:
+            print(f"{category['key']}: skipped, start page {start_page} > total pages {total_pages}")
+            continue
+        print(f"{category['key']}: pages {start_page}-{end_page} / {total_pages}")
+        for page in range(start_page, end_page + 1):
             if args.limit and processed >= args.limit:
                 break
-            soup = first_soup if page == 1 else BeautifulSoup(session.get(with_page(category["url"], page), timeout=30).text, "html.parser")
+            soup = first_soup if page == 1 else BeautifulSoup(fetch_text(session, with_page(category["url"], page)), "html.parser")
             for album in soup.select(".album__main"):
                 if args.limit and processed >= args.limit:
                     break
-                title_el = album.select_one(".album__title")
-                href = album.get("href")
-                if not title_el or not href:
-                    continue
-                album_id_match = re.search(r"/albums/(\d+)", href)
-                album_id = album_id_match.group(1) if album_id_match else ""
-                if not album_id or album_id in seen:
-                    continue
-                title = norm(title_el.get_text(strip=True))
-                parsed = parse_product(title, category)
-                if not parsed:
+                try:
+                    title_el = album.parent.select_one(".album__title") if album.parent else None
+                    cover_el = album.select_one(".album__img") or (album.parent.select_one(".album__img") if album.parent else None)
+                    href = album.get("href")
+                    raw_title = album.get("title") or (title_el.get_text(strip=True) if title_el else "")
+                    if not raw_title or not href:
+                        continue
+                    album_id_match = re.search(r"/albums/(\d+)", href)
+                    album_id = album_id_match.group(1) if album_id_match else ""
+                    if not album_id or album_id in seen:
+                        continue
+                    title = norm(raw_title)
+                    parsed = parse_product(title, category)
+                    if not parsed:
+                        skipped += 1
+                        continue
+                    album_url = absolute(category["url"], href)
+                    album_soup = BeautifulSoup(fetch_text(session, album_url), "html.parser")
+                    if "access code" in " ".join(album_soup.stripped_strings).lower():
+                        print(f"  locked album skipped: {album_url}")
+                        skipped += 1
+                        continue
+                    photos = []
+                    for image in album_soup.select(".image__img"):
+                        candidates = photo_candidates(album_url, image)
+                        if candidates and candidates[0] not in {item[0] for item in photos}:
+                            photos.append(candidates)
+                    photos = prioritize_cover_photo(photos, photo_candidates(category["url"], cover_el) if cover_el else [])
+                    if not photos:
+                        skipped += 1
+                        continue
+                    existing = existing_by_album.get(album_id)
+                    slug = existing["slug"] if existing else slugify(parsed["name"]) or f"album-{album_id}"
+                    if not existing and slug in all_slugs:
+                        slug = f"{slug}-{album_id}"
+                    all_slugs.add(slug)
+                    if existing and args.reuse_existing_photos and existing.get("photos"):
+                        final_photos = existing["photos"]
+                    elif args.dry_run or args.skip_image_upload:
+                        final_photos = [photo[0] for photo in photos]
+                    else:
+                        final_photos = [upload_image(session, photo, args.bucket, f"{args.provider}/{category['key']}/{album_id}/{index:02d}") for index, photo in enumerate(photos, start=1)]
+                    payload = {
+                        **parsed,
+                        "slug": slug,
+                        "price": DEFAULT_PRICE,
+                        "photos": final_photos,
+                        "stock": 100,
+                        "is_featured": existing.get("is_featured", False) if existing else False,
+                        "is_active": existing.get("is_active", False) if existing else False,
+                    }
+                    if source_columns:
+                        payload.update(
+                            {
+                                "source_provider": args.provider,
+                                "source_album_id": album_id,
+                                "source_album_url": album_url,
+                                "source_category_key": category["key"],
+                                "source_title": title,
+                                "last_synced_at": datetime.now(timezone.utc).isoformat(),
+                            }
+                        )
+                    else:
+                        payload["description"] = apply_source_marker(parsed["description"], args.provider, album_id)
+                    if args.dry_run:
+                        print(f"  [DRY RUN] {category['key']} | {title} -> {payload['name']} | {payload['league']}")
+                    elif existing:
+                        supabase.table("products").update(payload).eq("id", existing["id"]).execute()
+                        updated += 1
+                    else:
+                        supabase.table("products").insert(payload).execute()
+                        inserted += 1
+                    processed += 1
+                    seen.add(album_id)
+                    time.sleep(args.delay)
+                except Exception as exc:
                     skipped += 1
+                    print(f"  error skipped: {href} | {exc}")
                     continue
-                album_url = absolute(category["url"], href)
-                album_soup = BeautifulSoup(session.get(album_url, timeout=30).text, "html.parser")
-                if "access code" in " ".join(album_soup.stripped_strings).lower():
-                    print(f"  locked album skipped: {album_url}")
-                    skipped += 1
-                    continue
-                photos = []
-                for image in album_soup.select(".image__img"):
-                    source = original_photo_url(image.get("data-path")) or absolute(album_url, image.get("src"))
-                    if source and source not in photos:
-                        photos.append(source)
-                if not photos:
-                    skipped += 1
-                    continue
-                existing = existing_by_album.get(album_id)
-                slug = existing["slug"] if existing else slugify(parsed["name"]) or f"album-{album_id}"
-                if not existing and slug in all_slugs:
-                    slug = f"{slug}-{album_id}"
-                all_slugs.add(slug)
-                final_photos = photos if args.dry_run or args.skip_image_upload else [upload_image(session, photo, args.bucket, f"{args.provider}/{category['key']}/{album_id}/{index:02d}") for index, photo in enumerate(photos, start=1)]
-                payload = {
-                    **parsed,
-                    "slug": slug,
-                    "price": DEFAULT_PRICE,
-                    "photos": final_photos,
-                    "stock": 100,
-                    "is_featured": existing.get("is_featured", False) if existing else False,
-                    "is_active": existing.get("is_active", False) if existing else False,
-                    "source_provider": args.provider,
-                    "source_album_id": album_id,
-                    "source_album_url": album_url,
-                    "source_category_key": category["key"],
-                    "source_title": title,
-                    "last_synced_at": datetime.now(timezone.utc).isoformat(),
-                }
-                if args.dry_run:
-                    print(f"  [DRY RUN] {category['key']} | {title} -> {payload['name']} | {payload['league']}")
-                elif existing:
-                    supabase.table("products").update(payload).eq("id", existing["id"]).execute()
-                    updated += 1
-                else:
-                    supabase.table("products").insert(payload).execute()
-                    inserted += 1
-                processed += 1
-                seen.add(album_id)
-                time.sleep(args.delay)
 
     if not args.dry_run and args.deactivate_missing:
         stale_ids = [row["id"] for row in provider_rows if row.get("source_album_id") and row["source_album_id"] not in seen]
@@ -399,9 +563,14 @@ def main() -> None:
         print(f"Deactivated missing provider products: {len(stale_ids)}")
 
     if not args.dry_run and args.cutover:
-        rows = fetch_all(supabase, "id,source_provider")
-        provider_ids = [row["id"] for row in rows if row.get("source_provider") == args.provider]
-        other_ids = [row["id"] for row in rows if row.get("source_provider") != args.provider]
+        if source_columns:
+            rows = fetch_all(supabase, "id,source_provider,season")
+            provider_ids = [row["id"] for row in rows if row.get("source_provider") == args.provider]
+            other_ids = [row["id"] for row in rows if row.get("source_provider") != args.provider and row.get("season") != "A definir"]
+        else:
+            rows = fetch_all(supabase, "id,description,season")
+            provider_ids = [row["id"] for row in rows if extract_source_album_id(row.get("description"), args.provider)]
+            other_ids = [row["id"] for row in rows if not extract_source_album_id(row.get("description"), args.provider) and row.get("season") != "A definir"]
         for chunk in chunked(other_ids):
             supabase.table("products").update({"is_active": False}).in_("id", chunk).execute()
         for chunk in chunked(provider_ids):

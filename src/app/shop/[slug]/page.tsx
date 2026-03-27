@@ -61,7 +61,10 @@ export default async function ProductPage({ params }: Props) {
               const cleanDesc = product.description
                 .split('|')
                 .map((part) => part.trim())
-                .filter((part) => !part.toLowerCase().includes('yupoo'))
+                .filter((part) => {
+                  const lowered = part.toLowerCase()
+                  return !lowered.includes('yupoo') && !lowered.startsWith('ref catalogue:')
+                })
                 .join(' | ')
 
               if (!cleanDesc) return null
