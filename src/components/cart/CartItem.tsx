@@ -2,18 +2,20 @@
 import Image from 'next/image'
 import { useCartStore } from '@/store/cart'
 import { proxyImage } from '@/lib/images'
+import { normalizeProductTextSeasons } from '@/lib/season'
 import type { CartItem as CartItemType } from '@/types/cart'
 
 export function CartItem({ item }: { item: CartItemType }) {
   const { removeItem, updateQty } = useCartStore()
+  const displayName = normalizeProductTextSeasons(item.name)
 
   return (
     <div className="flex gap-4 py-4 border-b border-[var(--cream-3)]">
       <div className="relative w-20 h-24 bg-[var(--cream)] flex-shrink-0">
-        <Image src={proxyImage(item.photo)} alt={item.name} fill unoptimized sizes="80px" className="object-cover" />
+        <Image src={proxyImage(item.photo)} alt={displayName} fill unoptimized sizes="80px" className="object-cover" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-condensed text-sm tracking-wide uppercase text-[var(--black)] truncate">{item.name}</p>
+        <p className="font-condensed text-sm tracking-wide uppercase text-[var(--black)] truncate">{displayName}</p>
         <p className="text-xs text-[var(--grey)] mt-0.5">
           Taille: {item.size}
           {item.patch_names?.length > 0 && ` · Patch: ${item.patch_names.join(', ')}`}
@@ -32,7 +34,7 @@ export function CartItem({ item }: { item: CartItemType }) {
           <p className="font-condensed font-semibold">{(item.price * item.qty).toFixed(2)} €</p>
         </div>
       </div>
-      <button aria-label={`Supprimer ${item.name} du panier`} onClick={() => removeItem(item)} className="text-[var(--grey)] hover:text-[var(--terra)] transition-colors flex-shrink-0">
+      <button aria-label={`Supprimer ${displayName} du panier`} onClick={() => removeItem(item)} className="text-[var(--grey)] hover:text-[var(--terra)] transition-colors flex-shrink-0">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
         </svg>

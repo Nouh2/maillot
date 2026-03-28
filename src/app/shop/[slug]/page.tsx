@@ -8,6 +8,7 @@ import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
 import { Star } from 'lucide-react'
 import Link from 'next/link'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
+import { normalizeProductTextSeasons, normalizeSeasonLabel } from '@/lib/season'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -23,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }`
 
   return {
-    title: product.name,
-    description: `Achetez le ${product.name} - ${productDescriptor} saison ${product.season}. Prix: ${product.price} EUR`,
+    title: normalizeProductTextSeasons(product.name),
+    description: `Achetez le ${normalizeProductTextSeasons(product.name)} - ${productDescriptor} saison ${normalizeSeasonLabel(product.season)}. Prix: ${product.price} EUR`,
   }
 }
 
@@ -38,7 +39,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--cream)] md:pb-0">
-      <StickyAddToCart productName={product.name} price={product.price} />
+      <StickyAddToCart productName={normalizeProductTextSeasons(product.name)} price={product.price} />
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
         <div className="grid gap-2 md:grid-cols-2 md:gap-16">
@@ -49,10 +50,10 @@ export default async function ProductPage({ params }: Props) {
               <span className="opacity-30">|</span>
               <span className="truncate">{product.league}</span>
               <span className="opacity-30">|</span>
-              <span className="truncate font-bold text-[var(--black)]">{product.name}</span>
+              <span className="truncate font-bold text-[var(--black)]">{normalizeProductTextSeasons(product.name)}</span>
             </nav>
 
-            <PhotoGallery photos={product.photos} name={product.name} />
+            <PhotoGallery photos={product.photos} name={normalizeProductTextSeasons(product.name)} />
 
             {/* Social Proof / Rating */}
             <div className="mt-6 flex items-center gap-3">
@@ -79,7 +80,7 @@ export default async function ProductPage({ params }: Props) {
 
           <div className="min-w-0">
             <h1 className="mb-2 font-bebas text-4xl leading-tight text-[var(--black)] md:text-5xl">
-              {product.name}
+              {normalizeProductTextSeasons(product.name)}
             </h1>
             <p className="mb-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey)]">
               {product.club} · {getProductMetaLine(product)}

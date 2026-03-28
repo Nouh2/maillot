@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Plus, Minus, Check, ShieldCheck } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { FLOCAGE_PRICE, calculateCartItemUnitPrice } from '@/lib/cartPricing'
+import { normalizeProductTextSeasons } from '@/lib/season'
 import { SizeSelector } from './SizeSelector'
 import { PatchSelector } from './PatchSelector'
 import type { Product, Patch } from '@/types/product'
@@ -41,7 +42,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     addItem({
       product_id: product.id,
       slug: product.slug,
-      name: product.name,
+      name: normalizeProductTextSeasons(product.name),
       club: product.club,
       size,
       patches: selectedPatches,

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
 import { resolveLeagueFilterParam } from '@/lib/catalog'
+import { normalizeSeasonLabel } from '@/lib/season'
 import {
   applyProductFilters,
   parseProductAlphaFilter,
@@ -33,7 +34,7 @@ export default async function RetroPage({ searchParams }: RetroPageProps) {
   })
 
   const clubs = new Set(filteredProducts.map((product) => product.club)).size
-  const seasons = [...new Set(filteredProducts.map((product) => product.season))].sort().reverse()
+  const seasons = [...new Set(filteredProducts.map((product) => normalizeSeasonLabel(product.season)))].sort().reverse()
   const oldestSeason = seasons[seasons.length - 1]
 
   return (

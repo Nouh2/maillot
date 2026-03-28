@@ -1,4 +1,5 @@
 import type { Product } from '@/types/product'
+import { extractSeasonKey } from '@/lib/season'
 
 export const VALID_PRODUCT_TYPES = ['domicile', 'exterieur', 'third'] as const
 export const VALID_DATE_FILTERS = ['recent', 'oldest'] as const
@@ -37,18 +38,9 @@ function toTimestamp(value: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
-function toSeasonKey(value: string): number | null {
-  const matches = value.match(/(?:19|20)\d{2}/g)
-  if (!matches?.length) {
-    return null
-  }
-
-  return Math.max(...matches.map((match) => Number.parseInt(match, 10)))
-}
-
 export function compareProductsByRecency(left: Pick<Product, 'season' | 'created_at'>, right: Pick<Product, 'season' | 'created_at'>): number {
-  const leftSeason = toSeasonKey(left.season)
-  const rightSeason = toSeasonKey(right.season)
+  const leftSeason = extractSeasonKey(left.season)
+  const rightSeason = extractSeasonKey(right.season)
 
   if (leftSeason !== null && rightSeason !== null && leftSeason !== rightSeason) {
     return rightSeason - leftSeason

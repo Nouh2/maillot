@@ -1,4 +1,5 @@
 import type { Product } from '@/types/product'
+import { normalizeSeasonLabel } from '@/lib/season'
 
 export const PRODUCT_TYPE_LABELS: Record<Product['type'], string> = {
   domicile: 'Domicile',
@@ -39,7 +40,7 @@ export function getProductMetaLine(
     parts.push(getProductTypeLabel(product.type))
   }
   if (product.season) {
-    parts.push(product.season)
+    parts.push(normalizeSeasonLabel(product.season))
   }
-  return parts.join(' · ')
+  return parts.join(' - ')
 }

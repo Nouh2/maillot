@@ -181,19 +181,31 @@ def extract_sizes(title: str) -> list[str]:
     return found or DEFAULT_SIZES
 
 
+def expand_two_digit_year(value: int) -> int:
+    pivot = (datetime.now(timezone.utc).year + 5) % 100
+    return 2000 + value if value <= pivot else 1900 + value
+
+
+def normalize_season_year(year: int) -> int:
+    max_allowed = datetime.now(timezone.utc).year + 5
+    if year > max_allowed and 2000 <= year <= 2099:
+        return expand_two_digit_year(year % 100)
+    return year
+
+
 def parse_season(title: str) -> str:
     text = norm(title)
     match = re.search(r"\b(19\d{2}|20\d{2})\s*[-/ ]\s*(19\d{2}|20\d{2}|\d{2})\b", text)
     if match:
-        start = int(match.group(1))
+        start = normalize_season_year(int(match.group(1)))
         end_raw = match.group(2)
-        end = int(end_raw) if len(end_raw) == 4 else 2000 + int(end_raw)
+        end = normalize_season_year(int(end_raw)) if len(end_raw) == 4 else expand_two_digit_year(int(end_raw))
         return f"{start}-{end}"
     match = re.search(r"\b(\d{2})\s*[-/ ]\s*(\d{2})\b", text)
     if match:
-        return f"{2000 + int(match.group(1))}-{2000 + int(match.group(2))}"
+        return f"{expand_two_digit_year(int(match.group(1)))}-{expand_two_digit_year(int(match.group(2)))}"
     match = re.search(r"\b(19\d{2}|20\d{2})\b", text)
-    return match.group(1) if match else "A definir"
+    return str(normalize_season_year(int(match.group(1)))) if match else "A definir"
 
 
 def infer_kind(title: str) -> str:
