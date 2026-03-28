@@ -37,6 +37,15 @@ function toTimestamp(value: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
+function toSeasonKey(value: string): number | null {
+  const matches = value.match(/(?:19|20)\d{2}/g)
+  if (!matches?.length) {
+    return null
+  }
+
+  return Math.max(...matches.map((match) => Number.parseInt(match, 10)))
+}
+
 export function applyProductFilters(
   products: Product[],
   filters: {
@@ -72,6 +81,14 @@ export function applyProductFilters(
     }
 
     if (filters.date) {
+      const leftSeason = toSeasonKey(left.season)
+      const rightSeason = toSeasonKey(right.season)
+      if (leftSeason !== null && rightSeason !== null && leftSeason !== rightSeason) {
+        return filters.date === 'oldest'
+          ? leftSeason - rightSeason
+          : rightSeason - leftSeason
+      }
+
       const byCreatedAt = toTimestamp(left.created_at) - toTimestamp(right.created_at)
       if (byCreatedAt !== 0) {
         return filters.date === 'oldest' ? byCreatedAt : -byCreatedAt
