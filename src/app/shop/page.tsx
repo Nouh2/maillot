@@ -4,21 +4,17 @@ import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
 import { getProducts, getLeagues } from '@/lib/supabase/queries'
 import { getLeagueDisplayName, resolveLeagueFilterParam } from '@/lib/catalog'
+import {
+  applyProductFilters,
+  parseProductAlphaFilter,
+  parseProductDateFilter,
+  parseProductTypeFilter,
+} from '@/lib/productFilters'
 
 export const metadata: Metadata = { title: 'Tous les Maillots' }
 
 interface ShopPageProps {
-  searchParams: Promise<{ league?: string; type?: string; sort?: string; q?: string }>
-}
-
-const VALID_TYPES = ['domicile', 'exterieur', 'third'] as const
-type ProductType = (typeof VALID_TYPES)[number]
-
-function parseType(value: string | undefined): ProductType | undefined {
-  if (value && (VALID_TYPES as readonly string[]).includes(value)) {
-    return value as ProductType
-  }
-  return undefined
+  searchParams: Promise<{ league?: string; type?: string; sort?: string; q?: string; date?: string; alpha?: string }>
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
@@ -27,9 +23,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const resolvedLeague = resolveLeagueFilterParam(params.league, leagues)
   const products = await getProducts({
     league: resolvedLeague,
-    type: parseType(params.type),
+    type: parseProductTypeFilter(params.type),
     concept: false,
     q: params.q,
+  })
+  const filteredProducts = applyProductFilters(products, {
+    type: parseProductTypeFilter(params.type),
+    date: parseProductDateFilter(params.date),
+    alpha: parseProductAlphaFilter(params.alpha),
   })
 
   const title = params.q
@@ -43,7 +44,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       <div className="bg-[var(--black-2)] px-4 py-12 text-center">
         <p className="mb-2 font-condensed text-xs uppercase tracking-[4px] text-[var(--terra)]">Notre catalogue</p>
         <h1 className="mx-auto max-w-4xl break-words font-bebas text-5xl text-white md:text-7xl">{title}</h1>
-        <p className="mt-2 text-[var(--grey-lt)]">{products.length} maillots disponibles</p>
+        <p className="mt-2 text-[var(--grey-lt)]">{filteredProducts.length} maillots disponibles</p>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -52,12 +53,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </Suspense>
 
         <div>
-          {products.length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="py-20 text-center">
               <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouve</p>
             </div>
           ) : (
-            <ProductsGrid products={products} />
+            <ProductsGrid products={filteredProducts} />
           )}
         </div>
       </div>

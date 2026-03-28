@@ -1,15 +1,37 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
-import { getConceptProducts } from '@/lib/supabase/queries'
+import { FilterSidebar } from '@/components/products/FilterSidebar'
+import { resolveLeagueFilterParam } from '@/lib/catalog'
+import {
+  applyProductFilters,
+  parseProductAlphaFilter,
+  parseProductDateFilter,
+  parseProductTypeFilter,
+} from '@/lib/productFilters'
+import { getConceptProducts, getLeagues } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Maillots Concept',
   description: 'Collection de maillots concept avec des designs speciaux et des editions creatives.',
 }
 
-export default async function ConceptPage() {
+interface ConceptPageProps {
+  searchParams: Promise<{ league?: string; type?: string; date?: string; alpha?: string }>
+}
+
+export default async function ConceptPage({ searchParams }: ConceptPageProps) {
+  const params = await searchParams
+  const leagues = await getLeagues()
+  const resolvedLeague = resolveLeagueFilterParam(params.league, leagues)
   const products = await getConceptProducts()
-  const clubs = new Set(products.map((product) => product.club)).size
+  const filteredProducts = applyProductFilters(products, {
+    league: resolvedLeague,
+    type: parseProductTypeFilter(params.type),
+    date: parseProductDateFilter(params.date),
+    alpha: parseProductAlphaFilter(params.alpha),
+  })
+  const clubs = new Set(filteredProducts.map((product) => product.club)).size
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -31,18 +53,22 @@ export default async function ConceptPage() {
             MAILLOTS CONCEPT
           </h1>
           <p className="mt-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey-lt)]">
-            {products.length} maillots · {clubs} clubs
+            {filteredProducts.length} maillots - {clubs} clubs
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        {products.length === 0 ? (
+        <Suspense fallback={null}>
+          <FilterSidebar leagues={leagues} />
+        </Suspense>
+
+        {filteredProducts.length === 0 ? (
           <div className="py-20 text-center">
             <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot concept trouve</p>
           </div>
         ) : (
-          <ProductsGrid products={products} />
+          <ProductsGrid products={filteredProducts} />
         )}
       </div>
     </div>

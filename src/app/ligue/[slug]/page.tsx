@@ -1,14 +1,23 @@
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { FilterSidebar } from '@/components/products/FilterSidebar'
 import { getLeagueBySlug } from '@/lib/catalog'
+import {
+  applyProductFilters,
+  parseProductAlphaFilter,
+  parseProductDateFilter,
+  parseProductTypeFilter,
+} from '@/lib/productFilters'
 import { getProducts, getLeagues } from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ type?: string; date?: string; alpha?: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Pick<Props, 'params'>): Promise<Metadata> {
   const { slug } = await params
   const leagues = await getLeagues()
   const league = getLeagueBySlug(slug, leagues)
@@ -16,40 +25,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `Maillots ${league.name}` }
 }
 
-export default async function LeaguePage({ params }: Props) {
-  const { slug } = await params
+export default async function LeaguePage({ params, searchParams }: Props) {
+  const [{ slug }, filters] = await Promise.all([params, searchParams])
   const leagues = await getLeagues()
   const league = getLeagueBySlug(slug, leagues)
   if (!league) notFound()
 
   const products = await getProducts({ league: league.name, concept: false })
+  const filteredProducts = applyProductFilters(products, {
+    type: parseProductTypeFilter(filters.type),
+    date: parseProductDateFilter(filters.date),
+    alpha: parseProductAlphaFilter(filters.alpha),
+  })
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      {/* Header ligue animé */}
       <div className="league-hero relative overflow-hidden py-14 text-center">
-        {/* Grille diagonale */}
         <div className="league-grid absolute inset-0" />
-        {/* Lueur centrale */}
         <div className="league-glow absolute inset-0" />
-        {/* Lignes de lumière animées */}
         <div className="league-beam league-beam-1 absolute" />
         <div className="league-beam league-beam-2 absolute" />
         <div className="league-beam league-beam-3 absolute" />
 
-        {/* Contenu */}
         <div className="relative z-10">
           <p className="mb-3 text-5xl" style={{ filter: 'drop-shadow(0 0 12px rgba(193,68,14,0.6))' }}>
             {league.flag_emoji}
           </p>
           <h1
-            className="font-bebas text-6xl text-white md:text-8xl tracking-wide"
+            className="font-bebas text-6xl tracking-wide text-white md:text-8xl"
             style={{ textShadow: '0 0 40px rgba(193,68,14,0.4), 0 2px 0 rgba(0,0,0,0.8)' }}
           >
             {league.name}
           </h1>
           <p className="mt-3 font-condensed text-xs uppercase tracking-[0.25em] text-white/40">
-            {products.length} maillots disponibles
+            {filteredProducts.length} maillots disponibles
           </p>
         </div>
       </div>
@@ -60,7 +69,6 @@ export default async function LeaguePage({ params }: Props) {
           min-height: 200px;
         }
 
-        /* Grille diagonale fine */
         .league-grid {
           background-image:
             repeating-linear-gradient(
@@ -72,7 +80,6 @@ export default async function LeaguePage({ params }: Props) {
             );
         }
 
-        /* Lueur orange pulsante au centre */
         .league-glow {
           background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(193,68,14,0.22) 0%, transparent 70%);
           animation: glow-pulse 3s ease-in-out infinite alternate;
@@ -82,7 +89,6 @@ export default async function LeaguePage({ params }: Props) {
           to   { opacity: 1;   transform: scaleX(1.05); }
         }
 
-        /* Rayons de lumière traversants */
         .league-beam {
           width: 1px;
           top: -20%;
@@ -104,8 +110,12 @@ export default async function LeaguePage({ params }: Props) {
       `}</style>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        {products.length > 0 ? (
-          <ProductsGrid products={products} />
+        <Suspense fallback={null}>
+          <FilterSidebar showLeague={false} />
+        </Suspense>
+
+        {filteredProducts.length > 0 ? (
+          <ProductsGrid products={filteredProducts} />
         ) : (
           <p className="py-20 text-center text-[var(--grey)]">Aucun maillot disponible pour ce championnat.</p>
         )}
