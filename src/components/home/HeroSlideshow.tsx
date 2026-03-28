@@ -34,11 +34,11 @@ const SLIDE_META = [
     staticImage: '/images/real_barça.jpg',
   },
   {
-    smallText: 'Avant-Match 2026-27',
+    smallText: 'Avant-Match Actuel',
     bigText: "Maillots\nd'Avant-Match",
     cta: 'Voir la collection',
     href: '/shop',
-    staticImage: null,
+    staticImage: '/images/maillot.jpg',
   },
 ]
 

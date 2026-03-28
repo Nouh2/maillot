@@ -8,20 +8,23 @@ import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product, League } from '@/types/product'
 
+interface LeagueProductGroup {
+  leagueName: string
+  products: Product[]
+}
+
 export function CollectionsTabs({
-  allProducts,
+  leagueProductGroups,
   leagues,
 }: {
-  allProducts: Product[]
+  leagueProductGroups: LeagueProductGroup[]
   leagues: League[]
 }) {
   // Tabs : les 4 premières ligues (les plus fournies)
   const topLeagues = leagues.slice(0, 4)
   const [activeTab, setActiveTab] = useState(topLeagues[0]?.name ?? '')
 
-  const display = allProducts
-    .filter((p) => p.league === activeTab)
-    .slice(0, 6)
+  const display = (leagueProductGroups.find((group) => group.leagueName === activeTab)?.products ?? []).slice(0, 6)
 
   const activeLeague = leagues.find((l) => l.name === activeTab)
 

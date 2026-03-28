@@ -73,16 +73,19 @@ export default async function HomePage() {
   const leagues = (await getLeagues()).filter((league) => league.slug !== 'champions-league')
   const homeLeagues = leagues.slice(0, 4)
 
-  const [recentProducts, leagueProducts, preMatchProducts] = await Promise.all([
-    getProducts({ concept: false, limit: 36 }),
-    Promise.all(homeLeagues.map((league) => getProducts({ league: league.name, concept: false, limit: 24 }))),
-    getProducts({ concept: false, productKind: 'pre_match', limit: 16 }),
-  ])
+  const allCatalogProducts = await getProducts({ concept: false })
+  const recentProducts = sortProductsByRecency(allCatalogProducts)
+  const preMatchProducts = allCatalogProducts.filter((product) => product.product_kind === 'pre_match')
+  const leagueProductGroups = homeLeagues.map((league) => ({
+    leagueName: league.name,
+    products: pickNewestProducts(
+      allCatalogProducts.filter((product) => product.league === league.name),
+      8,
+      (product) => product.club,
+    ),
+  }))
 
-  const homeLeagueProducts = leagueProducts.map((products) =>
-    pickNewestProducts(products, 8, (product) => product.club),
-  )
-  const homeCatalogProducts = dedupeProducts(...homeLeagueProducts)
+  const homeCatalogProducts = dedupeProducts(...leagueProductGroups.map((group) => group.products))
   const topProducts = pickNewestProducts(homeCatalogProducts, 3, (product) => `${product.league}:${product.club}`)
   const latestPreMatch = pickNewestProducts(preMatchProducts, 1)[0] ?? null
   const heroProducts = [recentProducts[0] ?? null, recentProducts[1] ?? null, recentProducts[2] ?? null, latestPreMatch]
@@ -92,9 +95,9 @@ export default async function HomePage() {
       <EmojiCategoryBar leagues={leagues} />
       <HeroSlideshow heroProducts={heroProducts} />
       <PromoStrip />
-      <BestsellersTabs allProducts={homeCatalogProducts} leagues={homeLeagues} topProducts={topProducts} />
+      <BestsellersTabs leagueProductGroups={leagueProductGroups} leagues={homeLeagues} topProducts={topProducts} />
       <TrustScrollBar />
-      <CollectionsTabs allProducts={homeCatalogProducts} leagues={homeLeagues} />
+      <CollectionsTabs leagueProductGroups={leagueProductGroups} leagues={homeLeagues} />
       <ReassuranceBar />
       <LeaguesStrip leagues={leagues} />
       <CountdownBanner />

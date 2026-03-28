@@ -8,12 +8,17 @@ import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product, League } from '@/types/product'
 
+interface LeagueProductGroup {
+  leagueName: string
+  products: Product[]
+}
+
 export function BestsellersTabs({
-  allProducts,
+  leagueProductGroups,
   leagues,
   topProducts = [],
 }: {
-  allProducts: Product[]
+  leagueProductGroups: LeagueProductGroup[]
   leagues: League[]
   topProducts?: (Product | null)[]
 }) {
@@ -26,7 +31,7 @@ export function BestsellersTabs({
   const filtered =
     activeTab === 'Tous'
       ? (topProducts.filter(Boolean) as Product[])
-      : allProducts.filter((p) => p.league === activeTab).slice(0, 8)
+      : leagueProductGroups.find((group) => group.leagueName === activeTab)?.products ?? []
 
   const featured = filtered[0]
   const rest = filtered.slice(1)
