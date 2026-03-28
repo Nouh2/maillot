@@ -46,6 +46,21 @@ function toSeasonKey(value: string): number | null {
   return Math.max(...matches.map((match) => Number.parseInt(match, 10)))
 }
 
+export function compareProductsByRecency(left: Pick<Product, 'season' | 'created_at'>, right: Pick<Product, 'season' | 'created_at'>): number {
+  const leftSeason = toSeasonKey(left.season)
+  const rightSeason = toSeasonKey(right.season)
+
+  if (leftSeason !== null && rightSeason !== null && leftSeason !== rightSeason) {
+    return rightSeason - leftSeason
+  }
+
+  return toTimestamp(right.created_at) - toTimestamp(left.created_at)
+}
+
+export function sortProductsByRecency<T extends Pick<Product, 'season' | 'created_at'>>(products: T[]): T[] {
+  return [...products].sort(compareProductsByRecency)
+}
+
 export function applyProductFilters(
   products: Product[],
   filters: {
@@ -81,17 +96,9 @@ export function applyProductFilters(
     }
 
     if (filters.date) {
-      const leftSeason = toSeasonKey(left.season)
-      const rightSeason = toSeasonKey(right.season)
-      if (leftSeason !== null && rightSeason !== null && leftSeason !== rightSeason) {
-        return filters.date === 'oldest'
-          ? leftSeason - rightSeason
-          : rightSeason - leftSeason
-      }
-
-      const byCreatedAt = toTimestamp(left.created_at) - toTimestamp(right.created_at)
-      if (byCreatedAt !== 0) {
-        return filters.date === 'oldest' ? byCreatedAt : -byCreatedAt
+      const byRecency = compareProductsByRecency(left, right)
+      if (byRecency !== 0) {
+        return filters.date === 'oldest' ? -byRecency : byRecency
       }
     }
 

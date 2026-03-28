@@ -12,7 +12,8 @@ import { InstagramWall } from '@/components/home/InstagramWall'
 import { CountdownBanner } from '@/components/home/CountdownBanner'
 import { AboutSection } from '@/components/home/AboutSection'
 import { PromoStrip } from '@/components/home/PromoStrip'
-import { getFeaturedProducts, getLeagues, getProducts } from '@/lib/supabase/queries'
+import { sortProductsByRecency } from '@/lib/productFilters'
+import { getLeagues, getProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
@@ -35,20 +36,56 @@ function dedupeProducts(...groups: Product[][]): Product[] {
   return products
 }
 
+function pickNewestProducts(
+  products: Product[],
+  limit: number,
+  distinctKey?: (product: Product) => string,
+): Product[] {
+  const sorted = sortProductsByRecency(products)
+
+  if (!distinctKey) {
+    return sorted.slice(0, limit)
+  }
+
+  const picked: Product[] = []
+  const seenKeys = new Set<string>()
+  const seenIds = new Set<string>()
+
+  for (const product of sorted) {
+    const key = distinctKey(product)
+    if (seenKeys.has(key)) continue
+    picked.push(product)
+    seenKeys.add(key)
+    seenIds.add(product.id)
+    if (picked.length === limit) return picked
+  }
+
+  for (const product of sorted) {
+    if (seenIds.has(product.id)) continue
+    picked.push(product)
+    if (picked.length === limit) return picked
+  }
+
+  return picked
+}
+
 export default async function HomePage() {
   const leagues = (await getLeagues()).filter((league) => league.slug !== 'champions-league')
   const homeLeagues = leagues.slice(0, 4)
 
-  const [featuredProducts, recentProducts, leagueProducts] = await Promise.all([
-    getFeaturedProducts(12),
-    getProducts({ concept: false, limit: 12 }),
-    Promise.all(homeLeagues.map((league) => getProducts({ league: league.name, concept: false, limit: 8 }))),
+  const [recentProducts, leagueProducts, preMatchProducts] = await Promise.all([
+    getProducts({ concept: false, limit: 36 }),
+    Promise.all(homeLeagues.map((league) => getProducts({ league: league.name, concept: false, limit: 24 }))),
+    getProducts({ concept: false, productKind: 'pre_match', limit: 16 }),
   ])
 
-  const homepagePool = dedupeProducts(featuredProducts, recentProducts, ...leagueProducts)
-  const homeCatalogProducts = dedupeProducts(...leagueProducts)
-  const heroProducts = Array.from({ length: 4 }, (_, index) => homepagePool[index] ?? null)
-  const topProducts = homepagePool.slice(0, 3)
+  const homeLeagueProducts = leagueProducts.map((products) =>
+    pickNewestProducts(products, 8, (product) => product.club),
+  )
+  const homeCatalogProducts = dedupeProducts(...homeLeagueProducts)
+  const topProducts = pickNewestProducts(homeCatalogProducts, 3, (product) => `${product.league}:${product.club}`)
+  const latestPreMatch = pickNewestProducts(preMatchProducts, 1)[0] ?? null
+  const heroProducts = [recentProducts[0] ?? null, recentProducts[1] ?? null, recentProducts[2] ?? null, latestPreMatch]
 
   return (
     <>

@@ -5,6 +5,7 @@ export async function getProducts(filters?: {
   league?: string
   club?: string
   type?: string
+  productKind?: Product['product_kind']
   featured?: boolean
   concept?: boolean
   q?: string
@@ -19,6 +20,7 @@ export async function getProducts(filters?: {
   if (filters?.league) query = query.eq('league', filters.league)
   if (filters?.club) query = query.eq('club', filters.club)
   if (filters?.type) query = query.eq('type', filters.type)
+  if (filters?.productKind) query = query.eq('product_kind', filters.productKind)
   if (filters?.featured) query = query.eq('is_featured', true)
   if (filters?.concept === true) query = query.eq('season', 'A definir')
   if (filters?.concept === false) query = query.neq('season', 'A definir')
