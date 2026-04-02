@@ -99,8 +99,8 @@ export function findCatalogEntity(product: Partial<ProductIdentitySource>): Cata
         if (!matchesAlias(source.normalized, alias)) continue
 
         const score =
+          alias.length * 100 +
           source.weight +
-          alias.length * 10 +
           (source.normalized === alias ? 40 : 0) +
           (leagueHint === candidate.entry.league ? 15 : 0)
 

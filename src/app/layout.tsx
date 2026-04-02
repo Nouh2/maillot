@@ -36,7 +36,10 @@ export const metadata: Metadata = {
     default: "MAILLOT ADDICT — Maillots de Football Premium",
     template: "%s | MAILLOT ADDICT",
   },
-  description: 'Maillots de football premium pour tous les clubs. Livraison rapide en France et en Europe.',
+  description: 'Maillots de football premium pour tous les clubs. Livraison estimee de 7 a 12 jours ouvres.',
+  icons: {
+    icon: '/logohead.jpg',
+  },
 }
 
 export default function RootLayout({

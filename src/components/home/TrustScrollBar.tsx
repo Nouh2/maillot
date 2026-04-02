@@ -1,9 +1,9 @@
-import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
+import { LAUNCH_PROMO_ENABLED, SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const ITEMS = [
   '✓ 1 200+ Clients satisfaits',
   '✓ Paiement securise',
-  '✓ Expedition 24/48h',
+  `✓ ${SHIPPING_DELAY_LABEL}`,
   ...(LAUNCH_PROMO_ENABLED ? ['✓ Prix promo 7 jours'] : ['✓ Catalogue premium mis a jour']),
   '✓ Flocage +5 EUR',
   '✓ Catalogue dedoublonne',

@@ -227,18 +227,18 @@ export function ReviewsSection() {
           </div>
         </div>
 
-        {/* ── Carrousel ── */}
+        {/* ── Carrousel mobile / Grid desktop ── */}
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-4 overflow-x-auto pb-3"
+          className="flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-3 md:overflow-visible"
           style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {REVIEWS.slice(1).map((review) => (
+          {REVIEWS.slice(1, 7).map((review) => (
             <div
               key={review.id}
               data-card
-              className="flex-shrink-0 w-[82vw] sm:w-72 bg-white rounded-xl p-4 sm:p-5 flex flex-col gap-3"
+              className="flex-shrink-0 w-[82vw] sm:w-72 md:w-auto bg-white rounded-xl p-4 sm:p-5 flex flex-col gap-3"
               style={{ scrollSnapAlign: 'start', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }}
             >
               {/* Avatar + nom */}

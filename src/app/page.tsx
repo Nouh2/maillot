@@ -13,7 +13,7 @@ import { ReviewsSection } from '@/components/home/ReviewsSection'
 import { TrustScrollBar } from '@/components/home/TrustScrollBar'
 import { WhyUsSection } from '@/components/home/WhyUsSection'
 import { dedupeCatalogProducts, filterStandardCatalogProducts } from '@/lib/catalogPresentation'
-import { sortProductsByRecency } from '@/lib/productFilters'
+import { sortProductsByDefaultOrder } from '@/lib/productFilters'
 import { getLeagues, getProducts, getWorldCupProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
@@ -27,7 +27,7 @@ function dedupeProducts(...groups: Product[][]): Product[] {
 }
 
 function pickNewestProducts(products: Product[], limit: number, distinctKey?: (product: Product) => string): Product[] {
-  const sorted = sortProductsByRecency(products)
+  const sorted = sortProductsByDefaultOrder(products)
 
   if (!distinctKey) return sorted.slice(0, limit)
 
@@ -60,7 +60,7 @@ export default async function HomePage() {
   const rawCatalogProducts = await getProducts()
   const allCatalogProducts = dedupeCatalogProducts(filterStandardCatalogProducts(rawCatalogProducts))
   const worldCupProducts = await getWorldCupProducts()
-  const recentProducts = sortProductsByRecency(allCatalogProducts)
+  const recentProducts = sortProductsByDefaultOrder(allCatalogProducts)
   const preMatchProducts = allCatalogProducts.filter((product) => product.product_kind === 'pre_match')
 
   const leagueProductGroups = homeLeagues.map((league) => ({

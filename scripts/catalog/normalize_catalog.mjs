@@ -80,8 +80,8 @@ function findCatalogEntity(product) {
         if (!matchesAlias(source.normalized, alias)) continue
 
         const score =
+          alias.length * 100 +
           source.weight +
-          alias.length * 10 +
           (source.normalized === alias ? 40 : 0) +
           (product.league === candidate.entry.league ? 15 : 0)
 

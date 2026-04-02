@@ -46,7 +46,8 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
   const paginationRef = useRef<HTMLDivElement>(null)
 
   return (
-    <section className="relative w-full" style={{ background: 'var(--black)' }}>
+    <section className="relative w-full bg-[var(--black)]">
+      <div className="aspect-[3/4] md:aspect-[16/9] relative overflow-hidden">
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 4000, disableOnInteraction: false }}
@@ -57,8 +58,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
           bulletClass: 'hero-bullet',
           bulletActiveClass: 'hero-bullet-active',
         }}
-        className="w-full"
-        style={{ aspectRatio: '3/4' } as React.CSSProperties}
+        className="!absolute !inset-0 !w-full !h-full"
       >
         {SLIDE_META.map((slide, i) => {
           const product = heroProducts[i]
@@ -66,7 +66,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
 
           return (
             <SwiperSlide key={i}>
-              <div className="relative w-full h-full" style={{ aspectRatio: '3/4' }}>
+              <div className="relative w-full h-full">
                 {/* Image du produit */}
                 {imgSrc ? (
                   <Image
@@ -84,27 +84,27 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                 {/* Gradient overlay bas */}
                 <div
                   className="absolute inset-0"
-                  style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.90) 0%, rgba(28,23,18,0.3) 40%, transparent 65%)' }}
+                  style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.92) 0%, rgba(28,23,18,0.4) 45%, transparent 70%)' }}
                 />
 
                 {/* Texte overlay bas */}
-                <div className="absolute bottom-0 left-0 right-0 px-5 pb-20">
+                <div className="absolute bottom-0 left-0 right-0 px-5 pb-16 md:px-12 md:pb-12 lg:px-20 lg:pb-16 lg:max-w-2xl">
                   <p
-                    className="font-condensed uppercase mb-2"
+                    className="font-condensed uppercase mb-2 md:text-xs"
                     style={{ fontSize: 11, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.65)' }}
                   >
                     {slide.smallText}
                   </p>
                   <h2
-                    className="font-condensed font-bold uppercase text-white leading-tight mb-5"
-                    style={{ fontSize: 30, whiteSpace: 'pre-line' }}
+                    className="font-condensed font-bold uppercase text-white leading-tight mb-5 text-[30px] md:text-5xl lg:text-6xl"
+                    style={{ whiteSpace: 'pre-line' }}
                   >
                     {slide.bigText}
                   </h2>
                   <Link
                     href={slide.href}
-                    className="flex items-center justify-center font-condensed font-bold uppercase bg-white text-[var(--black)] hover:bg-[var(--cream)] transition-colors"
-                    style={{ fontSize: 13, height: 44, borderRadius: 2, letterSpacing: '0.08em', width: '100%' }}
+                    className="inline-flex items-center justify-center font-condensed font-bold uppercase bg-white text-[var(--black)] hover:bg-[var(--cream)] transition-colors w-full md:w-auto md:px-10"
+                    style={{ fontSize: 13, height: 44, borderRadius: 2, letterSpacing: '0.08em' }}
                   >
                     {slide.cta}
                   </Link>
@@ -114,11 +114,12 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
           )
         })}
       </Swiper>
+      </div>
 
       {/* Pagination dots */}
       <div
         ref={paginationRef}
-        className="hero-pagination absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10"
+        className="hero-pagination absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 md:justify-start md:left-12 md:right-auto lg:left-20"
       />
 
       <style>{`

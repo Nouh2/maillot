@@ -41,6 +41,14 @@ async function sendTelegramMessage(token: string, chatId: string, text: string):
   })
 }
 
+function escapeTelegramHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
 async function sendTelegramPhoto(token: string, chatId: string, photo: string, caption: string): Promise<void> {
   await telegramRequest(token, 'sendPhoto', {
     chat_id: chatId,
@@ -59,6 +67,43 @@ async function sendTelegramMediaGroup(token: string, chatId: string, photos: str
       ...(index === 0 ? { caption, parse_mode: 'HTML' } : {}),
     })),
   })
+}
+
+export async function sendTelegramContactNotification(params: {
+  name: string
+  email: string
+  orderNumber?: string
+  subject: string
+  message: string
+}): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  const chatId = process.env.TELEGRAM_CHAT_ID
+
+  if (!token || !chatId) {
+    console.error('Telegram env vars missing')
+    return false
+  }
+
+  const orderNumber = params.orderNumber?.trim()
+  const message = [
+    '📩 <b>NOUVEAU MESSAGE CONTACT</b>',
+    '',
+    `<b>Nom :</b> ${escapeTelegramHtml(params.name)}`,
+    `<b>Email :</b> ${escapeTelegramHtml(params.email)}`,
+    `<b>Commande :</b> ${orderNumber ? escapeTelegramHtml(orderNumber) : 'Non renseignee'}`,
+    '',
+    `<b>Sujet :</b> ${escapeTelegramHtml(params.subject)}`,
+    '',
+    escapeTelegramHtml(params.message),
+  ].join('\n')
+
+  try {
+    await sendTelegramMessage(token, chatId, message)
+    return true
+  } catch (error) {
+    console.error('Telegram contact notification failed:', error)
+    return false
+  }
 }
 
 export async function sendTelegramNotification(order: Order): Promise<boolean> {

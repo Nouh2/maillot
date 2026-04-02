@@ -33,25 +33,6 @@ body {
   width: 100%;
 }
 
-@media (pointer: fine) {
-  html,
-  body {
-    cursor: url('/cursor-default.svg') 4 4, auto;
-  }
-
-  a,
-  button,
-  summary,
-  [role="button"] {
-    cursor: url('/cursor-pointer.svg') 6 6, pointer;
-  }
-
-  input,
-  textarea,
-  select {
-    cursor: text;
-  }
-}
 
 .reveal {
   opacity: 0;

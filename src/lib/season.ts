@@ -10,15 +10,23 @@ function expandTwoDigitYear(value: number): number {
 }
 
 function parseCompactSeason(value: string): string | null {
-  const match = value.match(/\b(?!19|20)(\d{2})(\d{2})\b/)
-  if (!match) return null
+  // Format 6 chiffres : "202526" → "2025-2026"
+  const match6 = value.match(/\b(20\d{2})(\d{2})\b/)
+  if (match6) {
+    const start = Number.parseInt(match6[1], 10)
+    const end = expandTwoDigitYear(Number.parseInt(match6[2], 10))
+    if (end >= start) return `${start}-${end}`
+  }
 
-  const start = expandTwoDigitYear(Number.parseInt(match[1], 10))
-  const end = expandTwoDigitYear(Number.parseInt(match[2], 10))
+  // Format 4 chiffres : "2526" → "2025-2026"
+  const match4 = value.match(/\b(?!19|20)(\d{2})(\d{2})\b/)
+  if (match4) {
+    const start = expandTwoDigitYear(Number.parseInt(match4[1], 10))
+    const end = expandTwoDigitYear(Number.parseInt(match4[2], 10))
+    if (end >= start) return `${start}-${end}`
+  }
 
-  if (end < start) return null
-
-  return `${start}-${end}`
+  return null
 }
 
 export function normalizeSeasonYear(year: number): number {
@@ -31,7 +39,13 @@ export function normalizeSeasonYear(year: number): number {
 }
 
 export function normalizeSeasonLabel(value: string): string {
-  return value.replace(/\b(19\d{2}|20\d{2})\b/g, (match) => {
+  // Convertit "202526" → "2025-2026" dans les titres
+  const withExpanded = value.replace(/\b(20\d{2})(\d{2})\b/g, (_, y1, y2) => {
+    const start = Number.parseInt(y1, 10)
+    const end = expandTwoDigitYear(Number.parseInt(y2, 10))
+    return end >= start ? `${start}-${end}` : `${y1}${y2}`
+  })
+  return withExpanded.replace(/\b(19\d{2}|20\d{2})\b/g, (match) => {
     const normalized = normalizeSeasonYear(Number.parseInt(match, 10))
     return String(normalized)
   })

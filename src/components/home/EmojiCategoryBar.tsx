@@ -17,16 +17,6 @@ const LEAGUE_IMAGES: Record<string, string> = {
   'reste-du-monde': '/images/reste_du_monde.jpg',
 }
 
-const LEAGUE_IMAGE_SCALE: Record<string, string> = {
-  bundesliga: 'scale-[1.08]',
-  'serie-a': 'scale-[1.06]',
-  'ligue-1': 'scale-[1.28]',
-  'premier-league': 'scale-[1.18]',
-  'la-liga': 'scale-[1.06]',
-  'liga-portugal': 'scale-[0.92]',
-  'reste-du-monde': 'scale-[1.12]',
-  'cdm-2026': 'scale-[1.18]',
-}
 
 export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
   const leagueCategories = leagues
@@ -47,10 +37,8 @@ export function EmojiCategoryBar({ leagues }: { leagues: League[] }) {
         {allCategories.map((category) => (
           <Link key={category.href + category.label} href={category.href} className="flex items-center gap-2.5 transition-opacity hover:opacity-70">
             {category.image ? (
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--cream-3)] bg-[var(--cream)]">
-                <div className={`relative h-5 w-5 ${LEAGUE_IMAGE_SCALE[category.slug] ?? 'scale-100'}`}>
-                  <Image src={category.image} alt={category.label} fill sizes="20px" className="object-contain" />
-                </div>
+              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full border border-[var(--cream-3)]">
+                <Image src={category.image} alt={category.label} fill sizes="32px" className="object-cover" />
               </div>
             ) : null}
             <span className="whitespace-nowrap text-[15px] font-bold text-[var(--black)]">{category.label}</span>

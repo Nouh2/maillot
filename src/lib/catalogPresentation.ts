@@ -1,22 +1,29 @@
 import type { Product } from '@/types/product'
-import { compareProductsByRecency } from './productFilters'
+import { compareProductsByRecency, sortProductsByDefaultOrder } from './productFilters'
 import { expandCompactSeasonLabel, isPlaceholderSeason, resolveProductSeasonLabel } from './season'
 import { normalizeCatalogProduct, normalizeCatalogText } from './catalogEntityRegistry'
+import catalogEntities from '../../data/catalog-entities.json'
 
-const NATIONAL_TEAM_ALIASES: Record<string, string[]> = {
-  france: ['france', 'equipe de france', 'bleus'],
-  allemagne: ['allemagne', 'germany', 'dfb'],
-  angleterre: ['angleterre', 'england', 'three lions'],
-  argentine: ['argentine', 'argentina', 'albiceleste'],
-  bresil: ['bresil', 'brazil', 'brasil', 'selecao'],
-  espagne: ['espagne', 'spain', 'seleccion'],
-  italie: ['italie', 'italy', 'azzurri'],
-  japon: ['japon', 'japan'],
-  maroc: ['maroc', 'morocco'],
-  mexique: ['mexique', 'mexico'],
-  paysbas: ['pays bas', 'pays-bas', 'netherlands', 'holland'],
-  portugal: ['portugal', 'selecao'],
-  etatsunis: ['etats unis', 'etats-unis', 'usa', 'united states'],
+// Build national team lookup from all Selections nationales entries in the catalog
+const NATIONAL_TEAM_QUERY_MAP = new Map<string, string>()
+
+for (const entry of catalogEntities) {
+  if (entry.league !== 'Selections nationales') continue
+  const clubNorm = normalizeCatalogText(entry.club)
+  NATIONAL_TEAM_QUERY_MAP.set(clubNorm, entry.club)
+  for (const alias of (entry as { aliases?: string[] }).aliases ?? []) {
+    NATIONAL_TEAM_QUERY_MAP.set(normalizeCatalogText(alias), entry.club)
+  }
+}
+
+function resolveNationalTeamClub(normalizedQuery: string): string | null {
+  return NATIONAL_TEAM_QUERY_MAP.get(normalizedQuery) ?? null
+}
+
+function matchesNationalTeamClub(product: Product, canonicalClub: string): boolean {
+  const normalized = normalizeCatalogProduct(product)
+  if (normalized.league !== 'Selections nationales') return false
+  return normalizeCatalogText(normalized.club) === normalizeCatalogText(canonicalClub)
 }
 
 function getProductSignature(product: Product): string {
@@ -44,20 +51,6 @@ function isBetterCatalogCandidate(next: Product, current: Product): boolean {
   if (scoreGap !== 0) return scoreGap > 0
 
   return compareProductsByRecency(next, current) < 0
-}
-
-function matchesNationalTeamAlias(product: Product, normalizedQuery: string): boolean {
-  const normalized = normalizeCatalogProduct(product)
-  if (normalized.league !== 'Selections nationales') return false
-
-  return Object.entries(NATIONAL_TEAM_ALIASES).some(([, aliases]) => {
-    if (!aliases.includes(normalizedQuery)) return false
-
-    const club = normalizeCatalogText(normalized.club)
-    const name = normalizeCatalogText(normalized.name)
-
-    return aliases.some((alias) => club.includes(alias) || name.includes(alias))
-  })
 }
 
 function isExactLeagueQuery(normalizedQuery: string, product: Product): boolean {
@@ -89,7 +82,7 @@ export function dedupeCatalogProducts(products: Product[]): Product[] {
     }
   }
 
-  return Array.from(chosen.values()).sort(compareProductsByRecency)
+  return sortProductsByDefaultOrder(Array.from(chosen.values()))
 }
 
 export function isConceptProduct(product: Product): boolean {
@@ -108,8 +101,12 @@ export function searchCatalogProducts(products: Product[], query: string): Produ
   const normalizedQuery = normalizeCatalogText(query)
   if (!normalizedQuery) return products
 
-  if (products.some((product) => matchesNationalTeamAlias(product, normalizedQuery))) {
-    return products.filter((product) => matchesNationalTeamAlias(product, normalizedQuery))
+  // If query matches a national team name or alias → return ONLY that country's team products
+  const nationalTeamClub = resolveNationalTeamClub(normalizedQuery)
+  if (nationalTeamClub) {
+    const nationalTeamResults = products.filter((product) => matchesNationalTeamClub(product, nationalTeamClub))
+    if (nationalTeamResults.length > 0) return nationalTeamResults
+    // Fall through to standard search if no results in catalog
   }
 
   const tokens = normalizedQuery.split(' ').filter(Boolean)

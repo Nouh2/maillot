@@ -19,8 +19,9 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
   const display = products.filter((product) => product.club === activeCountry).slice(0, 6)
 
   return (
-    <section className="bg-[var(--cream)] px-4 pt-6 pb-8">
-      <h2 className="font-condensed text-[26px] font-normal leading-tight text-[var(--black)]">
+    <section className="bg-[var(--cream)] px-4 pt-6 pb-8 md:px-6 md:pt-10 md:pb-12">
+      <div className="mx-auto max-w-7xl">
+      <h2 className="font-condensed text-[26px] md:text-4xl font-normal leading-tight text-[var(--black)]">
         Nos Collections{' '}
         <span
           style={{
@@ -50,7 +51,7 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
       </div>
 
       {display.length > 0 ? (
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
           {display.map((product) => {
             const pricing = getProductPricing({ isRetro: product.is_retro })
 
@@ -59,7 +60,7 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
                 <div className="relative bg-[var(--cream-2)]">
                   <div className="relative" style={{ aspectRatio: '3/4' }}>
                     {product.photos[0] ? (
-                      <Image src={proxyImage(product.photos[0])} alt={product.name} fill unoptimized className="object-cover" sizes="45vw" />
+                      <Image src={proxyImage(product.photos[0])} alt={product.name} fill unoptimized className="object-cover" sizes="(min-width: 768px) 33vw, 45vw" />
                     ) : null}
                     <div
                       className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
@@ -97,6 +98,7 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
           Voir tous les maillots {activeCountry}
         </Link>
       ) : null}
+      </div>
     </section>
   )
 }

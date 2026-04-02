@@ -233,6 +233,7 @@
   { "league": "Liga Portugal", "country": "Portugal", "club": "Torreense", "aliases": ["torreense"] },
 
   { "league": "Reste du monde", "country": "Pays-Bas", "club": "Ajax", "aliases": ["ajax"] },
+  { "league": "Reste du monde", "country": "Serbie", "club": "Red Star Belgrade", "aliases": ["red star belgrade", "crvena zvezda"] },
   { "league": "Reste du monde", "country": "Pays-Bas", "club": "PSV Eindhoven", "aliases": ["psv", "psv eindhoven"] },
   { "league": "Reste du monde", "country": "Pays-Bas", "club": "Feyenoord Rotterdam", "aliases": ["feyenoord", "feyenoord rotterdam"] },
   { "league": "Reste du monde", "country": "Ecosse", "club": "Celtic", "aliases": ["celtic"] },

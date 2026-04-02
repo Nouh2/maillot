@@ -1,8 +1,9 @@
 import { MessageCircle, Package, RotateCcw, ShieldCheck, Shirt, Truck } from 'lucide-react'
+import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const ITEMS = [
   { icon: ShieldCheck, label: 'Paiement securise', sub: 'Stripe certifie PCI' },
-  { icon: Truck, label: 'Expedition 24/48h', sub: 'Livraison 6 EUR / 5 EUR / offerte des 3 maillots' },
+  { icon: Truck, label: SHIPPING_DELAY_LABEL, sub: 'Livraison 6 EUR / 5 EUR / offerte des 3 maillots' },
   { icon: RotateCcw, label: 'Satisfait ou rembourse', sub: 'Retour sous 14 jours' },
   { icon: Package, label: '4.5/5 Avis clients', sub: '1 200+ commandes' },
   { icon: MessageCircle, label: 'SAV reactif', sub: 'Reponse sous 24h' },
