@@ -1,17 +1,16 @@
 import { Star } from 'lucide-react'
+import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
 
 const LIST_ITEMS = [
   { icon: 'Catalogue', text: 'Selection premium mise a jour en continu' },
   { icon: 'Avis', text: '4.5/5 sur nos avis clients' },
-  { icon: 'Livraison', text: 'Livraison gratuite des 60EUR' },
+  { icon: 'Livraison', text: '6 EUR / 5 EUR / offerte des 3 maillots' },
 ]
 
 export function AboutSection() {
   return (
-    <section className="px-4 py-10 bg-[var(--cream)]">
-      <p className="mb-3 font-condensed text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--terra)]">
-        MAILLOT ADDICT
-      </p>
+    <section className="bg-[var(--cream)] px-4 py-10">
+      <p className="mb-3 font-condensed text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--terra)]">MAILLOT ADDICT</p>
 
       <h2 className="font-condensed text-[26px] font-bold leading-snug text-[var(--black)]">
         Des maillots qui font{' '}
@@ -28,25 +27,19 @@ export function AboutSection() {
       </h2>
 
       <p className="mt-3 text-[14px] leading-relaxed text-[var(--grey)]">
-        On selectionne les maillots les plus demandes et on te guide pour choisir vite sans te perdre
-        dans un catalogue. Livraison rapide, offre pack, et vraie preuve sociale grace a vous.
+        On selectionne les maillots les plus demandes et on te guide pour choisir vite sans te perdre dans un catalogue. {LAUNCH_PROMO_ENABLED ? 'Prix promo, ' : ''}livraison lisible et vraie preuve sociale grace a vous.
       </p>
 
       <ul className="mt-5 space-y-3">
         {LIST_ITEMS.map((item) => (
           <li key={item.icon} className="flex items-center gap-3 font-condensed text-[14px] text-[var(--black)]">
-            <span className="min-w-20 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--terra)]">
-              {item.icon}
-            </span>
+            <span className="min-w-20 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--terra)]">{item.icon}</span>
             {item.text}
           </li>
         ))}
       </ul>
 
-      <div
-        className="mt-6 flex items-center gap-4 rounded-xl bg-white p-4"
-        style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
-      >
+      <div className="mt-6 flex items-center gap-4 rounded-xl bg-white p-4" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
         <div>
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -63,10 +56,7 @@ export function AboutSection() {
 
       <div className="mt-8 text-center">
         <p className="font-condensed text-[52px] font-black leading-none text-[var(--black)]">+1 200</p>
-        <p
-          className="mt-2 font-condensed uppercase text-[var(--grey)]"
-          style={{ fontSize: 12, letterSpacing: '0.12em' }}
-        >
+        <p className="mt-2 font-condensed uppercase text-[var(--grey)]" style={{ fontSize: 12, letterSpacing: '0.12em' }}>
           Maillots livres
         </p>
       </div>

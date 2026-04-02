@@ -6,7 +6,6 @@ import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { Ticker } from '@/components/layout/Ticker'
 import { CartDrawer } from '@/components/cart/CartDrawer'
-import { CustomCursor } from '@/components/ui/CustomCursor'
 
 const barlow = Barlow({
   subsets: ['latin'],
@@ -53,7 +52,6 @@ export default function RootLayout({
       <body className="antialiased overflow-x-hidden">
         <Providers>
           <div className="flex min-h-screen flex-col overflow-x-hidden">
-            <CustomCursor />
             <Navbar />
             <Ticker />
             <CartDrawer />

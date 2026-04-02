@@ -1,12 +1,14 @@
 'use client'
-// src/components/home/BestsellersTabs.tsx
+
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
+import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
-import type { Product, League } from '@/types/product'
+import type { League, Product } from '@/types/product'
 
 interface LeagueProductGroup {
   leagueName: string
@@ -22,10 +24,8 @@ export function BestsellersTabs({
   leagues: League[]
   topProducts?: (Product | null)[]
 }) {
-  // Tabs : "Tous" + les 4 premières ligues
   const topLeagues = leagues.slice(0, 4)
-  const tabs = ['Tous', ...topLeagues.map((l) => l.name)]
-
+  const tabs = ['Tous', ...topLeagues.map((league) => league.name)]
   const [activeTab, setActiveTab] = useState('Tous')
 
   const filtered =
@@ -35,11 +35,12 @@ export function BestsellersTabs({
 
   const featured = filtered[0]
   const rest = filtered.slice(1)
+  const activeLeague = leagues.find((league) => league.name === activeTab)
+  const collectionHref = activeTab === 'Tous' ? '/shop' : `/ligue/${activeLeague?.slug ?? ''}`
 
   return (
-    <section className="px-4 pt-8 pb-4 bg-[var(--cream)]">
-      {/* Titre */}
-      <h2 className="font-condensed text-[26px] font-normal text-[var(--black)] leading-tight">
+    <section className="bg-[var(--cream)] px-4 pt-8 pb-4">
+      <h2 className="font-condensed text-[26px] font-normal leading-tight text-[var(--black)]">
         Le top du{' '}
         <span
           style={{
@@ -52,23 +53,15 @@ export function BestsellersTabs({
           moment
         </span>
       </h2>
-      <p className="text-[13px] text-[var(--grey)] mt-1 font-condensed">
-        Une sélection courte des bestsellers qui partent le plus.
-      </p>
+      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">Une selection courte des bestsellers qui partent le plus.</p>
 
-      {/* Tabs */}
-      <div
-        className="flex gap-5 mt-4 border-b border-[var(--cream-3)]"
-        style={{ overflowX: 'auto', scrollbarWidth: 'none' }}
-      >
+      <div className="mt-4 flex gap-5 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`font-condensed text-[12px] uppercase tracking-wide pb-2 whitespace-nowrap border-b-2 -mb-px transition-all ${
-              activeTab === tab
-                ? 'text-[var(--black)] font-bold border-[var(--black)]'
-                : 'text-[var(--grey-lt)] border-transparent'
+            className={`-mb-px whitespace-nowrap border-b-2 pb-2 font-condensed text-[12px] uppercase tracking-wide transition-all ${
+              activeTab === tab ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
             }`}
           >
             {tab}
@@ -76,23 +69,11 @@ export function BestsellersTabs({
         ))}
       </div>
 
-      {/* Grille mixte */}
       {featured ? (
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          {/* Carte featured — s'étire pour remplir exactement les 2 rangées de droite */}
-          <Link
-            href={`/shop/${featured.slug}`}
-            className="row-span-2 relative overflow-hidden bg-[var(--cream-2)] block"
-            style={{ borderRadius: 2, minHeight: 200 }}
-          >
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link href={collectionHref} className="relative row-span-2 block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2, minHeight: 200 }}>
             {activeTab === 'Tous' ? (
-              <Image
-                src="/images/france-kit.png"
-                alt={featured.name}
-                fill
-                className="object-cover object-top"
-                sizes="45vw"
-              />
+              <Image src="/images/france-kit.png" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
             ) : featured.photos[0] ? (
               <Image
                 src={proxyImage(featured.photos[0])}
@@ -103,68 +84,57 @@ export function BestsellersTabs({
                 sizes="45vw"
               />
             ) : null}
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }}
-            />
+
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
+
             <div className="absolute bottom-0 left-0 p-3">
-              <p className="font-condensed text-[10px] uppercase tracking-widest text-white/60 mb-1">Sélection</p>
-              <p className="font-condensed text-[15px] font-bold text-white uppercase leading-tight">
-                Les Plus<br />Demandées
+              <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Selection</p>
+              <p className="font-condensed text-[15px] font-bold uppercase leading-tight text-white">
+                Les Plus
+                <br />
+                Demandes
               </p>
-              <p className="font-condensed text-[11px] text-[var(--terra)] mt-2 font-semibold uppercase tracking-wide">
-                Voir tout →
-              </p>
+              <p className="mt-2 font-condensed text-[11px] font-semibold uppercase tracking-wide text-[var(--terra)]">Voir tout →</p>
             </div>
           </Link>
 
-          {/* 2 cartes normales */}
-          {rest.slice(0, 2).map((product) => (
-            <Link
-              key={product.id}
-              href={`/shop/${product.slug}`}
-              className="relative bg-[var(--cream-2)] overflow-hidden block"
-              style={{ borderRadius: 2 }}
-            >
-              <div className="relative" style={{ aspectRatio: '3/4' }}>
-                {product.photos[0] && (
-                  <Image
-                    src={proxyImage(product.photos[0])}
-                    alt={product.name}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                    sizes="45vw"
-                  />
-                )}
-                <div
-                  className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
-                  style={{ width: 28, height: 28, borderRadius: '50%' }}
-                >
-                  <ShoppingCart className="w-3.5 h-3.5" />
+          {rest.slice(0, 2).map((product) => {
+            const pricing = getProductPricing({ isRetro: product.is_retro })
+
+            return (
+              <Link key={product.id} href={`/shop/${product.slug}`} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
+                <div className="relative" style={{ aspectRatio: '3/4' }}>
+                  {product.photos[0] ? (
+                    <Image src={proxyImage(product.photos[0])} alt={product.name} fill unoptimized className="object-cover" sizes="45vw" />
+                  ) : null}
+                  <div
+                    className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
+                    style={{ width: 28, height: 28, borderRadius: '50%' }}
+                  >
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                  </div>
                 </div>
-              </div>
-              <div className="px-2 py-1.5">
-                <p className="font-condensed text-[11px] text-[var(--black)] truncate">{getProductMetaLine(product)}</p>
-                <p className="font-condensed text-[13px] font-semibold text-[var(--black)]">{product.price.toFixed(2)} €</p>
-              </div>
-            </Link>
-          ))}
+
+                <div className="px-2 py-1.5">
+                  <p className="truncate font-condensed text-[11px] text-[var(--black)]">{getProductMetaLine(product)}</p>
+                  <PriceDisplay
+                    currentPrice={formatEuro(pricing.currentPrice)}
+                    originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined}
+                    promoLabel={pricing.promoActive ? 'Promo' : undefined}
+                    size="sm"
+                  />
+                </div>
+              </Link>
+            )
+          })}
         </div>
       ) : (
-        <p className="font-condensed text-sm text-[var(--grey)] mt-6 text-center py-8">
-          Aucun maillot dans cette catégorie
-        </p>
+        <p className="mt-6 py-8 text-center font-condensed text-sm text-[var(--grey)]">Aucun maillot dans cette categorie</p>
       )}
 
-      {/* Voir plus → lien vers la ligue active */}
       <Link
-        href={
-          activeTab === 'Tous'
-            ? '/shop'
-            : `/ligue/${leagues.find((l) => l.name === activeTab)?.slug ?? 'shop'}`
-        }
-        className="block w-full mt-4 py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] border border-[var(--black)] hover:bg-[var(--black)] hover:text-white transition-colors"
+        href={collectionHref}
+        className="mt-4 block w-full border border-[var(--black)] py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] transition-colors hover:bg-[var(--black)] hover:text-white"
         style={{ borderRadius: 2 }}
       >
         Voir tous les maillots {activeTab !== 'Tous' ? activeTab : ''}

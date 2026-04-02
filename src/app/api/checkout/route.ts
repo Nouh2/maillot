@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { calculateCartItemUnitPrice } from '@/lib/cartPricing'
+import { calculateCartItemUnitPrice, calculateShippingAmount, getProductPricing } from '@/lib/cartPricing'
 import { getStripe } from '@/lib/stripe'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
 import type { CartItem } from '@/types/cart'
@@ -19,12 +19,10 @@ type PersistedOrderItem = {
   qty: number
 }
 
-function normalizeCartItems(items: CartItem[], priceMap: Record<string, number>): PersistedOrderItem[] {
+function normalizeCartItems(items: CartItem[], retroMap: Record<string, boolean>): PersistedOrderItem[] {
   return items.map((item) => {
-    const basePrice = priceMap[item.product_id]
-
-    if (basePrice === undefined) {
-      throw new Error(`Prix manquant pour ${item.product_id}`)
+    if (!(item.product_id in retroMap)) {
+      throw new Error(`Produit manquant pour ${item.product_id}`)
     }
 
     const patches = Array.isArray(item.patches) ? item.patches.filter(Boolean) : []
@@ -32,6 +30,7 @@ function normalizeCartItems(items: CartItem[], priceMap: Record<string, number>)
     const flocageName = item.flocage_name?.trim() || null
     const flocageNumber = item.flocage_number?.trim() || null
     const qty = Number.isFinite(item.qty) && item.qty > 0 ? Math.floor(item.qty) : 1
+    const basePrice = getProductPricing({ isRetro: retroMap[item.product_id] }).currentPrice
     const price = calculateCartItemUnitPrice({
       basePrice,
       patchCount: patches.length,
@@ -57,6 +56,7 @@ function normalizeCartItems(items: CartItem[], priceMap: Record<string, number>)
 
 export async function POST(request: NextRequest) {
   let items: CartItem[]
+
   try {
     const body = await request.json()
     items = body.items
@@ -73,20 +73,23 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseServiceClient() as any
   const { data: products, error: dbError } = await supabase
     .from('products')
-    .select('id, price')
+    .select('id, is_retro')
     .in('id', productIds)
 
   if (dbError || !products) {
     return NextResponse.json({ error: 'Erreur base de donnees' }, { status: 500 })
   }
 
-  const priceMap: Record<string, number> = {}
+  const retroMap: Record<string, boolean> = {}
   for (const product of products) {
-    priceMap[product.id] = Number(product.price)
+    retroMap[product.id] = Boolean(product.is_retro)
   }
 
-  const normalizedItems = normalizeCartItems(items, priceMap)
-  const orderTotal = normalizedItems.reduce((sum, item) => sum + (item.price * item.qty), 0)
+  const normalizedItems = normalizeCartItems(items, retroMap)
+  const itemCount = normalizedItems.reduce((sum, item) => sum + item.qty, 0)
+  const shippingAmount = calculateShippingAmount(itemCount)
+  const itemsSubtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const orderTotal = itemsSubtotal + shippingAmount
   const stripe = getStripe()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin
 
@@ -109,34 +112,61 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
+      allow_promotion_codes: true,
       locale: 'fr',
       client_reference_id: pendingOrder.id,
-      line_items: normalizedItems.map((item) => ({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: [
-              item.name,
-              `Taille ${item.size}`,
-              item.patch_names.length > 0 ? `Patch ${item.patch_names.join(', ')}` : null,
-              item.flocage_name || item.flocage_number
-                ? `Flocage ${[item.flocage_name, item.flocage_number].filter(Boolean).join(' #')}`
-                : null,
-            ].filter(Boolean).join(' - '),
-            images: item.photo ? [item.photo] : [],
+      line_items: [
+        ...normalizedItems.map((item) => ({
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: [
+                item.name,
+                `Taille ${item.size}`,
+                item.patch_names.length > 0 ? `Patch ${item.patch_names.join(', ')}` : null,
+                item.flocage_name || item.flocage_number
+                  ? `Flocage ${[item.flocage_name, item.flocage_number].filter(Boolean).join(' #')}`
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' - '),
+              images: item.photo ? [item.photo] : [],
+            },
+            unit_amount: Math.round(item.price * 100),
           },
-          unit_amount: Math.round(item.price * 100),
-        },
-        quantity: item.qty,
-      })),
+          quantity: item.qty,
+        })),
+        ...(shippingAmount > 0
+          ? [
+              {
+                price_data: {
+                  currency: 'eur',
+                  product_data: {
+                    name: 'Livraison',
+                    description:
+                      itemCount >= 3
+                        ? 'Offerte des 3 maillots'
+                        : itemCount === 2
+                          ? 'Tarif 2 maillots'
+                          : 'Tarif 1 maillot',
+                  },
+                  unit_amount: Math.round(shippingAmount * 100),
+                },
+                quantity: 1,
+              },
+            ]
+          : []),
+      ],
       shipping_address_collection: {
         allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'ES', 'IT', 'GB', 'NL', 'PT'],
       },
       phone_number_collection: { enabled: true },
       success_url: `${baseUrl}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/shop`,
+      cancel_url: `${baseUrl}/panier`,
       metadata: {
         order_id: pendingOrder.id,
+        item_count: String(itemCount),
+        shipping_amount: String(shippingAmount),
       },
     })
 
@@ -150,9 +180,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ url: session.url })
-  } catch (err) {
+  } catch (error) {
     await supabase.from('orders').delete().eq('id', pendingOrder.id)
-    console.error('Stripe checkout error:', err)
+    console.error('Stripe checkout error:', error)
     return NextResponse.json({ error: 'Erreur paiement' }, { status: 500 })
   }
 }

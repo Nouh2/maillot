@@ -1,20 +1,16 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
+import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { getLeagueBySlug } from '@/lib/catalog'
-import {
-  applyProductFilters,
-  parseProductAlphaFilter,
-  parseProductDateFilter,
-  parseProductTypeFilter,
-} from '@/lib/productFilters'
-import { getProducts, getLeagues } from '@/lib/supabase/queries'
+import { dedupeCatalogProducts, filterStandardCatalogProducts, getClubFilterOptions } from '@/lib/catalogPresentation'
+import { applyProductFilters, parseProductAlphaFilter } from '@/lib/productFilters'
+import { getLeagues, getProducts } from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ type?: string; date?: string; alpha?: string }>
+  searchParams: Promise<{ club?: string; alpha?: string }>
 }
 
 export async function generateMetadata({ params }: Pick<Props, 'params'>): Promise<Metadata> {
@@ -31,12 +27,12 @@ export default async function LeaguePage({ params, searchParams }: Props) {
   const league = getLeagueBySlug(slug, leagues)
   if (!league) notFound()
 
-  const products = await getProducts({ league: league.name, concept: false })
-  const filteredProducts = applyProductFilters(products, {
-    type: parseProductTypeFilter(filters.type),
-    date: parseProductDateFilter(filters.date),
+  const products = await getProducts({ league: league.name, club: filters.club })
+  const visibleProducts = dedupeCatalogProducts(filterStandardCatalogProducts(products))
+  const filteredProducts = applyProductFilters(visibleProducts, {
     alpha: parseProductAlphaFilter(filters.alpha),
   })
+  const clubs = getClubFilterOptions(visibleProducts)
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -111,7 +107,7 @@ export default async function LeaguePage({ params, searchParams }: Props) {
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <Suspense fallback={null}>
-          <FilterSidebar showLeague={false} />
+          <FilterSidebar clubs={clubs} showLeague={false} showClub showType={false} showDate={false} />
         </Suspense>
 
         {filteredProducts.length > 0 ? (

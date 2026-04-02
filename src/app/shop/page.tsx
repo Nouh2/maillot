@@ -1,43 +1,45 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
-import { getProducts, getLeagues } from '@/lib/supabase/queries'
+import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { getLeagueDisplayName, resolveLeagueFilterParam } from '@/lib/catalog'
-import {
-  applyProductFilters,
-  parseProductAlphaFilter,
-  parseProductDateFilter,
-  parseProductTypeFilter,
-} from '@/lib/productFilters'
+import { dedupeCatalogProducts, filterStandardCatalogProducts, getClubFilterOptions, searchCatalogProducts } from '@/lib/catalogPresentation'
+import { applyProductFilters, parseProductAlphaFilter, parseProductDateFilter, parseProductTypeFilter } from '@/lib/productFilters'
+import { getLeagues, getProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = { title: 'Tous les Maillots' }
 
 interface ShopPageProps {
-  searchParams: Promise<{ league?: string; type?: string; sort?: string; q?: string; date?: string; alpha?: string }>
+  searchParams: Promise<{ league?: string; club?: string; type?: string; q?: string; date?: string; alpha?: string }>
 }
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams
   const leagues = await getLeagues()
   const resolvedLeague = resolveLeagueFilterParam(params.league, leagues)
-  const products = await getProducts({
+
+  const rawProducts = await getProducts({
     league: resolvedLeague,
+    club: params.club,
     type: parseProductTypeFilter(params.type),
-    concept: false,
-    q: params.q,
   })
-  const filteredProducts = applyProductFilters(products, {
+
+  const visibleProducts = dedupeCatalogProducts(filterStandardCatalogProducts(rawProducts))
+  const searchedProducts = params.q ? searchCatalogProducts(visibleProducts, params.q) : visibleProducts
+  const filteredProducts = applyProductFilters(searchedProducts, {
     type: parseProductTypeFilter(params.type),
     date: parseProductDateFilter(params.date),
     alpha: parseProductAlphaFilter(params.alpha),
   })
+  const clubOptions = getClubFilterOptions(visibleProducts)
 
   const title = params.q
     ? `Resultats pour "${params.q}"`
-    : params.league
-      ? getLeagueDisplayName(params.league, leagues) ?? resolvedLeague ?? params.league.toUpperCase()
-      : 'TOUS LES MAILLOTS'
+    : params.club
+      ? params.club
+      : params.league
+        ? getLeagueDisplayName(params.league, leagues) ?? resolvedLeague ?? params.league.toUpperCase()
+        : 'TOUS LES MAILLOTS'
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -49,7 +51,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Suspense fallback={null}>
-          <FilterSidebar leagues={leagues} />
+          <FilterSidebar leagues={leagues} clubs={clubOptions} showClub={Boolean(params.league || params.club)} />
         </Suspense>
 
         <div>

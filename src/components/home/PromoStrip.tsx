@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, type ReactNode } from 'react'
+import { LAUNCH_PROMO_ENABLED, SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 function TrustPilotBadge() {
   const StarIcon = () => (
@@ -25,22 +26,28 @@ function TrustPilotBadge() {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <span className="text-[12px] font-bold tracking-wide text-white sm:text-[14px]">Excellent 4.5</span>
         <span className="text-[10px] text-white/60 sm:text-[12px]">|</span>
-        <span className="text-[11px] font-medium tracking-wide text-white sm:text-[13px]">
-          +1 200 clients satisfaits
-        </span>
+        <span className="text-[11px] font-medium tracking-wide text-white sm:text-[13px]">+1 200 clients satisfaits</span>
       </div>
     </div>
   )
 }
 
 const MESSAGES: ReactNode[] = [
+  ...(LAUNCH_PROMO_ENABLED
+    ? [
+        <span key="launch" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
+          OFFRE DE LANCEMENT - PRIX PROMO PENDANT 7 JOURS
+        </span>,
+      ]
+    : [
+        <span key="catalog" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
+          CATALOGUE PREMIUM - MAILLOTS CLUBS ET SELECTIONS
+        </span>,
+      ]),
   <span key="shipping" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-    LIVRAISON OFFERTE DES 60EUR - EXPEDITION 24/48H
+    {SHIPPING_DELAY_LABEL.toUpperCase()} - SUIVI DISPONIBLE
   </span>,
   <TrustPilotBadge key="reviews" />,
-  <span key="catalog" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-    CATALOGUE PREMIUM - TOUS LES GRANDS CLUBS
-  </span>,
 ]
 
 export function PromoStrip() {
@@ -55,6 +62,7 @@ export function PromoStrip() {
         setVisible(true)
       }, 300)
     }, 4000)
+
     return () => clearInterval(interval)
   }, [])
 

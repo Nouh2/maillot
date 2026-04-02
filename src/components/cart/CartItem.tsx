@@ -1,6 +1,8 @@
 'use client'
+
 import Image from 'next/image'
 import { useCartStore } from '@/store/cart'
+import { formatEuro } from '@/lib/cartPricing'
 import { proxyImage } from '@/lib/images'
 import { normalizeProductTextSeasons } from '@/lib/season'
 import type { CartItem as CartItemType } from '@/types/cart'
@@ -10,32 +12,53 @@ export function CartItem({ item }: { item: CartItemType }) {
   const displayName = normalizeProductTextSeasons(item.name)
 
   return (
-    <div className="flex gap-4 py-4 border-b border-[var(--cream-3)]">
-      <div className="relative w-20 h-24 bg-[var(--cream)] flex-shrink-0">
+    <div className="flex gap-4 border-b border-[var(--cream-3)] py-4">
+      <div className="relative h-24 w-20 flex-shrink-0 bg-[var(--cream)]">
         <Image src={proxyImage(item.photo)} alt={displayName} fill unoptimized sizes="80px" className="object-cover" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-condensed text-sm tracking-wide uppercase text-[var(--black)] truncate">{displayName}</p>
-        <p className="text-xs text-[var(--grey)] mt-0.5">
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-condensed text-sm uppercase tracking-wide text-[var(--black)]">{displayName}</p>
+        <p className="mt-0.5 text-xs text-[var(--grey)]">
           Taille: {item.size}
-          {item.patch_names?.length > 0 && ` · Patch: ${item.patch_names.join(', ')}`}
+          {item.patch_names?.length > 0 ? ` | Patch: ${item.patch_names.join(', ')}` : ''}
         </p>
-        {(item.flocage_name || item.flocage_number) && (
-          <p className="text-xs text-[var(--terra)] mt-0.5 font-medium">
-            Flocage: {item.flocage_name} {item.flocage_number && `#${item.flocage_number}`}
+
+        {item.flocage_name || item.flocage_number ? (
+          <p className="mt-0.5 text-xs font-medium text-[var(--terra)]">
+            Flocage: {item.flocage_name} {item.flocage_number ? `#${item.flocage_number}` : ''}
           </p>
-        )}
-        <div className="flex items-center justify-between mt-3">
+        ) : null}
+
+        <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center border border-[var(--cream-3)]">
-            <button aria-label="Diminuer la quantité" onClick={() => updateQty(item, item.qty - 1)} className="px-2 py-1 hover:bg-[var(--cream)]">-</button>
+            <button
+              aria-label="Diminuer la quantite"
+              onClick={() => updateQty(item, item.qty - 1)}
+              className="px-2 py-1 hover:bg-[var(--cream)]"
+            >
+              -
+            </button>
             <span className="px-3 py-1 text-sm">{item.qty}</span>
-            <button aria-label="Augmenter la quantité" onClick={() => updateQty(item, item.qty + 1)} className="px-2 py-1 hover:bg-[var(--cream)]">+</button>
+            <button
+              aria-label="Augmenter la quantite"
+              onClick={() => updateQty(item, item.qty + 1)}
+              className="px-2 py-1 hover:bg-[var(--cream)]"
+            >
+              +
+            </button>
           </div>
-          <p className="font-condensed font-semibold">{(item.price * item.qty).toFixed(2)} €</p>
+
+          <p className="font-condensed font-semibold">{formatEuro(item.price * item.qty)}</p>
         </div>
       </div>
-      <button aria-label={`Supprimer ${displayName} du panier`} onClick={() => removeItem(item)} className="text-[var(--grey)] hover:text-[var(--terra)] transition-colors flex-shrink-0">
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+      <button
+        aria-label={`Supprimer ${displayName} du panier`}
+        onClick={() => removeItem(item)}
+        className="flex-shrink-0 text-[var(--grey)] transition-colors hover:text-[var(--terra)]"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>

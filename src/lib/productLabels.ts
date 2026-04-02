@@ -1,5 +1,5 @@
 import type { Product } from '@/types/product'
-import { normalizeSeasonLabel } from '@/lib/season'
+import { resolveProductSeasonLabel } from '@/lib/season'
 
 export const PRODUCT_TYPE_LABELS: Record<Product['type'], string> = {
   domicile: 'Domicile',
@@ -33,14 +33,15 @@ export function showProductType(kind: Product['product_kind']): boolean {
 }
 
 export function getProductMetaLine(
-  product: Pick<Product, 'product_kind' | 'type' | 'season'>
+  product: Pick<Product, 'product_kind' | 'type' | 'season' | 'name' | 'club'>
 ): string {
   const parts = [getProductKindLabel(product.product_kind)]
   if (showProductType(product.product_kind)) {
     parts.push(getProductTypeLabel(product.type))
   }
-  if (product.season) {
-    parts.push(normalizeSeasonLabel(product.season))
+  const seasonLabel = resolveProductSeasonLabel(product)
+  if (seasonLabel) {
+    parts.push(seasonLabel)
   }
   return parts.join(' - ')
 }

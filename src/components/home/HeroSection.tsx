@@ -1,5 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
@@ -52,43 +54,53 @@ export function HeroSection({ featured }: { featured: Product[] }) {
         <div className="relative mt-8 grid grid-cols-2 items-start gap-4 lg:mt-0 lg:gap-6">
           <div className="absolute left-1/2 top-1/2 -z-10 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--terra)]/5 blur-3xl" />
           {featured.slice(0, 4).map((product) => (
-            <Link
-              key={product.id}
-              href={`/shop/${product.slug}`}
-              className="group relative flex h-full flex-col border border-[var(--black)]/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
-            >
-              <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
-                {product.photos[0] && (
-                  <Image
-                    src={proxyImage(product.photos[0])}
-                    alt={product.name}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 1024px) 50vw, 20vw"
-                    className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
-                  />
-                )}
-                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="border border-white/30 bg-black/20 px-2 py-1 font-condensed text-xs uppercase tracking-wider text-white backdrop-blur-sm">
-                    Apercu rapide
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col justify-between p-4 transition-colors group-hover:bg-[var(--cream)] sm:p-5">
-                <div>
-                  <p className="mb-1 font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--grey)] sm:mb-2 sm:text-xs">
-                    {product.club}
-                  </p>
-                  <p className="line-clamp-2 font-condensed text-sm font-bold leading-tight text-[var(--black)] transition-colors group-hover:text-[var(--terra)] sm:text-base">
-                    {getProductMetaLine(product)}
-                  </p>
-                </div>
-                <p className="mt-3 font-bebas text-xl text-[var(--black)] sm:mt-4 sm:text-2xl">
-                  {product.price.toFixed(2)} EUR
-                </p>
-              </div>
-            </Link>
+            (() => {
+              const pricing = getProductPricing({ isRetro: product.is_retro })
+
+              return (
+                <Link
+                  key={product.id}
+                  href={`/shop/${product.slug}`}
+                  className="group relative flex h-full flex-col border border-[var(--black)]/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
+                >
+                  <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
+                    {product.photos[0] && (
+                      <Image
+                        src={proxyImage(product.photos[0])}
+                        alt={product.name}
+                        fill
+                        unoptimized
+                        sizes="(max-width: 1024px) 50vw, 20vw"
+                        className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
+                      />
+                    )}
+                    <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <span className="border border-white/30 bg-black/20 px-2 py-1 font-condensed text-xs uppercase tracking-wider text-white backdrop-blur-sm">
+                        Apercu rapide
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between p-4 transition-colors group-hover:bg-[var(--cream)] sm:p-5">
+                    <div>
+                      <p className="mb-1 font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--grey)] sm:mb-2 sm:text-xs">
+                        {product.club}
+                      </p>
+                      <p className="line-clamp-2 font-condensed text-sm font-bold leading-tight text-[var(--black)] transition-colors group-hover:text-[var(--terra)] sm:text-base">
+                        {getProductMetaLine(product)}
+                      </p>
+                    </div>
+                    <PriceDisplay
+                      currentPrice={formatEuro(pricing.currentPrice)}
+                      originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined}
+                      promoLabel={pricing.promoActive ? 'Promo' : undefined}
+                      size="sm"
+                      className="mt-3 sm:mt-4"
+                    />
+                  </div>
+                </Link>
+              )
+            })()
           ))}
         </div>
       </div>

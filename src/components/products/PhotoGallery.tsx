@@ -1,102 +1,102 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+
+import { useState } from 'react'
 import Image from 'next/image'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { proxyImage } from '@/lib/images'
 
 export function PhotoGallery({ photos, name }: { photos: string[]; name: string }) {
   const [active, setActive] = useState(0)
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  // Sync scroll position when active index changes (from thumbnail click)
-  useEffect(() => {
-    if (photos.length === 0) return
-
-    const el = scrollRef.current
-    if (el) {
-      el.scrollTo({
-        left: el.clientWidth * active,
-        behavior: 'smooth'
-      })
-    }
-  }, [active, photos.length])
 
   if (photos.length === 0) return null
 
-  const handleScroll = () => {
-    const el = scrollRef.current
-    if (el) {
-      const index = Math.round(el.scrollLeft / el.clientWidth)
-      if (index !== active) {
-        setActive(index)
-      }
-    }
-  }
+  const activePhoto = photos[active] ?? photos[0]
+  const goToPrevious = () => setActive((current) => (current === 0 ? photos.length - 1 : current - 1))
+  const goToNext = () => setActive((current) => (current === photos.length - 1 ? 0 : current + 1))
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Outer sizing container — définit l'aspect ratio */}
-      <div className="relative w-full aspect-square sm:aspect-[4/5] bg-[var(--cream-2)] rounded-3xl shadow-xs border border-[var(--cream-3)] overflow-hidden">
-        {/* Inner scroll container — absolute inset-0 : taille définie par le parent, pas par le contenu */}
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory scrollbar-hide sm:cursor-zoom-in"
-        >
-          {photos.map((p, i) => (
-            <div
-              key={i}
-              className="relative flex-none w-full h-full snap-center bg-transparent"
+      <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-[var(--cream-3)] bg-[var(--cream-2)] shadow-xs sm:aspect-[4/5]">
+        <button
+          type="button"
+          onClick={goToNext}
+          aria-label={`Voir la photo suivante de ${name}`}
+          className="absolute inset-0 z-10 cursor-pointer"
+        />
+
+        <Image
+          key={activePhoto}
+          src={proxyImage(activePhoto)}
+          alt={`${name} - Photo ${active + 1}`}
+          fill
+          unoptimized
+          className="object-cover transition-transform duration-500 hover:scale-105"
+          priority={active === 0}
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+
+        {photos.length > 1 ? (
+          <>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                goToPrevious()
+              }}
+              aria-label={`Voir la photo precedente de ${name}`}
+              className="absolute top-1/2 left-3 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[var(--black)] shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
             >
-              <Image
-                src={proxyImage(p)}
-                alt={`${name} - Photo ${i + 1}`}
-                fill
-                unoptimized
-                className="object-cover transition-transform duration-500 hover:scale-105"
-                priority={i === 0}
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-          ))}
-        </div>
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                goToNext()
+              }}
+              aria-label={`Voir la photo suivante de ${name}`}
+              className="absolute top-1/2 right-3 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[var(--black)] shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        ) : null}
       </div>
 
-      {/* Thumbnails - Hidden on very small screens or keep them as indicators? */}
-      {/* Nike uses them as indicators. Let's keep them refined. */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide px-1 pb-1 max-w-full">
-        {photos.map((p, i) => (
+      <div className="scrollbar-hide flex max-w-full gap-2 overflow-x-auto px-1 pb-1">
+        {photos.map((photo, index) => (
           <button
-            key={i}
-            onClick={() => setActive(i)}
-            aria-label={`Photo ${i + 1} de ${name}`}
-            className={`group relative flex-shrink-0 h-20 w-20 overflow-hidden rounded-xl border-2 transition-all md:h-24 md:w-24
-              ${
-                active === i
-                  ? 'border-[var(--black)] scale-105 shadow-md'
-                  : 'border-transparent opacity-60 hover:opacity-100'
-              }`}
+            key={`${photo}-${index}`}
+            type="button"
+            onClick={() => setActive(index)}
+            aria-label={`Photo ${index + 1} de ${name}`}
+            className={`group relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all md:h-24 md:w-24 ${
+              active === index ? 'scale-105 border-[var(--black)] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
+            }`}
           >
             <Image
-              src={proxyImage(p)}
-              alt={`${name} miniature ${i + 1}`}
+              src={proxyImage(photo)}
+              alt={`${name} miniature ${index + 1}`}
               fill
               unoptimized
               sizes="80px"
               className="object-cover"
             />
-            {/* Active mask overlay */}
-            {active !== i && <div className="absolute inset-0 bg-white/10 transition-opacity group-hover:opacity-0" />}
+            {active !== index ? <div className="absolute inset-0 bg-white/10 transition-opacity group-hover:opacity-0" /> : null}
           </button>
         ))}
       </div>
 
-      {/* Mobile Dot Indicators */}
-      <div className="flex flex-wrap justify-center gap-1.5 md:hidden px-4 w-full max-w-full overflow-hidden">
-        {photos.map((_, i) => (
-          <div 
-            key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 
-              ${active === i ? 'w-6 bg-[var(--black)]' : 'w-1.5 bg-[var(--cream-3)]'}`}
+      <div className="flex w-full max-w-full flex-wrap justify-center gap-1.5 overflow-hidden px-4 md:hidden">
+        {photos.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => setActive(index)}
+            aria-label={`Selectionner la photo ${index + 1}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              active === index ? 'w-6 bg-[var(--black)]' : 'w-1.5 bg-[var(--cream-3)]'
+            }`}
           />
         ))}
       </div>

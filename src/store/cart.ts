@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CartItem } from '@/types/cart'
+import { calculateCartGrandTotal, calculateItemsSubtotal, calculateShippingAmount } from '@/lib/cartPricing'
 
 interface CartState {
   items: CartItem[]
@@ -12,6 +13,8 @@ interface CartState {
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
+  subtotal: () => number
+  shippingTotal: () => number
   total: () => number
   itemCount: () => number
 }
@@ -64,7 +67,9 @@ export const useCartStore = create<CartState>()(
       openCart: () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
 
-      total: () => get().items.reduce((sum, i) => sum + i.price * i.qty, 0),
+      subtotal: () => calculateItemsSubtotal(get().items),
+      shippingTotal: () => calculateShippingAmount(get().itemCount()),
+      total: () => calculateCartGrandTotal(get().items),
       itemCount: () => get().items.reduce((sum, i) => sum + i.qty, 0),
     }),
     { name: 'kitlab-cart', skipHydration: true }

@@ -1,23 +1,24 @@
+import { LAUNCH_PROMO_ENABLED, SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
+
 const TICKER_ITEMS = [
-  'LIVRAISON OFFERTE DÈS 60€',
-  'REAL MADRID', 'PSG', 'MANCHESTER CITY', 'BARCELONA',
-  'JUVENTUS', 'BAYERN MUNICH', 'ARSENAL', 'LIVERPOOL',
-  'PAIEMENT SÉCURISÉ', '1000+ CLIENTS SATISFAITS', 'FLOCAGE DISPONIBLE',
+  ...(LAUNCH_PROMO_ENABLED ? ['OFFRE DE LANCEMENT - PRIX PROMO 7 JOURS'] : ['CATALOGUE PREMIUM CLUBS + SELECTIONS']),
+  SHIPPING_DELAY_LABEL.toUpperCase(),
+  'AVIS CLIENTS 4.5/5',
+  'FLOCAGE DISPONIBLE +5 EUR',
+  'PAIEMENT SECURISE',
+  'SUIVI DE COMMANDE DISPONIBLE',
 ]
 
 export function Ticker() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
+
   return (
-    <div
-      className="overflow-hidden py-3 bg-[var(--terra)] w-full max-w-full"
-      role="region"
-      aria-label="Informations du site"
-    >
-      <div className="ticker-track flex gap-8 md:gap-12 whitespace-nowrap w-max">
-        {items.map((item, i) => (
-          <span key={i} className="font-condensed text-sm tracking-[3px] uppercase text-white flex items-center gap-4">
+    <div className="w-full max-w-full overflow-hidden bg-[var(--terra)] py-3" role="region" aria-label="Informations du site">
+      <div className="ticker-track flex w-max gap-8 whitespace-nowrap md:gap-12">
+        {items.map((item, index) => (
+          <span key={`${item}-${index}`} className="flex items-center gap-4 font-condensed text-sm uppercase tracking-[3px] text-white">
             {item}
-            <span className="w-1 h-1 rounded-full bg-white/50 inline-block" />
+            <span className="inline-block h-1 w-1 rounded-full bg-white/50" />
           </span>
         ))}
       </div>

@@ -1,5 +1,33 @@
+import type { Club, League, Patch, Product } from '@/types/product'
+import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
+import { normalizeCatalogProduct, normalizeCatalogProducts } from '@/lib/catalogEntityRegistry'
 import { getSupabaseServerClient } from './server'
-import type { Product, League, Club, Patch } from '@/types/product'
+
+type ProductQueryPage = {
+  data: Product[] | null
+  error: unknown
+}
+
+async function fetchAllProducts(
+  queryFactory: (from: number, to: number) => PromiseLike<ProductQueryPage>,
+): Promise<Product[]> {
+  const pageSize = 1000
+  const all: Product[] = []
+  let from = 0
+
+  while (true) {
+    const { data, error } = await queryFactory(from, from + pageSize - 1)
+    if (error) throw error
+
+    const rows = (data ?? []) as Product[]
+    all.push(...rows)
+
+    if (rows.length < pageSize) break
+    from += pageSize
+  }
+
+  return all
+}
 
 export async function getProducts(filters?: {
   league?: string
@@ -7,107 +35,81 @@ export async function getProducts(filters?: {
   type?: string
   productKind?: Product['product_kind']
   featured?: boolean
-  concept?: boolean
-  q?: string
   limit?: number
 }): Promise<Product[]> {
   const supabase = await getSupabaseServerClient()
-  let query = supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
+  const rawProducts = await fetchAllProducts((from, to) => {
+    let query = supabase.from('products').select('*').eq('is_active', true)
 
-  if (filters?.league) query = query.eq('league', filters.league)
-  if (filters?.club) query = query.eq('club', filters.club)
-  if (filters?.type) query = query.eq('type', filters.type)
-  if (filters?.productKind) query = query.eq('product_kind', filters.productKind)
-  if (filters?.featured) query = query.eq('is_featured', true)
-  if (filters?.concept === true) query = query.eq('season', 'A definir')
-  if (filters?.concept === false) query = query.neq('season', 'A definir')
-  if (filters?.q) {
-    // Découper par mots pour gérer les recherches multi-mots ("ac milan", "real madrid"...)
-    // Chaque mot doit matcher au moins une colonne (AND entre mots, OR entre colonnes)
-    const words = filters.q.trim().split(/\s+/).filter(Boolean)
-    for (const word of words) {
-      const t = `%${word}%`
-      query = query.or(`name.ilike.${t},club.ilike.${t},league.ilike.${t},country.ilike.${t},season.ilike.${t}`)
-    }
+    if (filters?.type) query = query.eq('type', filters.type)
+    if (filters?.productKind) query = query.eq('product_kind', filters.productKind)
+    if (filters?.featured) query = query.eq('is_featured', true)
+
+    return query.order('created_at', { ascending: false }).range(from, to)
+  })
+
+  let products = normalizeCatalogProducts(rawProducts)
+
+  if (filters?.league) {
+    products = products.filter((product) => product.league === filters.league)
   }
-  if (filters?.limit) query = query.limit(filters.limit)
 
-  const { data, error } = await query.order('created_at', { ascending: false })
-  if (error) throw error
-  return data ?? []
+  if (filters?.club) {
+    products = products.filter((product) => product.club === filters.club)
+  }
+
+  if (filters?.limit) {
+    products = products.slice(0, filters.limit)
+  }
+
+  return products
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   return getProducts({
     featured: true,
-    concept: false,
     limit,
   })
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const supabase = await getSupabaseServerClient()
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+  const { data, error } = await supabase.from('products').select('*').eq('slug', slug).eq('is_active', true).single()
   if (error) return null
-  return data
+  return normalizeCatalogProduct(data)
 }
 
 export async function getLeagues(): Promise<League[]> {
   const supabase = await getSupabaseServerClient()
-  const { data } = await supabase
-    .from('leagues')
-    .select('*')
-    .order('display_order')
+  const { data } = await supabase.from('leagues').select('*').order('display_order')
   return data ?? []
 }
 
 export async function getLeagueBySlug(slug: string): Promise<League | null> {
   const supabase = await getSupabaseServerClient()
-  const { data } = await supabase
-    .from('leagues')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  const { data } = await supabase.from('leagues').select('*').eq('slug', slug).single()
   return data ?? null
 }
 
 export async function getWorldCupProducts(): Promise<Product[]> {
-  const supabase = await getSupabaseServerClient()
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .neq('season', 'A definir')
-    .eq('league', 'Selections nationales')
-    .in('season', ['2026', '2026-2027'])
-    .order('club')
-  if (error) throw error
-  return data ?? []
+  const products = await getProducts({ league: 'Selections nationales' })
+  return dedupeCatalogProducts(
+    products.filter((product) => !product.is_retro && ['2026', '2026-2027'].includes(product.season)),
+  )
 }
 
 export async function getRetroProducts(): Promise<Product[]> {
   const supabase = await getSupabaseServerClient()
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .neq('season', 'A definir')
-    .eq('is_retro', true)
-    .order('season', { ascending: false })
-  if (error) throw error
-  return data ?? []
+  const rawProducts = await fetchAllProducts((from, to) =>
+    supabase.from('products').select('*').eq('is_active', true).eq('is_retro', true).order('created_at', { ascending: false }).range(from, to),
+  )
+
+  return dedupeCatalogProducts(normalizeCatalogProducts(rawProducts))
 }
 
 export async function getConceptProducts(): Promise<Product[]> {
-  return getProducts({ concept: true })
+  const products = await getProducts()
+  return dedupeCatalogProducts(filterConceptProducts(products))
 }
 
 export async function getPatches(): Promise<Patch[]> {
@@ -119,20 +121,11 @@ export async function getPatches(): Promise<Patch[]> {
 export async function getClubs(leagueSlug?: string): Promise<Club[]> {
   const supabase = await getSupabaseServerClient()
 
-  // Note: Supabase JS v2 ne supporte pas le filtrage par join via dot-notation.
-  // On résout d'abord le league_id, puis on filtre les clubs.
   if (leagueSlug) {
-    const { data: league } = await supabase
-      .from('leagues')
-      .select('id')
-      .eq('slug', leagueSlug)
-      .single()
+    const { data: league } = await supabase.from('leagues').select('id').eq('slug', leagueSlug).single()
     if (!league) return []
-    const { data } = await supabase
-      .from('clubs')
-      .select('*')
-      .eq('league_id', league.id)
-      .order('name')
+
+    const { data } = await supabase.from('clubs').select('*').eq('league_id', league.id).order('name')
     return data ?? []
   }
 

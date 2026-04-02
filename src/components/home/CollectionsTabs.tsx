@@ -1,37 +1,26 @@
 'use client'
-// src/components/home/CollectionsTabs.tsx
+
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
+import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
-import type { Product, League } from '@/types/product'
+import type { Product } from '@/types/product'
 
-interface LeagueProductGroup {
-  leagueName: string
-  products: Product[]
-}
+export function CollectionsTabs({ products }: { products: Product[] }) {
+  const countries = Array.from(new Set(products.map((product) => product.club))).sort((left, right) =>
+    left.localeCompare(right, 'fr-FR', { sensitivity: 'base' }),
+  )
 
-export function CollectionsTabs({
-  leagueProductGroups,
-  leagues,
-}: {
-  leagueProductGroups: LeagueProductGroup[]
-  leagues: League[]
-}) {
-  // Tabs : les 4 premières ligues (les plus fournies)
-  const topLeagues = leagues.slice(0, 4)
-  const [activeTab, setActiveTab] = useState(topLeagues[0]?.name ?? '')
-
-  const display = (leagueProductGroups.find((group) => group.leagueName === activeTab)?.products ?? []).slice(0, 6)
-
-  const activeLeague = leagues.find((l) => l.name === activeTab)
+  const [activeCountry, setActiveCountry] = useState(countries[0] ?? '')
+  const display = products.filter((product) => product.club === activeCountry).slice(0, 6)
 
   return (
-    <section className="px-4 pt-6 pb-8 bg-[var(--cream)]">
-      {/* Titre */}
-      <h2 className="font-condensed text-[26px] font-normal text-[var(--black)] leading-tight">
+    <section className="bg-[var(--cream)] px-4 pt-6 pb-8">
+      <h2 className="font-condensed text-[26px] font-normal leading-tight text-[var(--black)]">
         Nos Collections{' '}
         <span
           style={{
@@ -44,87 +33,70 @@ export function CollectionsTabs({
           Phares
         </span>
       </h2>
-      <p className="text-[13px] text-[var(--grey)] mt-1 font-condensed">
-        Des collections pensées pour se démarquer.
-      </p>
+      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">Une selection Coupe du Monde 2026, pays par pays.</p>
 
-      {/* Tabs */}
-      <div
-        className="flex gap-4 mt-3 border-b border-[var(--cream-3)]"
-        style={{ overflowX: 'auto', scrollbarWidth: 'none' }}
-      >
-        {topLeagues.map((league) => (
+      <div className="mt-3 flex gap-4 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {countries.map((country) => (
           <button
-            key={league.id}
-            onClick={() => setActiveTab(league.name)}
-            className={`font-condensed text-[11px] uppercase tracking-wide pb-2 whitespace-nowrap border-b-2 -mb-px transition-all ${
-              activeTab === league.name
-                ? 'text-[var(--black)] font-bold border-[var(--black)]'
-                : 'text-[var(--grey-lt)] border-transparent'
+            key={country}
+            onClick={() => setActiveCountry(country)}
+            className={`-mb-px whitespace-nowrap border-b-2 pb-2 font-condensed text-[11px] uppercase tracking-wide transition-all ${
+              activeCountry === country ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
             }`}
           >
-            {league.flag_emoji && league.flag_emoji.length <= 4 ? `${league.flag_emoji} ` : ''}{league.name}
+            {country}
           </button>
         ))}
       </div>
 
-      {/* Grille 2 colonnes */}
       {display.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          {display.map((product) => (
-            <Link
-              key={product.id}
-              href={`/shop/${product.slug}`}
-              className="block overflow-hidden"
-              style={{ borderRadius: 2 }}
-            >
-              <div className="bg-[var(--cream-2)] relative">
-                <div className="relative" style={{ aspectRatio: '3/4' }}>
-                  {product.photos[0] && (
-                    <Image
-                      src={proxyImage(product.photos[0])}
-                      alt={product.name}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                      sizes="45vw"
-                    />
-                  )}
-                  <div
-                    className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
-                    style={{ width: 32, height: 32, borderRadius: '50%' }}
-                  >
-                    <ShoppingCart className="w-4 h-4" />
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {display.map((product) => {
+            const pricing = getProductPricing({ isRetro: product.is_retro })
+
+            return (
+              <Link key={product.id} href={`/shop/${product.slug}`} className="block overflow-hidden" style={{ borderRadius: 2 }}>
+                <div className="relative bg-[var(--cream-2)]">
+                  <div className="relative" style={{ aspectRatio: '3/4' }}>
+                    {product.photos[0] ? (
+                      <Image src={proxyImage(product.photos[0])} alt={product.name} fill unoptimized className="object-cover" sizes="45vw" />
+                    ) : null}
+                    <div
+                      className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"
+                      style={{ width: 32, height: 32, borderRadius: '50%' }}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="pt-2 pb-3">
-                <p className="font-condensed text-[12px] text-[var(--black)] leading-snug truncate">
-                  {getProductMetaLine(product)}
-                </p>
-                <p className="font-condensed text-[13px] font-semibold text-[var(--black)] mt-0.5">
-                  {product.price.toFixed(2)} €
-                </p>
-              </div>
-            </Link>
-          ))}
+
+                <div className="pt-2 pb-3">
+                  <p className="truncate font-condensed text-[12px] leading-snug text-[var(--black)]">{getProductMetaLine(product)}</p>
+                  <PriceDisplay
+                    currentPrice={formatEuro(pricing.currentPrice)}
+                    originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined}
+                    promoLabel={pricing.promoActive ? 'Promo' : undefined}
+                    size="sm"
+                    className="mt-1"
+                  />
+                </div>
+              </Link>
+            )
+          })}
         </div>
       ) : (
-        <p className="font-condensed text-sm text-[var(--grey)] text-center py-8">
-          Collection bientôt disponible
-        </p>
+        <p className="py-8 text-center font-condensed text-sm text-[var(--grey)]">Collection bientot disponible</p>
       )}
 
-      {/* Lien voir tout pour la ligue active */}
-      {activeLeague && (
+      {activeCountry ? (
         <Link
-          href={`/ligue/${activeLeague.slug}`}
-          className="block w-full mt-4 py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] border border-[var(--black)] hover:bg-[var(--black)] hover:text-white transition-colors"
+          href={`/coupe-du-monde?club=${encodeURIComponent(activeCountry)}`}
+          className="mt-4 block w-full border border-[var(--black)] py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] transition-colors hover:bg-[var(--black)] hover:text-white"
           style={{ borderRadius: 2 }}
         >
-          Voir tous les maillots {activeLeague.name}
+          Voir tous les maillots {activeCountry}
         </Link>
-      )}
+      ) : null}
     </section>
   )
 }

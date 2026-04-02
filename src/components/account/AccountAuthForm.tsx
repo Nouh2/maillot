@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export function AccountAuthForm() {
@@ -35,7 +36,7 @@ export function AccountAuthForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="mb-2 block font-condensed text-xs tracking-[0.28em] uppercase text-[var(--grey)]">
+        <label htmlFor="email" className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
           Email
         </label>
         <input
@@ -52,16 +53,19 @@ export function AccountAuthForm() {
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="inline-flex w-full items-center justify-center rounded-full bg-[var(--terra)] px-5 py-3 font-condensed text-sm tracking-[0.24em] uppercase text-white disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex w-full items-center justify-center rounded-full bg-[var(--terra)] px-5 py-3 font-condensed text-sm uppercase tracking-[0.24em] text-white disabled:cursor-not-allowed disabled:opacity-70"
       >
         {status === 'loading' ? 'Envoi...' : 'Recevoir le lien magique'}
       </button>
 
-      {message && (
-        <p className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-[var(--grey)]'}`}>
-          {message}
+      <div className="rounded-2xl border border-[var(--terra)]/20 bg-[var(--terra-lt)] px-4 py-3 text-sm text-[var(--black)]">
+        <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Offre fidelite</p>
+        <p className="mt-1">
+          Cree ton compte et beneficie de <strong>-10 %</strong> sur ta premiere commande avec le code <strong>{LOYALTY_CODE}</strong>.
         </p>
-      )}
+      </div>
+
+      {message ? <p className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-[var(--grey)]'}`}>{message}</p> : null}
     </form>
   )
 }

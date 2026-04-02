@@ -1,19 +1,20 @@
 import type { Metadata } from 'next'
+import { AboutSection } from '@/components/home/AboutSection'
+import { BestsellersTabs } from '@/components/home/BestsellersTabs'
+import { CollectionsTabs } from '@/components/home/CollectionsTabs'
+import { CountdownBanner } from '@/components/home/CountdownBanner'
 import { EmojiCategoryBar } from '@/components/home/EmojiCategoryBar'
 import { HeroSlideshow } from '@/components/home/HeroSlideshow'
+import { InstagramWall } from '@/components/home/InstagramWall'
 import { LeaguesStrip } from '@/components/home/LeaguesStrip'
-import { BestsellersTabs } from '@/components/home/BestsellersTabs'
-import { TrustScrollBar } from '@/components/home/TrustScrollBar'
-import { CollectionsTabs } from '@/components/home/CollectionsTabs'
-import { WhyUsSection } from '@/components/home/WhyUsSection'
+import { PromoStrip } from '@/components/home/PromoStrip'
 import { ReassuranceBar } from '@/components/home/ReassuranceBar'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
-import { InstagramWall } from '@/components/home/InstagramWall'
-import { CountdownBanner } from '@/components/home/CountdownBanner'
-import { AboutSection } from '@/components/home/AboutSection'
-import { PromoStrip } from '@/components/home/PromoStrip'
+import { TrustScrollBar } from '@/components/home/TrustScrollBar'
+import { WhyUsSection } from '@/components/home/WhyUsSection'
+import { dedupeCatalogProducts, filterStandardCatalogProducts } from '@/lib/catalogPresentation'
 import { sortProductsByRecency } from '@/lib/productFilters'
-import { getLeagues, getProducts } from '@/lib/supabase/queries'
+import { getLeagues, getProducts, getWorldCupProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
@@ -22,30 +23,13 @@ export const metadata: Metadata = {
 }
 
 function dedupeProducts(...groups: Product[][]): Product[] {
-  const seen = new Set<string>()
-  const products: Product[] = []
-
-  for (const group of groups) {
-    for (const product of group) {
-      if (seen.has(product.id)) continue
-      seen.add(product.id)
-      products.push(product)
-    }
-  }
-
-  return products
+  return dedupeCatalogProducts(groups.flat())
 }
 
-function pickNewestProducts(
-  products: Product[],
-  limit: number,
-  distinctKey?: (product: Product) => string,
-): Product[] {
+function pickNewestProducts(products: Product[], limit: number, distinctKey?: (product: Product) => string): Product[] {
   const sorted = sortProductsByRecency(products)
 
-  if (!distinctKey) {
-    return sorted.slice(0, limit)
-  }
+  if (!distinctKey) return sorted.slice(0, limit)
 
   const picked: Product[] = []
   const seenKeys = new Set<string>()
@@ -73,9 +57,12 @@ export default async function HomePage() {
   const leagues = (await getLeagues()).filter((league) => league.slug !== 'champions-league')
   const homeLeagues = leagues.slice(0, 4)
 
-  const allCatalogProducts = await getProducts({ concept: false })
+  const rawCatalogProducts = await getProducts()
+  const allCatalogProducts = dedupeCatalogProducts(filterStandardCatalogProducts(rawCatalogProducts))
+  const worldCupProducts = await getWorldCupProducts()
   const recentProducts = sortProductsByRecency(allCatalogProducts)
   const preMatchProducts = allCatalogProducts.filter((product) => product.product_kind === 'pre_match')
+
   const leagueProductGroups = homeLeagues.map((league) => ({
     leagueName: league.name,
     products: pickNewestProducts(
@@ -97,7 +84,7 @@ export default async function HomePage() {
       <PromoStrip />
       <BestsellersTabs leagueProductGroups={leagueProductGroups} leagues={homeLeagues} topProducts={topProducts} />
       <TrustScrollBar />
-      <CollectionsTabs leagueProductGroups={leagueProductGroups} leagues={homeLeagues} />
+      <CollectionsTabs products={worldCupProducts} />
       <ReassuranceBar />
       <LeaguesStrip leagues={leagues} />
       <CountdownBanner />

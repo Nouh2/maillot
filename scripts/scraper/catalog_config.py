@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+import re
+import unicodedata
+from pathlib import Path
+
 REST_OF_WORLD_LEAGUE = "Reste du monde"
 NATIONAL_TEAMS_LEAGUE = "Selections nationales"
 LIGA_PORTUGAL_LEAGUE = "Liga Portugal"
@@ -107,3 +112,18 @@ ENTITY_ALIASES = {
     "croatia": ("Croatie", "Croatie", NATIONAL_TEAMS_LEAGUE),
     "nigeria": ("Nigeria", "Nigeria", NATIONAL_TEAMS_LEAGUE),
 }
+
+
+def _ascii_norm(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode("ascii").lower()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", text)).strip()
+
+
+_REGISTRY_PATH = Path(__file__).resolve().parents[2] / "data" / "catalog-entities.json"
+if _REGISTRY_PATH.exists():
+    _catalog_entities = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+    for _entity in _catalog_entities:
+        for _alias in {_entity["club"], *(_entity.get("aliases") or [])}:
+            _normalized = _ascii_norm(_alias)
+            if _normalized:
+                ENTITY_ALIASES[_normalized] = (_entity["club"], _entity["country"], _entity["league"])

@@ -1,29 +1,27 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Câblage next/font → Tailwind v4
-     Les noms var() sont DIFFÉRENTS des noms de propriété → pas de boucle infinie */
   --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bebas), sans-serif;
   --font-condensed: var(--font-barlow-condensed), sans-serif;
 }
 
 :root {
-  --cream:     #faf7f2;
-  --cream-2:   #f3ede3;
-  --cream-3:   #e8dfd0;
-  --cream-4:   #ddd0be;
-  --black:     #1c1712;
-  --black-2:   #2e2820;
-  --black-3:   #3f3830;
-  --grey:      #7a6f62;
-  --grey-lt:   #a89f92;
-  --terra:     #c1440e;
-  --terra-2:   #a83a0c;
-  --terra-3:   #d4581f;
-  --terra-lt:  #fdf0ea;
+  --cream: #faf7f2;
+  --cream-2: #f3ede3;
+  --cream-3: #e8dfd0;
+  --cream-4: #ddd0be;
+  --black: #1c1712;
+  --black-2: #2e2820;
+  --black-3: #3f3830;
+  --grey: #7a6f62;
+  --grey-lt: #a89f92;
+  --terra: #c1440e;
+  --terra-2: #a83a0c;
+  --terra-3: #d4581f;
+  --terra-lt: #fdf0ea;
   --terra-mid: #e8956d;
-  --white:     #ffffff;
+  --white: #ffffff;
 }
 
 html,
@@ -31,54 +29,60 @@ body {
   background-color: var(--cream);
   color: var(--black);
   overflow-x: hidden;
-  width: 100%;
   position: relative;
+  width: 100%;
 }
 
-/* Curseur custom — desktop uniquement */
 @media (pointer: fine) {
-  * { cursor: none; }
-  .cursor-dot {
-    width: 8px; height: 8px;
-    background: var(--terra);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
+  html,
+  body {
+    cursor: url('/cursor-default.svg') 4 4, auto;
   }
-  .cursor-ring {
-    width: 32px; height: 32px;
-    border: 2px solid var(--terra);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9998;
-    transform: translate(-50%, -50%);
-    transition: transform 0.15s ease-out;
+
+  a,
+  button,
+  summary,
+  [role="button"] {
+    cursor: url('/cursor-pointer.svg') 6 6, pointer;
+  }
+
+  input,
+  textarea,
+  select {
+    cursor: text;
   }
 }
 
-/* Scroll reveal */
 .reveal {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
+
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Ticker animation */
 @keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
+
 .ticker-track {
   animation: ticker 30s linear infinite;
 }
 
-/* Hide scrollbar for league strip */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

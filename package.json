@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "catalog:clean": "node scripts/catalog/clean_catalog.mjs",
+    "catalog:normalize": "node scripts/catalog/normalize_catalog.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.11.0",

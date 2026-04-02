@@ -1,43 +1,49 @@
 'use client'
+
 import { useState } from 'react'
-import { Plus, Minus, Check, ShieldCheck } from 'lucide-react'
+import { Check, Minus, Plus, ShieldCheck } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
-import { FLOCAGE_PRICE, calculateCartItemUnitPrice } from '@/lib/cartPricing'
+import { FLOCAGE_PRICE, calculateCartItemUnitPrice, formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { normalizeProductTextSeasons } from '@/lib/season'
 import { SizeSelector } from './SizeSelector'
 import { PatchSelector } from './PatchSelector'
 import type { Product, Patch } from '@/types/product'
 
+const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard', 'PayPal', 'Apple Pay']
+
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
   const [selectedPatches, setSelectedPatches] = useState<string[]>([])
   const [qty, setQty] = useState(1)
-
   const [hasFlocage, setHasFlocage] = useState(false)
   const [flocageName, setFlocageName] = useState('')
   const [flocageNumber, setFlocageNumber] = useState('')
-
   const [error, setError] = useState('')
-  const addItem = useCartStore((s) => s.addItem)
 
-  // Si aucun patch spécifique défini sur le produit, on affiche tous les patchs
-  const availablePatches = product.available_patches.length > 0
-    ? patches.filter((p) => product.available_patches.includes(p.code))
-    : patches
+  const addItem = useCartStore((state) => state.addItem)
+  const pricing = getProductPricing({ isRetro: product.is_retro })
+
+  const availablePatches =
+    product.available_patches.length > 0
+      ? patches.filter((patch) => product.available_patches.includes(patch.code))
+      : patches
+
+  const unitPrice = calculateCartItemUnitPrice({
+    basePrice: pricing.currentPrice,
+    patchCount: selectedPatches.length,
+    hasFlocage,
+  })
+  const totalPrice = unitPrice * qty
 
   const handleAdd = () => {
     if (!size) {
-      setError('VEUILLEZ SÉLECTIONNER UNE TAILLE')
+      setError('Veuillez selectionner une taille')
       return
     }
-    setError('')
-    const selectedPatchObjects = patches.filter((p) => selectedPatches.includes(p.code))
 
-    const effectivePrice = calculateCartItemUnitPrice({
-      basePrice: product.price,
-      patchCount: selectedPatches.length,
-      hasFlocage,
-    })
+    setError('')
+
+    const selectedPatchObjects = patches.filter((patch) => selectedPatches.includes(patch.code))
 
     addItem({
       product_id: product.id,
@@ -46,57 +52,43 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       club: product.club,
       size,
       patches: selectedPatches,
-      patch_names: selectedPatchObjects.map((p) => p.name),
+      patch_names: selectedPatchObjects.map((patch) => patch.name),
       flocage_name: hasFlocage ? flocageName.toUpperCase() : null,
       flocage_number: hasFlocage ? flocageNumber : null,
-      price: effectivePrice,
+      price: unitPrice,
       photo: product.photos[0] ?? '',
       qty,
     })
   }
 
-  const totalPrice = calculateCartItemUnitPrice({
-    basePrice: product.price,
-    patchCount: selectedPatches.length,
-    hasFlocage,
-  }) * qty
-
   return (
     <div className="space-y-8">
       <div className="space-y-10">
         <SizeSelector available={product.sizes} selected={size} onSelect={setSize} />
-        <PatchSelector
-          patches={availablePatches}
-          selected={selectedPatches}
-          onSelect={setSelectedPatches}
-        />
+        <PatchSelector patches={availablePatches} selected={selectedPatches} onSelect={setSelectedPatches} />
       </div>
 
-      {/* Flocage Section */}
       <div className="space-y-6 pt-2">
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div className="relative flex items-center justify-center w-6 h-6 rounded-sm border-2 border-[var(--black)] bg-white transition-colors">
+        <label className="group flex cursor-pointer items-center gap-3">
+          <div className="relative flex h-6 w-6 items-center justify-center rounded-sm border-2 border-[var(--black)] bg-white transition-colors">
             <input
               type="checkbox"
               className="peer sr-only"
               checked={hasFlocage}
-              onChange={(e) => setHasFlocage(e.target.checked)}
+              onChange={(event) => setHasFlocage(event.target.checked)}
             />
-            <div className="absolute inset-0 bg-[var(--black)] scale-0 peer-checked:scale-100 transition-transform flex items-center justify-center">
-              <Check className="w-4 h-4 text-white" strokeWidth={3} />
+            <div className="absolute inset-0 flex scale-0 items-center justify-center bg-[var(--black)] transition-transform peer-checked:scale-100">
+              <Check className="h-4 w-4 text-white" strokeWidth={3} />
             </div>
           </div>
+
           <div>
-            <span className="text-[17px] font-bold text-[var(--black)]">
-              Personnaliser ce maillot
-            </span>
-            <span className="ml-2 text-[15px] text-[var(--grey)]">
-              (+{FLOCAGE_PRICE}€)
-            </span>
+            <span className="text-[17px] font-bold text-[var(--black)]">Personnaliser ce maillot</span>
+            <span className="ml-2 text-[15px] text-[var(--grey)]">(+{formatEuro(FLOCAGE_PRICE)})</span>
           </div>
         </label>
 
-        {hasFlocage && (
+        {hasFlocage ? (
           <div className="grid grid-cols-6 gap-3 animate-in slide-in-from-top-2 fade-in duration-300">
             <div className="col-span-4 space-y-2">
               <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Nom</label>
@@ -104,47 +96,44 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 type="text"
                 maxLength={15}
                 value={flocageName}
-                onChange={(e) => setFlocageName(e.target.value)}
+                onChange={(event) => setFlocageName(event.target.value)}
                 placeholder="Ex: ZIDANE"
-                className="w-full bg-white border-2 border-[var(--cream-3)] rounded-xl px-4 py-3 font-condensed text-lg focus:border-[var(--black)] outline-none transition-colors uppercase"
+                className="w-full rounded-xl border-2 border-[var(--cream-3)] bg-white px-4 py-3 font-condensed text-lg uppercase outline-none transition-colors focus:border-[var(--black)]"
               />
             </div>
             <div className="col-span-2 space-y-2">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Numéro</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Numero</label>
               <input
                 type="text"
                 maxLength={2}
                 value={flocageNumber}
-                onChange={(e) => setFlocageNumber(e.target.value.replace(/\D/g, ''))}
+                onChange={(event) => setFlocageNumber(event.target.value.replace(/\D/g, ''))}
                 placeholder="10"
-                className="w-full bg-white border-2 border-[var(--cream-3)] rounded-xl px-4 py-3 font-condensed text-lg text-center focus:border-[var(--black)] outline-none transition-colors"
+                className="w-full rounded-xl border-2 border-[var(--cream-3)] bg-white px-4 py-3 text-center font-condensed text-lg outline-none transition-colors focus:border-[var(--black)]"
               />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
-      <div className="pt-4 border-t border-[var(--cream-3)]">
-        {error && (
-          <p className="mb-4 text-xs font-bold text-red-500 tracking-widest text-center animate-pulse">
-            {error}
-          </p>
-        )}
+      <div className="border-t border-[var(--cream-3)] pt-4">
+        {error ? (
+          <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p>
+        ) : null}
 
         <div className="flex flex-col gap-6">
           <div className="flex items-center">
-            {/* Modern Quantity Selector */}
-            <div className="flex items-center bg-white border-2 border-[var(--cream-3)] rounded-xl h-[56px] px-2 shadow-sm">
+            <div className="flex h-[56px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="w-10 h-10 flex items-center justify-center text-[var(--grey)] hover:text-[var(--black)] transition-colors"
+                className="flex h-10 w-10 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
               >
                 <Minus size={18} />
               </button>
               <span className="w-8 text-center font-bebas text-xl text-[var(--black)]">{qty}</span>
               <button
                 onClick={() => setQty(qty + 1)}
-                className="w-10 h-10 flex items-center justify-center text-[var(--grey)] hover:text-[var(--black)] transition-colors"
+                className="flex h-10 w-10 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
               >
                 <Plus size={18} />
               </button>
@@ -152,44 +141,51 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
 
             <button
               onClick={handleAdd}
-              className="flex-1 ml-4 h-[56px] bg-[var(--black)] text-white text-[16px] font-bold uppercase tracking-wider rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.98]"
+              className="ml-4 flex h-[56px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] text-[16px] font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98]"
             >
-              Ajouter au panier — {totalPrice.toFixed(2)} €
+              Ajouter au panier - {formatEuro(totalPrice)}
             </button>
           </div>
 
-          {/* New Payment Section */}
           <div className="space-y-4">
-            <div className="w-full py-3.5 bg-[#4ADE80] text-white text-center font-bebas text-2xl tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-sm">
-              <ShieldCheck className="w-6 h-6 text-white" />
-              Paiement 100 % Sécurisé
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-3 py-2 opacity-80 transition-opacity hover:opacity-100">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 object-contain" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4 object-contain" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 object-contain" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 object-contain" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" alt="Amex" className="h-5 object-contain" />
+            <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4ADE80] py-3.5 text-center font-bebas text-2xl tracking-wide text-white shadow-sm">
+              <ShieldCheck className="h-6 w-6 text-white" />
+              Paiement 100 % securise
             </div>
 
-            <div className="bg-[#F0F4FF] p-6 rounded-2xl border border-blue-50 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/30 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700"></div>
-              
-              <h3 className="relative font-bold text-[18px] text-[var(--black)] italic mb-4 inline-block">
-                Paiement & Sécurité
-                <div className="absolute -bottom-1 left-0 w-full h-2 bg-[#4BFF00] -z-10 opacity-60 rounded-full"></div>
+            <div className="flex flex-wrap items-center justify-center gap-2 py-2">
+              {PAYMENT_METHODS.map((method) => (
+                <span
+                  key={method}
+                  className="rounded-full border border-[var(--cream-3)] bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--grey)]"
+                >
+                  {method}
+                </span>
+              ))}
+            </div>
+
+            <div className="group relative overflow-hidden rounded-2xl border border-blue-50 bg-[#F0F4FF] p-6">
+              <div className="absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full bg-blue-100/30 transition-transform duration-700 group-hover:scale-110" />
+
+              <h3 className="relative mb-4 inline-block text-[18px] font-bold italic text-[var(--black)]">
+                Paiement & Securite
+                <div className="absolute left-0 -bottom-1 -z-10 h-2 w-full rounded-full bg-[#4BFF00] opacity-60" />
               </h3>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                <div className="px-2 py-1 bg-white rounded border border-blue-100 shadow-xs flex items-center justify-center">
-                  <ShieldCheck className="w-3 h-3 text-blue-500 mr-1" />
-                  <span className="text-[10px] font-bold text-blue-900 uppercase tracking-tighter">SSL Securing</span>
+              <div className="mb-4 flex flex-wrap gap-2">
+                <div className="flex items-center justify-center rounded border border-blue-100 bg-white px-2 py-1 shadow-xs">
+                  <ShieldCheck className="mr-1 h-3 w-3 text-blue-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-tighter text-blue-900">SSL Securing</span>
                 </div>
+                {pricing.promoDescription ? (
+                  <div className="rounded border border-[var(--terra)]/10 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--terra)]">
+                    {pricing.promoDescription}
+                  </div>
+                ) : null}
               </div>
 
-              <p className="text-[14px] leading-relaxed text-[#555555] relative z-10">
-                Vos informations de paiement sont traitées de manière sécurisée. Nous ne stockons pas les informations de carte bancaire et n&apos;y avons pas accès.
+              <p className="relative z-10 text-[14px] leading-relaxed text-[#555555]">
+                Vos informations de paiement sont traitees de maniere securisee. Nous ne stockons pas les informations de carte bancaire et n&apos;y avons pas acces.
               </p>
             </div>
           </div>

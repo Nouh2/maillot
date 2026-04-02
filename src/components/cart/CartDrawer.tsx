@@ -1,24 +1,34 @@
 'use client'
+
+import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
+import { formatEuro } from '@/lib/cartPricing'
+import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { CartItem } from './CartItem'
-import { Button } from '@/components/ui/Button'
+import { CheckoutButton } from './CheckoutButton'
 
 export function CartDrawer() {
-  const { items, isOpen, closeCart, total } = useCartStore()
+  const { items, isOpen, closeCart, subtotal, shippingTotal, total } = useCartStore()
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40" onClick={closeCart} />
-      )}
+      {isOpen ? (
+        <div className="fixed inset-0 z-40 bg-black/40" onClick={closeCart} />
+      ) : null}
 
-      {/* Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col transition-all duration-300 ${isOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'}`}>
-        <div className="flex items-center justify-between p-6 border-b border-[var(--cream-3)]">
+      <div
+        className={`fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-all duration-300 ${
+          isOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-[var(--cream-3)] p-6">
           <h2 className="font-bebas text-2xl tracking-widest">Mon Panier</h2>
-          <button onClick={closeCart} aria-label="Fermer le panier" className="text-[var(--grey)] hover:text-[var(--black)]">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button
+            onClick={closeCart}
+            aria-label="Fermer le panier"
+            className="text-[var(--grey)] transition-colors hover:text-[var(--black)]"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -26,51 +36,51 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto px-6">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="flex h-full flex-col items-center justify-center text-center">
               <p className="font-bebas text-3xl text-[var(--cream-3)]">Panier vide</p>
-              <p className="text-[var(--grey)] text-sm mt-2">Ajoutez des maillots pour commencer</p>
+              <p className="mt-2 text-sm text-[var(--grey)]">Ajoutez des maillots pour commencer</p>
             </div>
           ) : (
             items.map((item) => <CartItem key={`${item.product_id}-${item.size}`} item={item} />)
           )}
         </div>
 
-        {items.length > 0 && (
-          <div className="p-6 border-t border-[var(--cream-3)] space-y-4">
-            <div className="flex justify-between font-condensed text-lg tracking-wide">
-              <span>Total</span>
-              <span className="font-bold">{total().toFixed(2)} €</span>
+        {items.length > 0 ? (
+          <div className="space-y-4 border-t border-[var(--cream-3)] p-6">
+            <div className="space-y-2 rounded-2xl bg-[var(--cream)] p-4">
+              <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
+                <span>Sous-total</span>
+                <span>{formatEuro(subtotal())}</span>
+              </div>
+              <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
+                <span>Livraison</span>
+                <span>{formatEuro(shippingTotal())}</span>
+              </div>
+              <div className="flex justify-between font-condensed text-lg tracking-wide text-[var(--black)]">
+                <span>Total</span>
+                <span className="font-bold">{formatEuro(total())}</span>
+              </div>
             </div>
-            <p className="text-xs text-[var(--grey)] text-center">Livraison offerte dès 60€</p>
+
+            <div className="rounded-2xl border border-[var(--terra)]/20 bg-[var(--terra-lt)] px-4 py-3 text-center">
+              <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Compte fidelite</p>
+              <p className="mt-1 text-sm text-[var(--black)]">
+                Cree ton compte et utilise le code <strong>{LOYALTY_CODE}</strong> sur ta premiere commande.
+              </p>
+            </div>
+
+            <Link
+              href="/panier"
+              onClick={closeCart}
+              className="block text-center font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)] underline underline-offset-4"
+            >
+              Voir le panier detaille
+            </Link>
+
             <CheckoutButton />
           </div>
-        )}
+        ) : null}
       </div>
     </>
-  )
-}
-
-function CheckoutButton() {
-  const { items, total } = useCartStore()
-
-  const handleCheckout = async () => {
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, total: total() }),
-      })
-      if (!res.ok) throw new Error(`Erreur ${res.status}`)
-      const { url } = await res.json()
-      if (url) window.location.href = url
-    } catch (err) {
-      console.error('Checkout échoué', err)
-    }
-  }
-
-  return (
-    <Button onClick={handleCheckout} size="lg" className="w-full">
-      Commander — {total().toFixed(2)} €
-    </Button>
   )
 }

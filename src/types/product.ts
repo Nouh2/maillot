@@ -17,6 +17,7 @@ export interface Product {
   is_active: boolean
   is_featured: boolean
   is_retro: boolean
+  is_concept?: boolean
   source_provider: string | null
   source_album_id: string | null
   source_album_url: string | null

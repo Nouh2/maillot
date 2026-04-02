@@ -1,37 +1,25 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
-import { resolveLeagueFilterParam } from '@/lib/catalog'
-import {
-  applyProductFilters,
-  parseProductAlphaFilter,
-  parseProductDateFilter,
-  parseProductTypeFilter,
-} from '@/lib/productFilters'
-import { getConceptProducts, getLeagues } from '@/lib/supabase/queries'
+import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { applyProductFilters, parseProductAlphaFilter } from '@/lib/productFilters'
+import { getConceptProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Maillots Concept',
-  description: 'Collection de maillots concept avec des designs speciaux et des editions creatives.',
+  description: 'Selection manuelle de maillots concept et editions creatives.',
 }
 
 interface ConceptPageProps {
-  searchParams: Promise<{ league?: string; type?: string; date?: string; alpha?: string }>
+  searchParams: Promise<{ alpha?: string }>
 }
 
 export default async function ConceptPage({ searchParams }: ConceptPageProps) {
   const params = await searchParams
-  const leagues = await getLeagues()
-  const resolvedLeague = resolveLeagueFilterParam(params.league, leagues)
   const products = await getConceptProducts()
   const filteredProducts = applyProductFilters(products, {
-    league: resolvedLeague,
-    type: parseProductTypeFilter(params.type),
-    date: parseProductDateFilter(params.date),
     alpha: parseProductAlphaFilter(params.alpha),
   })
-  const clubs = new Set(filteredProducts.map((product) => product.club)).size
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -46,26 +34,23 @@ export default async function ConceptPage({ searchParams }: ConceptPageProps) {
           />
         </div>
         <div className="relative z-10">
-          <p className="mb-3 font-condensed text-xs uppercase tracking-[6px] text-[var(--terra)]">
-            Collection creative
-          </p>
-          <h1 className="font-bebas text-6xl leading-none text-white md:text-8xl">
-            MAILLOTS CONCEPT
-          </h1>
+          <p className="mb-3 font-condensed text-xs uppercase tracking-[6px] text-[var(--terra)]">Selection creative</p>
+          <h1 className="font-bebas text-6xl leading-none text-white md:text-8xl">MAILLOTS CONCEPT</h1>
           <p className="mt-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey-lt)]">
-            {filteredProducts.length} maillots - {clubs} clubs
+            Selection manuelle - {filteredProducts.length} maillots
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Suspense fallback={null}>
-          <FilterSidebar leagues={leagues} />
+          <FilterSidebar showLeague={false} showType={false} showDate={false} />
         </Suspense>
 
         {filteredProducts.length === 0 ? (
           <div className="py-20 text-center">
-            <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot concept trouve</p>
+            <p className="font-bebas text-4xl text-[var(--cream-3)]">Selection concept en cours</p>
+            <p className="mt-3 text-sm text-[var(--grey)]">Les maillots concept sont desormais separes du retro et seront ajoutes manuellement.</p>
           </div>
         ) : (
           <ProductsGrid products={filteredProducts} />
