@@ -2,8 +2,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { CartButton } from '@/components/cart/CartButton'
 import { CONCEPT_HREF, getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { League } from '@/types/product'
 import {
   ArrowRight,
@@ -19,16 +21,16 @@ import {
 
 interface NavbarClientProps {
   leagues: League[]
-  userEmail: string | null
 }
 
-export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
+export function NavbarClient({ leagues }: NavbarClientProps) {
   const router = useRouter()
   const leagueNavigation = getLeagueNavigationOptions(leagues)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLeagues, setShowLeagues] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const closeMobileMenu = () => {
@@ -66,6 +68,29 @@ export function NavbarClient({ leagues, userEmail }: NavbarClientProps) {
       document.body.style.overflow = ''
     }
   }, [mobileOpen, searchOpen])
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient()
+    let cancelled = false
+
+    void (async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!cancelled) {
+        setUserEmail(data.user?.email ?? null)
+      }
+    })()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+      setUserEmail(session?.user?.email ?? null)
+    })
+
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
+  }, [])
 
   return (
     <>

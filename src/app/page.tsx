@@ -14,13 +14,14 @@ import { TrustScrollBar } from '@/components/home/TrustScrollBar'
 import { WhyUsSection } from '@/components/home/WhyUsSection'
 import { dedupeCatalogProducts, filterStandardCatalogProducts } from '@/lib/catalogPresentation'
 import { sortProductsByDefaultOrder } from '@/lib/productFilters'
-import { getLeagues, getProducts, getWorldCupProducts } from '@/lib/supabase/queries'
+import { getLeagues, getProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
   title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
   description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
 }
+export const revalidate = 300
 
 function dedupeProducts(...groups: Product[][]): Product[] {
   return dedupeCatalogProducts(groups.flat())
@@ -54,12 +55,16 @@ function pickNewestProducts(products: Product[], limit: number, distinctKey?: (p
 }
 
 export default async function HomePage() {
-  const leagues = (await getLeagues()).filter((league) => league.slug !== 'champions-league')
+  const [allLeagues, rawCatalogProducts] = await Promise.all([
+    getLeagues(),
+    getProducts(),
+  ])
+  const leagues = allLeagues.filter((league) => league.slug !== 'champions-league')
   const homeLeagues = leagues.slice(0, 4)
-
-  const rawCatalogProducts = await getProducts()
   const allCatalogProducts = dedupeCatalogProducts(filterStandardCatalogProducts(rawCatalogProducts))
-  const worldCupProducts = await getWorldCupProducts()
+  const worldCupProducts = dedupeCatalogProducts(
+    allCatalogProducts.filter((product) => product.league === 'Selections nationales' && ['2026', '2026-2027'].includes(product.season)),
+  )
   const recentProducts = sortProductsByDefaultOrder(allCatalogProducts)
   const preMatchProducts = allCatalogProducts.filter((product) => product.product_kind === 'pre_match')
 

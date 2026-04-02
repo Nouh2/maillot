@@ -1,12 +1,38 @@
+import { unstable_cache } from 'next/cache'
 import type { Club, League, Patch, Product } from '@/types/product'
 import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
 import { normalizeCatalogProduct, normalizeCatalogProducts } from '@/lib/catalogEntityRegistry'
-import { getSupabaseServerClient } from './server'
+import { getSupabasePublicClient } from './server'
 
 type ProductQueryPage = {
   data: Product[] | null
   error: unknown
 }
+
+type CatalogListRow = Pick<
+  Product,
+  | 'id'
+  | 'slug'
+  | 'name'
+  | 'club'
+  | 'league'
+  | 'country'
+  | 'product_kind'
+  | 'type'
+  | 'season'
+  | 'price'
+  | 'photos'
+  | 'available_patches'
+  | 'is_featured'
+  | 'is_retro'
+  | 'is_concept'
+  | 'source_title'
+  | 'source_category_key'
+  | 'created_at'
+>
+
+const CATALOG_REVALIDATE_SECONDS = 300
+const STATIC_REVALIDATE_SECONDS = 3600
 
 async function fetchAllProducts(
   queryFactory: (from: number, to: number) => PromiseLike<ProductQueryPage>,
@@ -29,6 +55,100 @@ async function fetchAllProducts(
   return all
 }
 
+function toCachedCatalogProduct(row: CatalogListRow): Product {
+  return {
+    ...row,
+    description: null,
+    sizes: [],
+    available_patches: Array.isArray(row.available_patches) ? row.available_patches : [],
+    photos: Array.isArray(row.photos) ? row.photos.slice(0, 2) : [],
+    stock: 0,
+    is_active: true,
+    source_provider: null,
+    source_album_id: null,
+    source_album_url: null,
+    last_synced_at: null,
+  }
+}
+
+const getCachedProducts = unstable_cache(
+  async (): Promise<Product[]> => {
+    const supabase = getSupabasePublicClient()
+    const rawProducts = await fetchAllProducts((from, to) =>
+      supabase
+        .from('products')
+        .select(
+          'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at',
+        )
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .range(from, to),
+    )
+
+    return normalizeCatalogProducts((rawProducts as CatalogListRow[]).map(toCachedCatalogProduct))
+  },
+  ['catalog-products'],
+  { revalidate: CATALOG_REVALIDATE_SECONDS },
+)
+
+const getCachedLeagues = unstable_cache(
+  async (): Promise<League[]> => {
+    const supabase = getSupabasePublicClient()
+    const { data } = await supabase.from('leagues').select('*').order('display_order')
+    return data ?? []
+  },
+  ['catalog-leagues'],
+  { revalidate: STATIC_REVALIDATE_SECONDS },
+)
+
+const getCachedProductBySlug = unstable_cache(
+  async (slug: string): Promise<Product | null> => {
+    const supabase = getSupabasePublicClient()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+
+    if (error) return null
+
+    return normalizeCatalogProduct(data)
+  },
+  ['catalog-product-by-slug'],
+  { revalidate: CATALOG_REVALIDATE_SECONDS },
+)
+
+const getCachedPatches = unstable_cache(
+  async (): Promise<Patch[]> => {
+    const supabase = getSupabasePublicClient()
+    const { data } = await supabase.from('patches').select('*')
+    return data ?? []
+  },
+  ['catalog-patches'],
+  { revalidate: STATIC_REVALIDATE_SECONDS },
+)
+
+const getCachedClubs = unstable_cache(
+  async (leagueSlug?: string): Promise<Club[]> => {
+    const supabase = getSupabasePublicClient()
+
+    if (leagueSlug) {
+      const { data: league } = await supabase.from('leagues').select('id').eq('slug', leagueSlug).single()
+      const leagueRow = league as { id: string } | null
+      if (!leagueRow) return []
+
+      const { data } = await supabase.from('clubs').select('*').eq('league_id', leagueRow.id).order('name')
+      return data ?? []
+    }
+
+    const { data } = await supabase.from('clubs').select('*').order('name')
+    return data ?? []
+  },
+  ['catalog-clubs'],
+  { revalidate: STATIC_REVALIDATE_SECONDS },
+)
+
 export async function getProducts(filters?: {
   league?: string
   club?: string
@@ -37,18 +157,7 @@ export async function getProducts(filters?: {
   featured?: boolean
   limit?: number
 }): Promise<Product[]> {
-  const supabase = await getSupabaseServerClient()
-  const rawProducts = await fetchAllProducts((from, to) => {
-    let query = supabase.from('products').select('*').eq('is_active', true)
-
-    if (filters?.type) query = query.eq('type', filters.type)
-    if (filters?.productKind) query = query.eq('product_kind', filters.productKind)
-    if (filters?.featured) query = query.eq('is_featured', true)
-
-    return query.order('created_at', { ascending: false }).range(from, to)
-  })
-
-  let products = normalizeCatalogProducts(rawProducts)
+  let products = await getCachedProducts()
 
   if (filters?.league) {
     products = products.filter((product) => product.league === filters.league)
@@ -56,6 +165,18 @@ export async function getProducts(filters?: {
 
   if (filters?.club) {
     products = products.filter((product) => product.club === filters.club)
+  }
+
+  if (filters?.type) {
+    products = products.filter((product) => product.type === filters.type)
+  }
+
+  if (filters?.productKind) {
+    products = products.filter((product) => product.product_kind === filters.productKind)
+  }
+
+  if (filters?.featured) {
+    products = products.filter((product) => product.is_featured)
   }
 
   if (filters?.limit) {
@@ -73,22 +194,16 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const supabase = await getSupabaseServerClient()
-  const { data, error } = await supabase.from('products').select('*').eq('slug', slug).eq('is_active', true).single()
-  if (error) return null
-  return normalizeCatalogProduct(data)
+  return getCachedProductBySlug(slug)
 }
 
 export async function getLeagues(): Promise<League[]> {
-  const supabase = await getSupabaseServerClient()
-  const { data } = await supabase.from('leagues').select('*').order('display_order')
-  return data ?? []
+  return getCachedLeagues()
 }
 
 export async function getLeagueBySlug(slug: string): Promise<League | null> {
-  const supabase = await getSupabaseServerClient()
-  const { data } = await supabase.from('leagues').select('*').eq('slug', slug).single()
-  return data ?? null
+  const leagues = await getCachedLeagues()
+  return leagues.find((league) => league.slug === slug) ?? null
 }
 
 export async function getWorldCupProducts(): Promise<Product[]> {
@@ -99,36 +214,19 @@ export async function getWorldCupProducts(): Promise<Product[]> {
 }
 
 export async function getRetroProducts(): Promise<Product[]> {
-  const supabase = await getSupabaseServerClient()
-  const rawProducts = await fetchAllProducts((from, to) =>
-    supabase.from('products').select('*').eq('is_active', true).eq('is_retro', true).order('created_at', { ascending: false }).range(from, to),
-  )
-
-  return dedupeCatalogProducts(normalizeCatalogProducts(rawProducts))
+  const products = await getCachedProducts()
+  return dedupeCatalogProducts(products.filter((product) => product.is_retro))
 }
 
 export async function getConceptProducts(): Promise<Product[]> {
-  const products = await getProducts()
+  const products = await getCachedProducts()
   return dedupeCatalogProducts(filterConceptProducts(products))
 }
 
 export async function getPatches(): Promise<Patch[]> {
-  const supabase = await getSupabaseServerClient()
-  const { data } = await supabase.from('patches').select('*')
-  return data ?? []
+  return getCachedPatches()
 }
 
 export async function getClubs(leagueSlug?: string): Promise<Club[]> {
-  const supabase = await getSupabaseServerClient()
-
-  if (leagueSlug) {
-    const { data: league } = await supabase.from('leagues').select('id').eq('slug', leagueSlug).single()
-    if (!league) return []
-
-    const { data } = await supabase.from('clubs').select('*').eq('league_id', league.id).order('name')
-    return data ?? []
-  }
-
-  const { data } = await supabase.from('clubs').select('*').order('name')
-  return data ?? []
+  return getCachedClubs(leagueSlug)
 }

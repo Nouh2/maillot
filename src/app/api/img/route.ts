@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ALLOWED_HOSTS = ['photo.yupoo.com', 'x.yupoo.com', 'y.yupoo.com']
+const IMAGE_CACHE_SECONDS = 60 * 60 * 24
+const IMAGE_STALE_SECONDS = 60 * 60 * 24 * 7
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get('url')
@@ -21,6 +23,9 @@ export async function GET(request: NextRequest) {
   }
 
   const res = await fetch(url, {
+    next: {
+      revalidate: IMAGE_CACHE_SECONDS,
+    },
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       Referer: 'https://www.yupoo.com/',
@@ -38,7 +43,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(buffer, {
     headers: {
       'Content-Type': contentType,
-      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+      'Cache-Control': `public, max-age=${IMAGE_CACHE_SECONDS}, s-maxage=${IMAGE_CACHE_SECONDS}, stale-while-revalidate=${IMAGE_STALE_SECONDS}`,
     },
   })
 }

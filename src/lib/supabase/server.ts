@@ -24,6 +24,25 @@ export async function getSupabaseServerClient() {
   )
 }
 
+let _publicClient: ReturnType<typeof createClient> | null = null
+
+export function getSupabasePublicClient() {
+  if (!_publicClient) {
+    _publicClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    )
+  }
+
+  return _publicClient
+}
+
 // Client service role pour les webhooks (contourne le RLS)
 let _serviceClient: ReturnType<typeof createClient> | null = null
 
