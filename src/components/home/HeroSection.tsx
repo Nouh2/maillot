@@ -69,7 +69,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                         alt={product.name}
                         fill
                         unoptimized
-                        fallbackMode="placeholder"
+                        fallbackMode="proxy"
                         sizes="(max-width: 1024px) 50vw, 20vw"
                         className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
                       />
