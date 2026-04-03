@@ -1,18 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
-import { proxyImage } from '@/lib/images'
 import type { Product } from '@/types/product'
 
 export function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false)
-  const photo = proxyImage(hovered && product.photos[1] ? product.photos[1] : product.photos[0])
+  const photo = hovered && product.photos[1] ? product.photos[1] : product.photos[0]
   const pricing = getProductPricing({ isRetro: product.is_retro })
 
   return (
@@ -24,7 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream)]">
           {photo ? (
-            <Image
+            <ExternalProductImage
               src={photo}
               alt={product.name}
               fill

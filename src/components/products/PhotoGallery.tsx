@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { proxyImage } from '@/lib/images'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 
 export function PhotoGallery({ photos, name }: { photos: string[]; name: string }) {
   const [active, setActive] = useState(0)
@@ -24,9 +23,9 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           className="absolute inset-0 z-10 cursor-pointer"
         />
 
-        <Image
+        <ExternalProductImage
           key={activePhoto}
-          src={proxyImage(activePhoto)}
+          src={activePhoto}
           alt={`${name} - Photo ${active + 1}`}
           fill
           unoptimized
@@ -74,8 +73,8 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               active === index ? 'scale-105 border-[var(--black)] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
             }`}
           >
-            <Image
-              src={proxyImage(photo)}
+            <ExternalProductImage
+              src={photo}
               alt={`${name} miniature ${index + 1}`}
               fill
               unoptimized

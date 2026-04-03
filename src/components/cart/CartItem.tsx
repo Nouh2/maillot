@@ -1,9 +1,8 @@
 'use client'
 
-import Image from 'next/image'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { useCartStore } from '@/store/cart'
 import { formatEuro } from '@/lib/cartPricing'
-import { proxyImage } from '@/lib/images'
 import { normalizeProductTextSeasons } from '@/lib/season'
 import type { CartItem as CartItemType } from '@/types/cart'
 
@@ -14,7 +13,7 @@ export function CartItem({ item }: { item: CartItemType }) {
   return (
     <div className="flex gap-4 border-b border-[var(--cream-3)] py-4">
       <div className="relative h-24 w-20 flex-shrink-0 bg-[var(--cream)]">
-        <Image src={proxyImage(item.photo)} alt={displayName} fill unoptimized sizes="80px" className="object-cover" />
+        <ExternalProductImage src={item.photo} alt={displayName} fill unoptimized sizes="80px" className="object-cover" />
       </div>
 
       <div className="min-w-0 flex-1">

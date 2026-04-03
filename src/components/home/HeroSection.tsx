@@ -1,8 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
-import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
 
@@ -65,8 +64,8 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                 >
                   <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
                     {product.photos[0] && (
-                      <Image
-                        src={proxyImage(product.photos[0])}
+                      <ExternalProductImage
+                        src={product.photos[0]}
                         alt={product.name}
                         fill
                         unoptimized

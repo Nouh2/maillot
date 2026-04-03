@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
-import { proxyImage } from '@/lib/images'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
 
@@ -60,7 +59,7 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
                 <div className="relative bg-[var(--cream-2)]">
                   <div className="relative" style={{ aspectRatio: '3/4' }}>
                     {product.photos[0] ? (
-                      <Image src={proxyImage(product.photos[0])} alt={product.name} fill unoptimized className="object-cover" sizes="(min-width: 768px) 33vw, 45vw" />
+                      <ExternalProductImage src={product.photos[0]} alt={product.name} fill unoptimized className="object-cover" sizes="(min-width: 768px) 33vw, 45vw" />
                     ) : null}
                     <div
                       className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md"

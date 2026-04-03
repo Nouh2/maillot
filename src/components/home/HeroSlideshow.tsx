@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination } from 'swiper/modules'
-import { proxyImage } from '@/lib/images'
+import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import type { Product } from '@/types/product'
 import 'swiper/css'
 import 'swiper/css/pagination'
@@ -62,21 +62,25 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
       >
         {SLIDE_META.map((slide, i) => {
           const product = heroProducts[i]
-          const imgSrc = slide.staticImage ?? (product?.photos[0] ? proxyImage(product.photos[0]) : null)
+          const imgSrc = slide.staticImage ?? (product?.photos[0] ?? null)
 
           return (
             <SwiperSlide key={i}>
               <div className="relative w-full h-full">
                 {/* Image du produit */}
                 {imgSrc ? (
-                  <Image
-                    src={imgSrc}
-                    alt={slide.bigText}
-                    fill
-                    unoptimized={!slide.staticImage}
-                    className="object-cover"
-                    priority={i === 0}
-                  />
+                  slide.staticImage ? (
+                    <Image src={imgSrc} alt={slide.bigText} fill className="object-cover" priority={i === 0} />
+                  ) : (
+                    <ExternalProductImage
+                      src={imgSrc}
+                      alt={slide.bigText}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      priority={i === 0}
+                    />
+                  )
                 ) : (
                   <div className="absolute inset-0 bg-[var(--black-2)]" />
                 )}
