@@ -17,7 +17,7 @@ export function hasImageKitConfigured(): boolean {
 }
 
 function buildImageKitPath(url: string): string {
-  return `${IMAGEKIT_URL_ENDPOINT}/tr:${IMAGEKIT_DEFAULT_TRANSFORM}/${url}`
+  return `${IMAGEKIT_URL_ENDPOINT}/${url}?tr=${encodeURIComponent(IMAGEKIT_DEFAULT_TRANSFORM)}`
 }
 
 export function getImageKitUrl(url: string): string {
