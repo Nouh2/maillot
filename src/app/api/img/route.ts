@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ALLOWED_HOSTS = ['photo.yupoo.com', 'x.yupoo.com', 'y.yupoo.com']
-const IMAGE_CACHE_SECONDS = 60 * 60 * 24
-const IMAGE_STALE_SECONDS = 60 * 60 * 24 * 7
+const IMAGE_CACHE_SECONDS = 60 * 60 * 24 * 30
+const IMAGE_STALE_SECONDS = 60 * 60 * 24 * 365
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get('url')
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(buffer, {
     headers: {
       'Content-Type': contentType,
-      'Cache-Control': `public, max-age=${IMAGE_CACHE_SECONDS}, s-maxage=${IMAGE_CACHE_SECONDS}, stale-while-revalidate=${IMAGE_STALE_SECONDS}`,
+      'Cache-Control': `public, max-age=${IMAGE_CACHE_SECONDS}, s-maxage=${IMAGE_CACHE_SECONDS}, stale-while-revalidate=${IMAGE_STALE_SECONDS}, immutable`,
     },
   })
 }

@@ -76,7 +76,7 @@ export function BestsellersTabs({
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Link href={collectionHref} className="relative row-span-2 block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2, minHeight: 200 }}>
               {activeTab === 'Tous' ? (
-                <Image src="/images/france-kit.png" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
+                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
               ) : featured.photos[0] ? (
                 <Image src={proxyImage(featured.photos[0])} alt={featured.name} fill unoptimized className="object-cover" sizes="45vw" />
               ) : null}
@@ -110,7 +110,7 @@ export function BestsellersTabs({
           <div className="mt-3 hidden md:grid md:grid-cols-4 lg:grid-cols-4 gap-4">
             <Link href={collectionHref} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
               {activeTab === 'Tous' ? (
-                <Image src="/images/france-kit.png" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
+                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
               ) : featured.photos[0] ? (
                 <Image src={proxyImage(featured.photos[0])} alt={featured.name} fill unoptimized className="object-cover" sizes="25vw" />
               ) : null}
