@@ -77,6 +77,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                       alt={slide.bigText}
                       fill
                       unoptimized
+                      fallbackMode="placeholder"
                       className="object-cover"
                       priority={i === 0}
                     />

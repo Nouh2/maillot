@@ -6,9 +6,19 @@ import { getDirectImageUrl, getProxyImageUrl, isYupooImage } from '@/lib/images'
 
 type ExternalProductImageProps = Omit<ImageProps, 'src'> & {
   src: string
+  fallbackMode?: 'proxy' | 'placeholder'
+  placeholderSrc?: string
 }
 
-export function ExternalProductImage({ src, alt, onError, referrerPolicy, ...props }: ExternalProductImageProps) {
+export function ExternalProductImage({
+  src,
+  alt,
+  onError,
+  referrerPolicy,
+  fallbackMode = 'placeholder',
+  placeholderSrc = '/images/product-placeholder.svg',
+  ...props
+}: ExternalProductImageProps) {
   const directSrc = getDirectImageUrl(src)
   const proxySrc = getProxyImageUrl(src)
   const [currentSrc, setCurrentSrc] = useState(directSrc)
@@ -20,8 +30,13 @@ export function ExternalProductImage({ src, alt, onError, referrerPolicy, ...pro
       alt={alt}
       referrerPolicy={currentSrc === directSrc && isYupooImage(directSrc) ? 'no-referrer' : referrerPolicy}
       onError={(event) => {
-        if (currentSrc !== proxySrc && proxySrc !== directSrc) {
+        if (fallbackMode === 'proxy' && currentSrc !== proxySrc && proxySrc !== directSrc) {
           setCurrentSrc(proxySrc)
+          return
+        }
+
+        if (fallbackMode === 'placeholder' && currentSrc !== placeholderSrc) {
+          setCurrentSrc(placeholderSrc)
           return
         }
 

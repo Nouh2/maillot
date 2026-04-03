@@ -29,6 +29,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           alt={`${name} - Photo ${active + 1}`}
           fill
           unoptimized
+          fallbackMode="proxy"
           className="object-cover transition-transform duration-500 hover:scale-105"
           priority={active === 0}
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -78,6 +79,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               alt={`${name} miniature ${index + 1}`}
               fill
               unoptimized
+              fallbackMode="proxy"
               sizes="80px"
               className="object-cover"
             />
