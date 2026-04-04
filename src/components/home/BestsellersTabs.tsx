@@ -78,7 +78,7 @@ export function BestsellersTabs({
               {activeTab === 'Tous' ? (
                 <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
               ) : featured.photos[0] ? (
-                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" className="object-cover" sizes="45vw" />
+                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="45vw" />
               ) : null}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-3">
@@ -92,7 +92,7 @@ export function BestsellersTabs({
               return (
                 <Link key={product.id} href={`/shop/${product.slug}`} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
                   <div className="relative" style={{ aspectRatio: '3/4' }}>
-                    {product.photos[0] ? <ExternalProductImage src={product.photos[0]} alt={product.name} fill unoptimized fallbackMode="proxy" className="object-cover" sizes="45vw" /> : null}
+                    {product.photos[0] ? <ExternalProductImage src={product.photos[0]} alt={product.name} fill unoptimized fallbackMode="proxy" bunnyTransform="card" className="object-cover" sizes="45vw" /> : null}
                     <div className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md" style={{ width: 28, height: 28, borderRadius: '50%' }}>
                       <ShoppingCart className="h-3.5 w-3.5" />
                     </div>
@@ -112,7 +112,7 @@ export function BestsellersTabs({
               {activeTab === 'Tous' ? (
                 <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
               ) : featured.photos[0] ? (
-                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" className="object-cover" sizes="25vw" />
+                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="25vw" />
               ) : null}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-4">
@@ -127,7 +127,7 @@ export function BestsellersTabs({
               return (
                 <Link key={product.id} href={`/shop/${product.slug}`} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
                   <div className="relative" style={{ aspectRatio: '3/4' }}>
-                    {product.photos[0] ? <ExternalProductImage src={product.photos[0]} alt={product.name} fill unoptimized fallbackMode="proxy" className="object-cover" sizes="25vw" /> : null}
+                    {product.photos[0] ? <ExternalProductImage src={product.photos[0]} alt={product.name} fill unoptimized fallbackMode="proxy" bunnyTransform="card" className="object-cover" sizes="25vw" /> : null}
                     <div className="absolute bottom-2 right-2 flex items-center justify-center bg-[var(--black)] text-white shadow-md" style={{ width: 32, height: 32, borderRadius: '50%' }}>
                       <ShoppingCart className="h-4 w-4" />
                     </div>

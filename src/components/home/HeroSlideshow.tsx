@@ -78,6 +78,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                       fill
                       unoptimized
                       fallbackMode="proxy"
+                      bunnyTransform="hero"
                       className="object-cover"
                       priority={i === 0}
                     />

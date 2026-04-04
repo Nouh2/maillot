@@ -30,6 +30,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           fill
           unoptimized
           fallbackMode="proxy"
+          bunnyTransform="gallery"
           className="object-cover transition-transform duration-500 hover:scale-105"
           priority={active === 0}
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -80,6 +81,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               fill
               unoptimized
               fallbackMode="proxy"
+              bunnyTransform="thumb"
               sizes="80px"
               className="object-cover"
             />

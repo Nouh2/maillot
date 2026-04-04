@@ -13,7 +13,7 @@ export function CartItem({ item }: { item: CartItemType }) {
   return (
     <div className="flex gap-4 border-b border-[var(--cream-3)] py-4">
       <div className="relative h-24 w-20 flex-shrink-0 bg-[var(--cream)]">
-        <ExternalProductImage src={item.photo} alt={displayName} fill unoptimized fallbackMode="proxy" sizes="80px" className="object-cover" />
+        <ExternalProductImage src={item.photo} alt={displayName} fill unoptimized fallbackMode="proxy" bunnyTransform="cart" sizes="80px" className="object-cover" />
       </div>
 
       <div className="min-w-0 flex-1">
