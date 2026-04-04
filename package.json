@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "catalog:clean": "node scripts/catalog/clean_catalog.mjs",
-    "catalog:normalize": "node scripts/catalog/normalize_catalog.mjs"
+    "catalog:normalize": "node scripts/catalog/normalize_catalog.mjs",
+    "images:migrate:bunny": "node scripts/catalog/migrate_images_to_bunny.mjs",
+    "images:status:bunny": "node scripts/catalog/bunny_migration_status.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.11.0",

@@ -2,10 +2,18 @@
 import type { NextConfig } from 'next'
 
 const imageKitEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT?.trim()
+const bunnyCdnEndpoint = process.env.NEXT_PUBLIC_BUNNY_CDN_BASE_URL?.trim() ?? 'https://maillotaddict.b-cdn.net'
 const imageKitHostname = (() => {
   if (!imageKitEndpoint) return null
   try {
     return new URL(imageKitEndpoint).hostname
+  } catch {
+    return null
+  }
+})()
+const bunnyCdnHostname = (() => {
+  try {
+    return new URL(bunnyCdnEndpoint).hostname
   } catch {
     return null
   }
@@ -32,6 +40,14 @@ const nextConfig: NextConfig = {
             {
               protocol: 'https' as const,
               hostname: imageKitHostname,
+            },
+          ]
+        : []),
+      ...(bunnyCdnHostname
+        ? [
+            {
+              protocol: 'https' as const,
+              hostname: bunnyCdnHostname,
             },
           ]
         : []),
