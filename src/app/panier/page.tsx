@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
 import { CartItem } from '@/components/cart/CartItem'
 import { formatEuro } from '@/lib/cartPricing'
@@ -71,6 +72,10 @@ export default function CartPage() {
               <p className="mt-2">
                 Cree ton compte et profite de <strong>-10 %</strong> sur ta premiere commande avec le code <strong>{LOYALTY_CODE}</strong>.
               </p>
+            </div>
+
+            <div className="mt-4">
+              <CheckoutContactFields />
             </div>
 
             <CheckoutButton className="mt-6" />

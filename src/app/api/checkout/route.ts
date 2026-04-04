@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateCartItemUnitPrice, calculateShippingAmount, getProductPricing } from '@/lib/cartPricing'
+import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
+import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
 import { getStripe } from '@/lib/stripe'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
 import type { CartItem } from '@/types/cart'
@@ -56,16 +58,26 @@ function normalizeCartItems(items: CartItem[], retroMap: Record<string, boolean>
 
 export async function POST(request: NextRequest) {
   let items: CartItem[]
+  let email = ''
+  let marketingOptIn = false
+  let attribution: AttributionPayload = {}
 
   try {
     const body = await request.json()
     items = body.items
+    email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+    marketingOptIn = body.marketingOptIn === true
+    attribution = normalizeAttributionPayload(body.attribution)
   } catch {
     return NextResponse.json({ error: 'Body invalide' }, { status: 400 })
   }
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: 'Panier vide' }, { status: 400 })
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
   }
 
   const productIds = [...new Set(items.map((item) => item.product_id))]
@@ -92,15 +104,31 @@ export async function POST(request: NextRequest) {
   const orderTotal = itemsSubtotal + shippingAmount
   const stripe = getStripe()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin
+  const orderNumber = generateOrderNumber()
+  const publicTrackingToken = generatePublicTrackingToken()
+  const sourceChannel = deriveSourceChannel({
+    utmSource: attribution.utm_source ?? null,
+    sourceChannel: attribution.source_channel ?? null,
+  })
+  const now = new Date().toISOString()
 
   const { data: pendingOrder, error: insertError } = await supabase
     .from('orders')
     .insert({
+      order_number: orderNumber,
+      public_tracking_token: publicTrackingToken,
       status: 'pending',
+      customer_email: email,
       items: normalizedItems,
       total_amount: orderTotal,
+      marketing_opt_in: marketingOptIn,
+      utm_source: attribution.utm_source ?? null,
+      utm_medium: attribution.utm_medium ?? null,
+      utm_campaign: attribution.utm_campaign ?? null,
+      utm_content: attribution.utm_content ?? null,
+      source_channel: sourceChannel,
     })
-    .select('id')
+    .select('id, order_number, public_tracking_token')
     .single()
 
   if (insertError || !pendingOrder) {
@@ -109,12 +137,32 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    await supabase
+      .from('checkout_leads')
+      .upsert({
+        email,
+        marketing_opt_in: marketingOptIn,
+        source_channel: sourceChannel,
+        utm_source: attribution.utm_source ?? null,
+        utm_medium: attribution.utm_medium ?? null,
+        utm_campaign: attribution.utm_campaign ?? null,
+        utm_content: attribution.utm_content ?? null,
+        cart_snapshot: normalizedItems,
+        updated_at: now,
+        last_checkout_started_at: now,
+      }, { onConflict: 'email' })
+
+    if (marketingOptIn) {
+      await syncLeadToBrevo({ email, marketingOptIn })
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       allow_promotion_codes: true,
       locale: 'fr',
       client_reference_id: pendingOrder.id,
+      customer_email: email,
       line_items: [
         ...normalizedItems.map((item) => ({
           price_data: {
@@ -165,8 +213,12 @@ export async function POST(request: NextRequest) {
       cancel_url: `${baseUrl}/panier`,
       metadata: {
         order_id: pendingOrder.id,
+        order_number: pendingOrder.order_number,
+        public_tracking_token: pendingOrder.public_tracking_token,
         item_count: String(itemCount),
         shipping_amount: String(shippingAmount),
+        marketing_opt_in: marketingOptIn ? 'true' : 'false',
+        source_channel: sourceChannel,
       },
     })
 

@@ -39,8 +39,8 @@ export function HeroSection({ featured }: { featured: Product[] }) {
           <div className="mt-12 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
             {[
               ['Catalogue', 'Selection premium'],
-              ['1000+', 'Clients satisfaits'],
-              ['48h', 'Livraison rapide'],
+              ['Suivi', 'Lien unique'],
+              ['Paiement', 'Carte via Stripe'],
             ].map(([value, label]) => (
               <div key={label} className="group cursor-default">
                 <p className="mb-1 font-bebas text-4xl text-[var(--black)] transition-colors group-hover:text-[var(--terra)] lg:text-5xl">{value}</p>
@@ -63,7 +63,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                   className="group relative flex h-full flex-col border border-[var(--black)]/5 bg-white transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
                 >
                   <div className="relative aspect-[4/5] shrink-0 overflow-hidden bg-[var(--cream-2)]">
-                    {product.photos[0] && (
+                    {product.photos[0] ? (
                       <ExternalProductImage
                         src={product.photos[0]}
                         alt={product.name}
@@ -74,7 +74,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                         sizes="(max-width: 1024px) 50vw, 20vw"
                         className="object-cover mix-blend-multiply transition-transform duration-700 ease-in-out group-hover:scale-110"
                       />
-                    )}
+                    ) : null}
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <span className="border border-white/30 bg-black/20 px-2 py-1 font-condensed text-xs uppercase tracking-wider text-white backdrop-blur-sm">

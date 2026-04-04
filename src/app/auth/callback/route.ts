@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
+import { linkOrdersToUserAccount } from '@/lib/orders'
 
 function getSafeRedirectPath(candidate: string | null) {
   if (!candidate || !candidate.startsWith('/')) {
@@ -12,7 +13,8 @@ function getSafeRedirectPath(candidate: string | null) {
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code')
   const nextPath = getSafeRedirectPath(request.nextUrl.searchParams.get('next'))
-  const response = NextResponse.redirect(new URL(nextPath, request.url), { status: 303 })
+  const redirectUrl = new URL(nextPath, request.url)
+  const response = NextResponse.redirect(redirectUrl, { status: 303 })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest) {
           })
         },
       },
-    }
+    },
   )
 
   if (!code) {
@@ -39,6 +41,16 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     return NextResponse.redirect(new URL('/compte?error=auth', request.url), { status: 303 })
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user?.email) {
+    await linkOrdersToUserAccount(user.id, user.email)
+    redirectUrl.searchParams.set('auth', 'success')
+    response.headers.set('Location', redirectUrl.toString())
   }
 
   return response

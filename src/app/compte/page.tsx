@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { TrackEventOnMount } from '@/components/analytics/TrackEventOnMount'
 import { AccountAuthForm } from '@/components/account/AccountAuthForm'
-import { getSupabaseServerClient, getSupabaseServiceClient } from '@/lib/supabase/server'
+import { getOrdersForAccount } from '@/lib/orders'
+import { getSupabaseServerClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = { title: 'Mon Compte' }
 
@@ -10,45 +12,45 @@ interface OrderItem {
   size: string
   qty: number
   price: number
-  patch_name?: string
+  patch_names?: string[]
 }
 
 interface AccountOrder {
   id: string
+  order_number: string
+  public_tracking_token: string
   status: string
   total_amount: number | null
   created_at: string
   items: OrderItem[] | null
+  tracking_number?: string | null
+  tracking_url?: string | null
 }
 
 interface AccountPageProps {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; auth?: string }>
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending:   { label: 'En attente',  color: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
-  paid:      { label: 'Payée',       color: 'text-blue-700 bg-blue-50 border-blue-200' },
-  shipped:   { label: 'Expédiée',    color: 'text-purple-700 bg-purple-50 border-purple-200' },
-  delivered: { label: 'Livrée',      color: 'text-green-700 bg-green-50 border-green-200' },
-  cancelled: { label: 'Annulée',     color: 'text-red-700 bg-red-50 border-red-200' },
+  pending: { label: 'En attente', color: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
+  paid: { label: 'Payee', color: 'text-blue-700 bg-blue-50 border-blue-200' },
+  shipped: { label: 'Expediee', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+  delivered: { label: 'Livree', color: 'text-green-700 bg-green-50 border-green-200' },
+  cancelled: { label: 'Annulee', color: 'text-red-700 bg-red-50 border-red-200' },
 }
 
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const params = await searchParams
   const supabase = await getSupabaseServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   const authError = params.error === 'auth'
+  const authSuccess = params.auth === 'success'
 
-  // Récupérer les commandes si connecté
   let orders: AccountOrder[] = []
   if (user?.email) {
-    const service = getSupabaseServiceClient()
-    const { data } = await service
-      .from('orders')
-      .select('id, status, total_amount, created_at, items')
-      .eq('customer_email', user.email)
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const { data } = await getOrdersForAccount(user.id, user.email)
     orders = (data as AccountOrder[] | null) ?? []
   }
 
@@ -58,27 +60,32 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         <p className="mb-2 font-condensed text-xs tracking-[4px] uppercase text-[var(--terra)]">Espace client</p>
         <h1 className="font-bebas text-6xl text-white md:text-7xl">MON COMPTE</h1>
         <p className="mt-2 text-[var(--grey-lt)]">
-          {user ? `Connecté en tant que ${user.email}` : 'Connexion sécurisée par Supabase'}
+          {user ? `Connecte en tant que ${user.email}` : 'Connexion securisee par Supabase'}
         </p>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 space-y-6">
-
-        {/* Bloc auth */}
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-10 sm:px-6">
+        {authSuccess ? <TrackEventOnMount event="account_authenticated" /> : null}
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
           <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
             <p className="font-condensed text-xs tracking-[0.28em] uppercase text-[var(--grey)]">
               {user ? 'Etat de session' : 'Connexion'}
             </p>
             <h2 className="mt-3 font-bebas text-5xl leading-none text-[var(--black)]">
-              {user ? 'Mon espace' : 'Accéder à mon compte'}
+              {user ? 'Mon espace' : 'Acceder a mon compte'}
             </h2>
 
-            {authError && (
+            {authError ? (
               <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                Le lien de connexion n&apos;a pas pu être validé. Réessaie avec un nouveau lien.
+                Le lien de connexion n&apos;a pas pu etre valide. Reessaye avec un nouveau lien.
               </p>
-            )}
+            ) : null}
+
+            {authSuccess ? (
+              <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                Connexion reussie. Tes commandes ont ete rattachees a ton compte.
+              </p>
+            ) : null}
 
             {user ? (
               <div className="mt-6 space-y-4">
@@ -89,16 +96,16 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/suivi"
-                    className="inline-flex items-center justify-center rounded-full bg-[var(--black)] px-5 py-3 font-condensed text-sm tracking-[0.22em] uppercase text-white hover:bg-[var(--terra)] transition-colors"
+                    className="inline-flex items-center justify-center rounded-full bg-[var(--black)] px-5 py-3 font-condensed text-sm tracking-[0.22em] uppercase text-white transition-colors hover:bg-[var(--terra)]"
                   >
                     Suivi de commande
                   </Link>
                   <form action="/auth/signout" method="post">
                     <button
                       type="submit"
-                      className="inline-flex w-full items-center justify-center rounded-full border border-[var(--cream-3)] px-5 py-3 font-condensed text-sm tracking-[0.22em] uppercase text-[var(--black)] hover:border-[var(--black)] transition-colors sm:w-auto"
+                      className="inline-flex w-full items-center justify-center rounded-full border border-[var(--cream-3)] px-5 py-3 font-condensed text-sm tracking-[0.22em] uppercase text-[var(--black)] transition-colors hover:border-[var(--black)] sm:w-auto"
                     >
-                      Se déconnecter
+                      Se deconnecter
                     </button>
                   </form>
                 </div>
@@ -111,65 +118,96 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           </section>
 
           <aside className="rounded-[2rem] border border-[var(--cream-3)] bg-[var(--terra-lt)] p-6 md:p-8">
-            <p className="font-condensed text-xs tracking-[0.28em] uppercase text-[var(--terra)]">Comment ça marche</p>
+            <p className="font-condensed text-xs tracking-[0.28em] uppercase text-[var(--terra)]">Comment ca marche</p>
             <h2 className="mt-3 font-bebas text-5xl leading-none text-[var(--black)]">Lien magique</h2>
             <div className="mt-5 space-y-4 text-sm text-[var(--black-2)]">
-              <p>Entre ton <strong>email</strong>, reçois un lien de connexion instantané — aucun mot de passe à retenir.</p>
-              <p>Une fois connecté, retrouve l&apos;historique de toutes tes commandes directement ici.</p>
-              <p>Tu peux aussi suivre une commande sans compte via <Link href="/suivi" className="text-[var(--terra)] underline underline-offset-4">Suivi commande</Link>.</p>
+              <p>Entre ton email, recois un lien de connexion instantane sans mot de passe.</p>
+              <p>Une fois connecte, retrouve tout l&apos;historique de tes commandes et les liens de suivi.</p>
+              <p>Si tu n&apos;as pas encore de compte, tes commandes sont rattachees automatiquement au premier login avec le meme email.</p>
             </div>
           </aside>
         </div>
 
-        {/* Historique des commandes */}
-        {user && (
+        {user ? (
           <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
-            <h2 className="font-bebas text-4xl text-[var(--black)] mb-6">Mes commandes</h2>
+            <h2 className="mb-6 font-bebas text-4xl text-[var(--black)]">Mes commandes</h2>
 
             {orders.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="py-12 text-center">
                 <p className="font-condensed text-sm uppercase tracking-widest text-[var(--grey)]">Aucune commande pour le moment</p>
-                <Link href="/shop" className="mt-4 inline-block rounded-full bg-[var(--terra)] px-6 py-3 font-condensed text-sm tracking-widest uppercase text-white hover:bg-[var(--black)] transition-colors">
-                  Découvrir les maillots
+                <Link
+                  href="/shop"
+                  className="mt-4 inline-block rounded-full bg-[var(--terra)] px-6 py-3 font-condensed text-sm tracking-widest uppercase text-white transition-colors hover:bg-[var(--black)]"
+                >
+                  Decouvrir les maillots
                 </Link>
               </div>
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => {
-                  const s = STATUS_LABELS[order.status] ?? { label: order.status, color: 'text-gray-600 bg-gray-50 border-gray-200' }
+                  const status = STATUS_LABELS[order.status] ?? {
+                    label: order.status,
+                    color: 'text-gray-600 bg-gray-50 border-gray-200',
+                  }
+
                   return (
-                    <div key={order.id} className="border border-[var(--cream-3)] p-4 rounded-2xl">
-                      <div className="flex items-start justify-between">
+                    <article key={order.id} className="rounded-2xl border border-[var(--cream-3)] p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <p className="font-mono text-xs text-[var(--grey)]">#{order.id.slice(0, 8).toUpperCase()}</p>
-                          <p className="text-xs text-[var(--grey)] mt-0.5">
-                            {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          <p className="font-mono text-xs text-[var(--grey)]">{order.order_number}</p>
+                          <p className="mt-0.5 text-xs text-[var(--grey)]">
+                            {new Date(order.created_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
                           </p>
                           <p className="mt-2 text-sm text-[var(--black)]">
                             {order.items?.length ?? 0} article{(order.items?.length ?? 0) > 1 ? 's' : ''}
                           </p>
                         </div>
+
                         <div className="text-right">
-                          <span className={`inline-block border text-xs font-condensed px-3 py-1 tracking-widest uppercase rounded-full ${s.color}`}>
-                            {s.label}
+                          <span className={`inline-block rounded-full border px-3 py-1 text-xs font-condensed uppercase tracking-widest ${status.color}`}>
+                            {status.label}
                           </span>
-                          <p className="font-bebas text-2xl text-[var(--terra)] mt-1">{order.total_amount?.toFixed(2)} €</p>
+                          <p className="mt-1 font-bebas text-2xl text-[var(--terra)]">{order.total_amount?.toFixed(2)} EUR</p>
                         </div>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-[var(--cream-3)] space-y-1">
-                        {order.items?.map((item, i: number) => (
-                          <p key={i} className="text-xs text-[var(--grey)]">
-                            {item.name} — T.{item.size}{item.patch_name ? ` + ${item.patch_name}` : ''}{item.qty > 1 ? ` ×${item.qty}` : ''}
+
+                      <div className="mt-3 space-y-1 border-t border-[var(--cream-3)] pt-3">
+                        {order.items?.map((item, index) => (
+                          <p key={index} className="text-xs text-[var(--grey)]">
+                            {item.name} - T.{item.size}
+                            {item.patch_names?.length ? ` + ${item.patch_names.join(', ')}` : ''}
+                            {item.qty > 1 ? ` x${item.qty}` : ''}
                           </p>
                         ))}
                       </div>
-                    </div>
+
+                      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                        <Link
+                          href={`/suivi/${order.public_tracking_token}`}
+                          className="inline-flex items-center justify-center rounded-full bg-[var(--black)] px-4 py-2 text-xs font-condensed uppercase tracking-[0.16em] text-white transition-colors hover:bg-[var(--terra)]"
+                        >
+                          Voir le suivi
+                        </Link>
+                        {order.tracking_url ? (
+                          <Link
+                            href={order.tracking_url}
+                            className="inline-flex items-center justify-center rounded-full border border-[var(--cream-3)] px-4 py-2 text-xs font-condensed uppercase tracking-[0.16em] text-[var(--black)] transition-colors hover:border-[var(--black)]"
+                          >
+                            Lien transporteur
+                          </Link>
+                        ) : null}
+                      </div>
+                    </article>
                   )
                 })}
               </div>
             )}
           </section>
-        )}
+        ) : null}
       </div>
     </div>
   )

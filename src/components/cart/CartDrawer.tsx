@@ -6,6 +6,7 @@ import { formatEuro } from '@/lib/cartPricing'
 import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { CartItem } from './CartItem'
 import { CheckoutButton } from './CheckoutButton'
+import { CheckoutContactFields } from './CheckoutContactFields'
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, subtotal, shippingTotal, total } = useCartStore()
@@ -76,6 +77,8 @@ export function CartDrawer() {
             >
               Voir le panier detaille
             </Link>
+
+            <CheckoutContactFields compact />
 
             <CheckoutButton />
           </div>

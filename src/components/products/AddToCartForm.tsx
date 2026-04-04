@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, Minus, Plus, ShieldCheck } from 'lucide-react'
-import { useCartStore } from '@/store/cart'
 import { FLOCAGE_PRICE, calculateCartItemUnitPrice, formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { normalizeProductTextSeasons } from '@/lib/season'
-import { SizeSelector } from './SizeSelector'
+import { trackEvent } from '@/lib/tracking'
+import { useCartStore } from '@/store/cart'
+import type { Patch, Product } from '@/types/product'
 import { PatchSelector } from './PatchSelector'
-import type { Product, Patch } from '@/types/product'
+import { SizeSelector } from './SizeSelector'
 
-const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard', 'PayPal', 'Apple Pay']
+const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard']
 
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
@@ -35,6 +36,15 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   })
   const totalPrice = unitPrice * qty
 
+  useEffect(() => {
+    trackEvent('product_view', {
+      product_id: product.id,
+      product_name: normalizeProductTextSeasons(product.name),
+      price: pricing.currentPrice,
+      league: product.league,
+    })
+  }, [pricing.currentPrice, product.id, product.league, product.name])
+
   const handleAdd = () => {
     if (!size) {
       setError('Veuillez selectionner une taille')
@@ -44,11 +54,12 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     setError('')
 
     const selectedPatchObjects = patches.filter((patch) => selectedPatches.includes(patch.code))
+    const normalizedName = normalizeProductTextSeasons(product.name)
 
     addItem({
       product_id: product.id,
       slug: product.slug,
-      name: normalizeProductTextSeasons(product.name),
+      name: normalizedName,
       club: product.club,
       size,
       patches: selectedPatches,
@@ -58,6 +69,16 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       price: unitPrice,
       photo: product.photos[0] ?? '',
       qty,
+    })
+
+    trackEvent('add_to_cart', {
+      product_id: product.id,
+      product_name: normalizedName,
+      quantity: qty,
+      size,
+      patch_count: selectedPatches.length,
+      has_flocage: hasFlocage,
+      value: totalPrice,
     })
   }
 
@@ -117,9 +138,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       </div>
 
       <div className="border-t border-[var(--cream-3)] pt-4">
-        {error ? (
-          <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p>
-        ) : null}
+        {error ? <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p> : null}
 
         <div className="flex flex-col gap-6">
           <div className="flex items-center">
@@ -165,7 +184,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
             </div>
 
             <div className="group relative overflow-hidden rounded-2xl border border-blue-50 bg-[#F0F4FF] p-6">
-              <div className="absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full bg-blue-100/30 transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-blue-100/30 transition-transform duration-700 group-hover:scale-110" />
 
               <h3 className="relative mb-4 inline-block text-[18px] font-bold italic text-[var(--black)]">
                 Paiement & Securite

@@ -1,16 +1,16 @@
-import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { Star } from 'lucide-react'
 import Link from 'next/link'
-import { getProductBySlug, getPatches } from '@/lib/supabase/queries'
-import { formatEuro, getProductPricing } from '@/lib/cartPricing'
-import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
-import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
+import { ShieldCheck, Ticket } from 'lucide-react'
+import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
 import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { formatEuro, getProductPricing } from '@/lib/cartPricing'
+import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
+import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
+import { getPatches, getProductBySlug } from '@/lib/supabase/queries'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -71,24 +71,22 @@ export default async function ProductPage({ params }: Props) {
 
             <PhotoGallery photos={product.photos} name={normalizeProductTextSeasons(product.name)} />
 
-            <div className="mt-6 flex items-center gap-3">
-              <div className="flex gap-1">
-                {[...Array(5)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex h-5.5 w-5.5 items-center justify-center overflow-hidden rounded-sm"
-                    style={{
-                      background:
-                        index < 4 ? '#00b67a' : 'linear-gradient(90deg, #00b67a 50%, #dcdce0 50%)',
-                    }}
-                  >
-                    <Star className="h-3.5 w-3.5 fill-white text-white" />
-                  </div>
-                ))}
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[var(--cream-3)] bg-white p-4">
+                <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Paiement</p>
+                <div className="mt-3 flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
+                  <p className="text-sm leading-relaxed text-[var(--black)]">Paiement carte bancaire via Stripe, sans stockage de donnees CB sur le site.</p>
+                </div>
               </div>
-              <p className="whitespace-nowrap font-condensed text-[13px] font-bold text-[var(--black)]">
-                Note 4.5/5 sur plus de 1200 clients
-              </p>
+
+              <div className="rounded-2xl border border-[var(--cream-3)] bg-white p-4">
+                <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Suivi</p>
+                <div className="mt-3 flex items-start gap-3">
+                  <Ticket className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
+                  <p className="text-sm leading-relaxed text-[var(--black)]">Confirmation par email puis lien de suivi unique des que l expedition est disponible.</p>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { CollectionHeader } from '@/components/products/CollectionHeader'
 import { getLeagueDisplayName, resolveLeagueFilterParam } from '@/lib/catalog'
 import { dedupeCatalogProducts, filterStandardCatalogProducts, getClubFilterOptions, searchCatalogProducts } from '@/lib/catalogPresentation'
 import { applyProductFilters, parseProductAlphaFilter, parseProductDateFilter, parseProductTypeFilter } from '@/lib/productFilters'
@@ -43,11 +44,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <div className="bg-[var(--black-2)] px-4 py-12 text-center">
-        <p className="mb-2 font-condensed text-xs uppercase tracking-[4px] text-[var(--terra)]">Notre catalogue</p>
-        <h1 className="mx-auto max-w-4xl break-words font-bebas text-5xl text-white md:text-7xl">{title}</h1>
-        <p className="mt-2 text-[var(--grey-lt)]">{filteredProducts.length} maillots disponibles</p>
-      </div>
+      <CollectionHeader
+        title={title}
+        subtitle={`${filteredProducts.length} maillots`}
+        color="#c1440e"
+        breadcrumb={[{ label: 'Boutique' }]}
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Suspense fallback={null}>

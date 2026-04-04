@@ -1,12 +1,20 @@
-// src/components/providers/Providers.tsx
 'use client'
-import { useEffect } from 'react'
+
+import { Suspense, useEffect } from 'react'
+import { AnalyticsManager } from '@/components/providers/AnalyticsManager'
 import { useCartStore } from '@/store/cart'
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Hydrate Zustand après le montage côté client pour éviter les mismatches SSR
   useEffect(() => {
     useCartStore.persist.rehydrate()
   }, [])
-  return <>{children}</>
+
+  return (
+    <>
+      {children}
+      <Suspense fallback={null}>
+        <AnalyticsManager />
+      </Suspense>
+    </>
+  )
 }

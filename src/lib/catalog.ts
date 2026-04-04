@@ -70,3 +70,8 @@ export function getLeagueDisplayName(leagueParam: string | undefined, leagues: L
   if (!leagueParam) return undefined
   return getLeagueBySlug(leagueParam, leagues)?.name
 }
+
+export function getLeagueColor(slug: string): string {
+  // Garder la couleur signature du site (Terra) pour toutes les collections
+  return '#c1440e'
+}

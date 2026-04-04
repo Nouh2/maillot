@@ -9,17 +9,17 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Comment fonctionne le systeme de patchs ?',
-    a: "Les patchs (LDC, Coupe de France, FA Cup...) sont disponibles selon l'eligibilite du club. Vous pouvez les ajouter lors de l'achat.",
+    a: 'Les patchs (LDC, Coupe de France, FA Cup...) sont disponibles selon l eligibilite du club. Vous pouvez les ajouter lors de l achat.',
   },
   {
     q: 'Puis-je retourner mon maillot ?',
-    a: 'Oui, les retours sont acceptes sous 14 jours suivant la reception, en etat neuf avec les etiquettes.',
+    a: 'Oui, les retours sont acceptes sous 14 jours suivant la reception, en etat neuf avec les etiquettes, hors articles personnalises sauf defaut produit ou erreur du vendeur.',
   },
   {
     q: 'Comment suivre ma commande ?',
-    a: "Vous recevrez un email avec le numero de suivi des l'expedition de votre commande.",
+    a: 'Vous recevez un email de confirmation puis un lien de suivi unique. Vous pouvez aussi retrouver vos commandes dans votre compte avec le meme email.',
   },
-]
+] as const
 
 export const metadata = { title: 'FAQ' }
 

@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { FilterSidebar } from '@/components/products/FilterSidebar'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
+import { CollectionHeader } from '@/components/products/CollectionHeader'
 import { applyProductFilters, parseProductAlphaFilter } from '@/lib/productFilters'
 import { getConceptProducts } from '@/lib/supabase/queries'
 
@@ -23,24 +24,12 @@ export default async function ConceptPage({ searchParams }: ConceptPageProps) {
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
-      <div className="relative overflow-hidden bg-[var(--black-2)] py-16 text-center">
-        <div className="pointer-events-none absolute inset-0 opacity-5">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(135deg, white 0, white 1px, transparent 0, transparent 50%)',
-              backgroundSize: '18px 18px',
-            }}
-          />
-        </div>
-        <div className="relative z-10">
-          <p className="mb-3 font-condensed text-xs uppercase tracking-[6px] text-[var(--terra)]">Selection creative</p>
-          <h1 className="font-bebas text-6xl leading-none text-white md:text-8xl">MAILLOTS CONCEPT</h1>
-          <p className="mt-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey-lt)]">
-            Selection manuelle - {filteredProducts.length} maillots
-          </p>
-        </div>
-      </div>
+      <CollectionHeader
+        title="MAILLOTS CONCEPT"
+        subtitle={`${filteredProducts.length} maillots`}
+        color="#c1440e"
+        breadcrumb={[{ label: 'Concept' }]}
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Suspense fallback={null}>

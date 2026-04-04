@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { trackEvent } from '@/lib/tracking'
 
 type ContactFormValues = {
   name: string
@@ -40,14 +41,17 @@ export function ContactForm() {
       const data = await response.json().catch(() => null)
 
       if (!response.ok) {
-        setError(data?.error ?? 'Impossible d’envoyer votre message pour le moment.')
+        setError(data?.error ?? 'Impossible d envoyer votre message pour le moment.')
         return
       }
 
-      setSuccess('Votre message a bien été envoyé au service client.')
+      trackEvent('contact_form_submitted', {
+        has_order_number: Boolean(values.orderNumber.trim()),
+      })
+      setSuccess('Votre message a bien ete envoye au service client.')
       setValues(INITIAL_VALUES)
     } catch {
-      setError('Impossible d’envoyer votre message pour le moment.')
+      setError('Impossible d envoyer votre message pour le moment.')
     } finally {
       setLoading(false)
     }
@@ -61,9 +65,7 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
-            Nom
-          </label>
+          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">Nom</label>
           <input
             type="text"
             value={values.name}
@@ -75,9 +77,7 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
-            Email
-          </label>
+          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">Email</label>
           <input
             type="email"
             value={values.email}
@@ -92,9 +92,7 @@ export function ContactForm() {
 
       <div className="grid gap-4 md:grid-cols-[1fr_220px]">
         <div>
-          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
-            Sujet
-          </label>
+          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">Sujet</label>
           <input
             type="text"
             value={values.subject}
@@ -106,9 +104,7 @@ export function ContactForm() {
         </div>
 
         <div>
-          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
-            N° commande
-          </label>
+          <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">No commande</label>
           <input
             type="text"
             value={values.orderNumber}
@@ -121,9 +117,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">
-          Message
-        </label>
+        <label className="mb-2 block font-condensed text-xs uppercase tracking-[0.28em] text-[var(--grey)]">Message</label>
         <textarea
           value={values.message}
           onChange={(event) => updateValue('message', event.target.value)}

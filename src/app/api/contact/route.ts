@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { sendSupportAckEmail } from '@/lib/email'
 import { sendTelegramContactNotification } from '@/lib/telegram'
 
 type ContactPayload = {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Corps de requête invalide.' }, { status: 400 })
+    return NextResponse.json({ error: 'Corps de requete invalide.' }, { status: 400 })
   }
 
   const name = normalizeValue(body.name)
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (name.length > 120 || email.length > 160 || orderNumber.length > 80 || subject.length > 140 || message.length > 2000) {
-    return NextResponse.json({ error: 'Un ou plusieurs champs dépassent la longueur autorisée.' }, { status: 400 })
+    return NextResponse.json({ error: 'Un ou plusieurs champs depassent la longueur autorisee.' }, { status: 400 })
   }
 
   const delivered = await sendTelegramContactNotification({
@@ -51,8 +52,15 @@ export async function POST(request: NextRequest) {
   })
 
   if (!delivered) {
-    return NextResponse.json({ error: 'Service client temporairement indisponible. Merci de réessayer plus tard.' }, { status: 503 })
+    return NextResponse.json({ error: 'Service client temporairement indisponible. Merci de reessayer plus tard.' }, { status: 503 })
   }
+
+  await sendSupportAckEmail({
+    to: email,
+    customerName: name,
+    subject,
+    orderNumber,
+  })
 
   return NextResponse.json({ ok: true })
 }

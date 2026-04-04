@@ -1,8 +1,9 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
-import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { LOYALTY_CODE } from '@/lib/siteConfig'
+import { trackEvent } from '@/lib/tracking'
 
 export function AccountAuthForm() {
   const [email, setEmail] = useState('')
@@ -29,6 +30,7 @@ export function AccountAuthForm() {
       return
     }
 
+    trackEvent('account_magic_link_requested', { email_domain: email.split('@')[1] ?? null })
     setStatus('sent')
     setMessage('Lien magique envoye. Verifie ta boite mail puis reviens sur ton compte.')
   }

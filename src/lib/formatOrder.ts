@@ -70,7 +70,7 @@ export function formatOrderMessage(order: Order): string {
     : ['Non renseigne']
 
   return [
-    `🛒 <b>NOUVELLE COMMANDE #${escapeHtml(order.id.slice(-8).toUpperCase())}</b>`,
+    `<b>NOUVELLE COMMANDE ${escapeHtml(order.order_number)}</b>`,
     '',
     '<b>CLIENT</b>',
     `Nom / prenom : ${formatField(order.customer_name)}`,
@@ -84,6 +84,7 @@ export function formatOrderMessage(order: Order): string {
     itemLines,
     '',
     `<b>TOTAL : ${order.total_amount != null ? order.total_amount.toFixed(2) : 'N/A'} EUR</b>`,
+    `Canal : ${formatField(order.source_channel)}`,
     `Commande le ${escapeHtml(date)}`,
   ].join('\n')
 }
