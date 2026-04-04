@@ -1,25 +1,29 @@
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
-import { Trophy, Truck, Zap } from 'lucide-react'
+import { CheckCircle2, ShieldCheck, Truck, Zap } from 'lucide-react'
+import Link from 'next/link'
 
 const WHY_ITEMS = [
   {
     icon: Zap,
-    title: LAUNCH_PROMO_ENABLED ? 'Offre de lancement' : 'Catalogue premium',
-    desc: LAUNCH_PROMO_ENABLED
-      ? 'Des prix promo pendant 7 jours sur les maillots standards et retro, sans sacrifier la finition premium.'
-      : 'Une selection premium de maillots clubs et selections, nettoyee pour rendre la recherche plus fiable.',
+    title: 'Sélection qui convertit',
+    desc: 'On garde uniquement les maillots les plus demandés — pas de catalogue infini. Tu trouves vite, tu commandes vite.',
   },
   {
-    icon: Trophy,
-    title: 'Patchs disponibles',
-    desc: "Personnalisez votre maillot avec les patchs LDC, Copa, FA Cup et bien d'autres, selon le club et la selection.",
+    icon: ShieldCheck,
+    title: 'Qualité vérifiée',
+    desc: 'Chaque référence est triée sur le volet : flocage propre, tissu solide, coutures nettes. Aucun compromis sur la finition.',
   },
   {
     icon: Truck,
-    title: 'Livraison claire',
-    desc: '1 maillot: 6 EUR, 2 maillots: 5 EUR, livraison offerte des 3 maillots. Expedition suivie.',
+    title: 'Livraison sans friction',
+    desc: 'Suivi partagé dès expédition. 1 maillot → 6€ · 2 → 5€ · Gratuite dès 3. Simple, transparent, fiable.',
   },
+] as const
+
+const STATS = [
+  { value: '+30 000', label: 'clients satisfaits' },
+  { value: '4.5 / 5', label: 'note moyenne' },
+  { value: '+250 000', label: 'maillots livrés' },
 ] as const
 
 export function WhyUsSection() {
@@ -28,27 +32,47 @@ export function WhyUsSection() {
       <div className="pointer-events-none absolute top-0 right-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_center,var(--black-2)_0%,transparent_70%)] opacity-50 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        {/* Headline */}
         <div className="mb-10 flex flex-col justify-between gap-8 border-b border-white/10 pb-8 md:flex-row md:items-end">
           <div>
             <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)] sm:text-sm">
               <span className="h-[2px] w-8 bg-[var(--terra)]" />
-              Notre promesse
+              Pourquoi nous choisir
             </p>
-            <h2 className="font-bebas text-6xl leading-none md:text-8xl">
-              LA DIFFERENCE
+            <h2 className="font-bebas text-5xl leading-none md:text-7xl">
+              PLUS DE 30 000 FANS
               <br />
-              MAILLOT ADDICT
+              NOUS FONT CONFIANCE
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">
-            Des maillots premium, un tunnel de commande clair, et des collections mieux rangees pour trouver plus vite le bon modele.
-          </p>
+          <div className="flex flex-col gap-2 md:items-end">
+            <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">
+              On n'est pas un gros catalogue généraliste. On est une boutique spécialisée, taillée pour ceux qui savent
+              ce qu'ils veulent.
+            </p>
+            <Link
+              href="/shop"
+              className="mt-2 inline-flex items-center gap-2 rounded-none border border-white/20 px-5 py-2.5 font-condensed text-xs uppercase tracking-[0.2em] text-white transition-colors hover:border-[var(--terra)] hover:text-[var(--terra)]"
+            >
+              Voir le catalogue →
+            </Link>
+          </div>
         </div>
 
+        {/* Stats row */}
+        <div className="mb-12 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.03]">
+          {STATS.map((stat) => (
+            <div key={stat.value} className="flex flex-col items-center gap-1 py-5 px-3 text-center">
+              <p className="font-bebas text-3xl leading-none text-[var(--terra)] sm:text-4xl">{stat.value}</p>
+              <p className="font-condensed text-[10px] uppercase tracking-wider text-white/50">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* 3 items */}
         <div className="grid gap-12 md:grid-cols-3 md:gap-8 lg:gap-12">
           {WHY_ITEMS.map((item, index) => {
             const Icon = item.icon
-
             return (
               <ScrollReveal key={item.title}>
                 <div className="group relative">
@@ -68,6 +92,21 @@ export function WhyUsSection() {
               </ScrollReveal>
             )
           })}
+        </div>
+
+        {/* Trust footer */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-8">
+          {[
+            'Paiement 100% sécurisé via Stripe',
+            'Retour sous 14 jours',
+            'Suivi partagé dès expédition',
+            'Flocage & patchs disponibles',
+          ].map((item) => (
+            <span key={item} className="flex items-center gap-2 font-condensed text-[11px] uppercase tracking-wider text-white/40">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[var(--terra)]" strokeWidth={2} />
+              {item}
+            </span>
+          ))}
         </div>
       </div>
     </section>

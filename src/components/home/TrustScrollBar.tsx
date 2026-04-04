@@ -1,29 +1,31 @@
-import { LAUNCH_PROMO_ENABLED, SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
+import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const ITEMS = [
-  '✓ 1 200+ Clients satisfaits',
-  '✓ Paiement securise',
-  `✓ ${SHIPPING_DELAY_LABEL}`,
-  ...(LAUNCH_PROMO_ENABLED ? ['✓ Prix promo 7 jours'] : ['✓ Catalogue premium mis a jour']),
-  '✓ Flocage +5 EUR',
-  '✓ Catalogue dedoublonne',
-  '✓ SAV reactif',
+  '+30 000 clients satisfaits',
+  '★ Note 4.5/5 — Excellent',
+  'Paiement 100% sécurisé',
+  `${SHIPPING_DELAY_LABEL}`,
+  '+250 000 maillots livrés',
+  'Flocage & patchs disponibles',
+  'Retour sous 14 jours',
+  'Suivi transmis dès expédition',
+  'Boutique française depuis 2024',
 ]
 
 const ALL_ITEMS = [...ITEMS, ...ITEMS]
 
 export function TrustScrollBar() {
   return (
-    <div className="overflow-hidden bg-[var(--black)]">
-      <div className="flex" style={{ animation: 'trust-scroll 20s linear infinite', width: 'max-content' }}>
+    <div className="overflow-hidden border-y border-white/5 bg-[var(--black)]">
+      <div className="flex" style={{ animation: 'trust-scroll 22s linear infinite', width: 'max-content' }}>
         {ALL_ITEMS.map((item, index) => (
           <span
             key={`${item}-${index}`}
-            className="flex-shrink-0 border-r border-white/10 px-5 py-2.5 font-condensed uppercase text-white"
-            style={{ fontSize: 10, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}
+            className="flex flex-shrink-0 items-center gap-2 border-r border-white/10 px-5 py-2.5 font-condensed uppercase text-white"
+            style={{ fontSize: 10, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}
           >
-            <span className="font-bold text-[var(--terra)]">{item.slice(0, 1)}</span>
-            {item.slice(1)}
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--terra)]" />
+            {item}
           </span>
         ))}
       </div>

@@ -20,8 +20,13 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
   return (
     <section className="bg-[var(--cream)] px-4 pt-6 pb-8 md:px-6 md:pt-10 md:pb-12">
       <div className="mx-auto max-w-7xl">
-      <h2 className="font-condensed text-[26px] md:text-4xl font-normal leading-tight text-[var(--black)]">
-        Nos Collections{' '}
+      <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-[var(--terra-lt)] px-3 py-1">
+        <span className="font-condensed text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--terra)]">
+          ⚽ Coupe du Monde 2026
+        </span>
+      </div>
+      <h2 className="font-condensed text-[26px] md:text-4xl font-bold leading-tight text-[var(--black)]">
+        Les maillots qui{' '}
         <span
           style={{
             textDecoration: 'underline',
@@ -30,10 +35,12 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
             textUnderlineOffset: 5,
           }}
         >
-          Phares
+          partent vite.
         </span>
       </h2>
-      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">Une selection Coupe du Monde 2026, pays par pays.</p>
+      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">
+        Sélection pays par pays — les plus demandés en stock limité.
+      </p>
 
       <div className="mt-3 flex gap-4 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
         {countries.map((country) => (
