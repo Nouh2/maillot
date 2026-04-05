@@ -98,6 +98,8 @@ function renderEmailFrame(options: EmailFrameOptions): string {
     '<html lang="fr">',
     '<head>',
     '<meta charSet="utf-8" />',
+    '<meta name="color-scheme" content="light only" />',
+    '<meta name="supported-color-schemes" content="light only" />',
     `<title>${escapeHtml(options.title)}</title>`,
     '</head>',
     `<body style="margin:0;background:#f7f0e6;font-family:Arial,sans-serif;color:#1c1712;">`,
@@ -105,12 +107,12 @@ function renderEmailFrame(options: EmailFrameOptions): string {
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 12px;background:#f7f0e6;">',
     '<tr><td align="center">',
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#ffffff;border:1px solid #eadfce;border-radius:28px;overflow:hidden;">',
-    '<tr><td style="padding:0;">',
-    '<div style="padding:32px;background:linear-gradient(135deg,#1c1712 0%,#2e2820 65%,#472d1d 100%);">',
-    `<p style="margin:0 0 12px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#e8956d;font-weight:700;">${escapeHtml(options.eyebrow)}</p>`,
-    `<p style="margin:0;font-size:40px;line-height:0.95;font-weight:900;color:#ffffff;text-transform:uppercase;">${escapeHtml(options.title)}</p>`,
+    '<tr><td style="padding:0;" bgcolor="#1c1712">',
+    '<div style="padding:32px;background:#1c1712;background-image:linear-gradient(135deg,#1c1712 0%,#2e2820 65%,#472d1d 100%);color:#ffffff;">',
+    `<p style="margin:0 0 12px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#e8956d;-webkit-text-fill-color:#e8956d;font-weight:700;">${escapeHtml(options.eyebrow)}</p>`,
+    `<p style="margin:0;font-size:40px;line-height:0.95;font-weight:900;color:#ffffff;-webkit-text-fill-color:#ffffff;text-transform:uppercase;">${escapeHtml(options.title)}</p>`,
     options.intro
-      ? `<p style="margin:18px 0 0;max-width:520px;font-size:15px;line-height:1.7;color:rgba(255,255,255,0.78);">${options.intro}</p>`
+      ? `<p style="margin:18px 0 0;max-width:520px;font-size:15px;line-height:1.7;color:#d8d1c7;-webkit-text-fill-color:#d8d1c7;">${options.intro}</p>`
       : '',
     '</div>',
     `<div style="padding:32px;">${options.sections.join('')}`,
