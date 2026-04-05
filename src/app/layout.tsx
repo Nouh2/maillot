@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { headers } from 'next/headers'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import './globals.css'
-import { CartDrawer } from '@/components/cart/CartDrawer'
-import { Footer } from '@/components/layout/Footer'
-import { Navbar } from '@/components/layout/Navbar'
-import { Ticker } from '@/components/layout/Ticker'
+import { AppShell } from '@/components/layout/AppShell'
 import { Providers } from '@/components/providers/Providers'
 
 const barlow = Barlow({
@@ -46,14 +42,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const pathname = (await headers()).get('x-pathname') ?? ''
-  const isOpsRoute = pathname.startsWith('/ops')
-
   return (
     <html
       lang="fr"
@@ -61,13 +54,7 @@ export default async function RootLayout({
     >
       <body className="antialiased overflow-x-hidden">
         <Providers>
-          <div className="flex min-h-screen flex-col overflow-x-hidden">
-            {isOpsRoute ? null : <Navbar />}
-            {isOpsRoute ? null : <Ticker />}
-            {isOpsRoute ? null : <CartDrawer />}
-            <main className="flex-1 overflow-x-hidden">{children}</main>
-            {isOpsRoute ? null : <Footer />}
-          </div>
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
