@@ -71,12 +71,12 @@ function escapeHtml(value: string): string {
 }
 
 function paragraph(text: string): string {
-  return `<p style="margin:0 0 16px;color:#2b241e;line-height:1.7;font-size:15px;">${text}</p>`
+  return `<p style="margin:0 0 16px;color:#1a1209;line-height:1.7;font-size:15px;">${text}</p>`
 }
 
 function bulletList(items: string[]): string {
   const listItems = items.map((item) => `<li style="margin:0 0 10px;">${item}</li>`).join('')
-  return `<ul style="margin:0 0 18px;padding-left:20px;color:#2b241e;line-height:1.7;font-size:15px;">${listItems}</ul>`
+  return `<ul style="margin:0 0 18px;padding-left:20px;color:#1a1209;line-height:1.7;font-size:15px;">${listItems}</ul>`
 }
 
 function renderCta(cta: EmailCta): string {
@@ -112,7 +112,7 @@ function renderEmailFrame(options: EmailFrameOptions): string {
     `<p style="margin:0 0 12px;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:#e8956d;-webkit-text-fill-color:#e8956d;font-weight:700;">${escapeHtml(options.eyebrow)}</p>`,
     `<p style="margin:0;font-size:40px;line-height:0.95;font-weight:900;color:#ffffff;-webkit-text-fill-color:#ffffff;text-transform:uppercase;">${escapeHtml(options.title)}</p>`,
     options.intro
-      ? `<p style="margin:18px 0 0;max-width:520px;font-size:15px;line-height:1.7;color:#d8d1c7;-webkit-text-fill-color:#d8d1c7;">${options.intro}</p>`
+      ? `<p style="margin:18px 0 0;max-width:520px;font-size:15px;line-height:1.7;color:#ede8e2;-webkit-text-fill-color:#ede8e2;">${options.intro}</p>`
       : '',
     '</div>',
     `<div style="padding:32px;">${options.sections.join('')}`,
@@ -120,9 +120,9 @@ function renderEmailFrame(options: EmailFrameOptions): string {
       ? `<div style="margin:8px 0 24px;">${options.primaryCta ? renderCta(options.primaryCta) : ''}${options.primaryCta && options.secondaryCta ? '<span style="display:inline-block;width:10px;"></span>' : ''}${options.secondaryCta ? renderCta(options.secondaryCta) : ''}</div>`
       : '',
     options.note
-      ? `<div style="margin:24px 0 0;padding:16px 18px;border:1px solid #eadfce;border-radius:20px;background:#fbf7f1;color:#5d5348;font-size:13px;line-height:1.7;">${options.note}</div>`
+      ? `<div style="margin:24px 0 0;padding:16px 18px;border:1px solid #d8cfc4;border-radius:20px;background:#f5ede0;color:#3a2f28;font-size:13px;line-height:1.7;">${options.note}</div>`
       : '',
-    `<div style="margin-top:28px;padding-top:20px;border-top:1px solid #f0e5d7;"><p style="margin:0 0 10px;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#c1440e;font-weight:700;">${escapeHtml(getSiteName())}</p><p style="margin:0;color:#7a6f62;font-size:13px;line-height:1.7;">Paiement securise, suivi partage des qu il est disponible, et support centralise pour les questions de commande.</p>${supportEmail ? `<p style="margin:10px 0 0;color:#7a6f62;font-size:13px;line-height:1.7;">Besoin d aide ? Reponds a cet email ou ecris a ${escapeHtml(supportEmail)}.</p>` : ''}</div>`,
+    `<div style="margin-top:28px;padding-top:20px;border-top:1px solid #e8dfd0;"><p style="margin:0 0 10px;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#c1440e;font-weight:700;">${escapeHtml(getSiteName())}</p><p style="margin:0;color:#3d3229;font-size:13px;line-height:1.7;">Paiement securise, suivi partage des qu il est disponible, et support centralise pour les questions de commande.</p>${supportEmail ? `<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.7;">Besoin d aide ? Reponds a cet email ou ecris a ${escapeHtml(supportEmail)}.</p>` : ''}</div>`,
     '</div>',
     '</td></tr>',
     '</table>',
