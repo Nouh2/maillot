@@ -15,7 +15,7 @@ const REVIEWS = [
     initials: 'EM',
     color: '#C1440E',
     stars: 5,
-    text: 'Déjà 3 commandes, jamais déçu. Toujours au rendez-vous sur la qualité et les délais.',
+    text: 'Deja 3 commandes, jamais decu. Toujours au rendez-vous sur la qualite et les delais.',
     product: 'Maillot Mexique 2026',
   },
   {
@@ -23,23 +23,23 @@ const REVIEWS = [
     initials: 'KB',
     color: '#3f3830',
     stars: 5,
-    text: 'Qualité incroyable, exactement comme sur les photos. Le flocage est impeccable. Boutique de confiance.',
-    product: 'Maillot Brésil Retro',
+    text: 'Qualite incroyable, exactement comme sur les photos. Le flocage est impeccable. Boutique de confiance.',
+    product: 'Maillot Bresil Retro',
   },
   {
-    name: 'Théo D.',
+    name: 'Theo D.',
     initials: 'TD',
     color: '#A83A0C',
     stars: 5,
-    text: "J'ai commandé le maillot Algérie avec le patch. Rendu parfait. Livraison en 9 jours chrono.",
-    product: 'Maillot Algérie 2026',
+    text: 'J ai commande le maillot Algerie avec le patch. Rendu parfait. Livraison en 9 jours chrono.',
+    product: 'Maillot Algerie 2026',
   },
   {
     name: 'Adam S.',
     initials: 'AS',
     color: '#7a6f62',
     stars: 5,
-    text: 'Maillot reçu bien emballé, qualité au top. Pas déçu du tout, je reviendrai sûrement pour la CAN.',
+    text: 'Maillot recu bien emballe, qualite au top. Pas decu du tout, je reviendrai surement pour la CAN.',
     product: 'Maillot PSG 2024',
   },
   {
@@ -47,7 +47,7 @@ const REVIEWS = [
     initials: 'NH',
     color: '#D4581F',
     stars: 5,
-    text: 'Le SAV a répondu en quelques heures à ma question. Sérieux, fiable, je recommande à tous mes potes.',
+    text: 'Le SAV a repondu en quelques heures a ma question. Serieux, fiable, je recommande a tous mes potes.',
     product: 'Maillot Real Madrid',
   },
   {
@@ -55,7 +55,7 @@ const REVIEWS = [
     initials: 'RC',
     color: '#1C1712',
     stars: 5,
-    text: "Commandé vendredi, reçu le mercredi suivant. La qualité est là, c'est du solide. Top boutique.",
+    text: 'Commande vendredi, recu le mercredi suivant. La qualite est la, c est du solide. Top boutique.',
     product: 'Maillot Barcelone 2024',
   },
   {
@@ -63,7 +63,7 @@ const REVIEWS = [
     initials: 'YT',
     color: '#C1440E',
     stars: 5,
-    text: 'Suivi de commande nickel, maillot conforme à la description. Je recommande les yeux fermés.',
+    text: 'Suivi de commande nickel, maillot conforme a la description. Je recommande les yeux fermes.',
     product: 'Maillot Maroc 2026',
   },
 ]
@@ -84,7 +84,6 @@ const ALL_REVIEWS = [...REVIEWS, ...REVIEWS]
 export function ReviewsSection() {
   return (
     <section className="overflow-hidden bg-[var(--cream)] py-12 md:py-16">
-      {/* Header stats */}
       <div className="mx-auto mb-10 max-w-7xl px-4 sm:px-6">
         <div className="text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--cream-3)] bg-white px-4 py-2 shadow-sm">
@@ -103,16 +102,15 @@ export function ReviewsSection() {
                 color: 'transparent',
               }}
             >
-              LIVRÉS
+              LIVRES
             </span>
           </h2>
           <p className="mt-2 font-condensed text-sm text-[var(--grey)]">
-            Merci pour vos retours — ils nous poussent à faire encore mieux.
+            Merci pour vos retours - ils nous poussent a faire encore mieux.
           </p>
         </div>
       </div>
 
-      {/* Scrolling reviews */}
       <div className="relative">
         <div
           className="flex gap-4 px-4"
@@ -135,12 +133,12 @@ export function ReviewsSection() {
                     {review.name}
                   </p>
                   <p className="font-condensed text-[10px] font-semibold uppercase tracking-wide text-[#00b67a]">
-                    ✓ Vérifié
+                    Verifie
                   </p>
                 </div>
               </div>
               <StarRating />
-              <p className="mt-3 flex-1 text-[12px] leading-relaxed text-[var(--grey)]">"{review.text}"</p>
+              <p className="mt-3 flex-1 text-[12px] leading-relaxed text-[var(--grey)]">&quot;{review.text}&quot;</p>
               <p className="mt-4 font-condensed text-[9px] uppercase tracking-widest text-[var(--terra)]">
                 {review.product}
               </p>
@@ -149,7 +147,6 @@ export function ReviewsSection() {
         </div>
       </div>
 
-      {/* CTA */}
       <div className="mx-auto mt-10 max-w-7xl px-4 sm:px-6">
         <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center">
           <Link

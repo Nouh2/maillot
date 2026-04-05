@@ -40,7 +40,7 @@ export default async function LeaguePage({ params, searchParams }: Props) {
       <CollectionHeader
         title={league.name}
         subtitle={`${filteredProducts.length} maillots`}
-        color={getLeagueColor(league.slug)}
+        color={getLeagueColor()}
         breadcrumb={[{ label: league.name }]}
       />
 

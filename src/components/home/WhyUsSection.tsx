@@ -1,29 +1,29 @@
-import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { CheckCircle2, ShieldCheck, Truck, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { CheckCircle2, ShieldCheck, Truck, Zap } from 'lucide-react'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 const WHY_ITEMS = [
   {
     icon: Zap,
-    title: 'Sélection qui convertit',
-    desc: 'On garde uniquement les maillots les plus demandés — pas de catalogue infini. Tu trouves vite, tu commandes vite.',
+    title: 'Selection qui convertit',
+    desc: 'On garde uniquement les maillots les plus demandes - pas de catalogue infini. Tu trouves vite, tu commandes vite.',
   },
   {
     icon: ShieldCheck,
-    title: 'Qualité vérifiée',
-    desc: 'Chaque référence est triée sur le volet : flocage propre, tissu solide, coutures nettes. Aucun compromis sur la finition.',
+    title: 'Qualite verifiee',
+    desc: 'Chaque reference est triee sur le volet : flocage propre, tissu solide, coutures nettes. Aucun compromis sur la finition.',
   },
   {
     icon: Truck,
     title: 'Livraison sans friction',
-    desc: 'Suivi partagé dès expédition. 1 maillot → 6€ · 2 → 5€ · Gratuite dès 3. Simple, transparent, fiable.',
+    desc: 'Suivi partage des expedition. 1 maillot -> 6 EUR · 2 -> 5 EUR · gratuite des 3. Simple, transparent, fiable.',
   },
 ] as const
 
 const STATS = [
   { value: '+30 000', label: 'clients satisfaits' },
   { value: '4.5 / 5', label: 'note moyenne' },
-  { value: '+250 000', label: 'maillots livrés' },
+  { value: '+250 000', label: 'maillots livres' },
 ] as const
 
 export function WhyUsSection() {
@@ -32,7 +32,6 @@ export function WhyUsSection() {
       <div className="pointer-events-none absolute top-0 right-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_center,var(--black-2)_0%,transparent_70%)] opacity-50 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        {/* Headline */}
         <div className="mb-10 flex flex-col justify-between gap-8 border-b border-white/10 pb-8 md:flex-row md:items-end">
           <div>
             <p className="mb-4 flex items-center gap-3 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)] sm:text-sm">
@@ -47,8 +46,8 @@ export function WhyUsSection() {
           </div>
           <div className="flex flex-col gap-2 md:items-end">
             <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">
-              On n'est pas un gros catalogue généraliste. On est une boutique spécialisée, taillée pour ceux qui savent
-              ce qu'ils veulent.
+              On n&apos;est pas un gros catalogue generaliste. On est une boutique specialisee, taillee pour ceux qui savent
+              ce qu&apos;ils veulent.
             </p>
             <Link
               href="/shop"
@@ -59,17 +58,15 @@ export function WhyUsSection() {
           </div>
         </div>
 
-        {/* Stats row */}
         <div className="mb-12 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.03]">
           {STATS.map((stat) => (
-            <div key={stat.value} className="flex flex-col items-center gap-1 py-5 px-3 text-center">
+            <div key={stat.value} className="flex flex-col items-center gap-1 px-3 py-5 text-center">
               <p className="font-bebas text-3xl leading-none text-[var(--terra)] sm:text-4xl">{stat.value}</p>
               <p className="font-condensed text-[10px] uppercase tracking-wider text-white/50">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        {/* 3 items */}
         <div className="grid gap-12 md:grid-cols-3 md:gap-8 lg:gap-12">
           {WHY_ITEMS.map((item, index) => {
             const Icon = item.icon
@@ -94,13 +91,12 @@ export function WhyUsSection() {
           })}
         </div>
 
-        {/* Trust footer */}
         <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-8">
           {[
-            'Paiement 100% sécurisé via Stripe',
+            'Paiement 100% securise via Stripe',
             'Retour sous 14 jours',
-            'Suivi partagé dès expédition',
-            'Flocage & patchs disponibles',
+            'Suivi partage des expedition',
+            'Flocage et patchs disponibles',
           ].map((item) => (
             <span key={item} className="flex items-center gap-2 font-condensed text-[11px] uppercase tracking-wider text-white/40">
               <CheckCircle2 className="h-3.5 w-3.5 text-[var(--terra)]" strokeWidth={2} />

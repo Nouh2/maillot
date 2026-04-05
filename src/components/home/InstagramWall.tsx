@@ -14,21 +14,21 @@ export function InstagramWall() {
     <section className="overflow-hidden bg-[var(--black)] py-12">
       <div className="mx-auto mb-7 max-w-7xl px-4 text-center sm:px-6">
         <p className="mb-2 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)]">
-          Communauté MAILLOT ADDICT
+          Communaute MAILLOT ADDICT
         </p>
         <h2 className="font-bebas text-4xl text-white sm:text-5xl">
-          ILS L'ONT REÇU.{' '}
+          ILS L&apos;ONT RECU.{' '}
           <span
             style={{
               WebkitTextStroke: '2px white',
               color: 'transparent',
             }}
           >
-            ILS L'ONT PORTÉ.
+            ILS L&apos;ONT PORTE.
           </span>
         </h2>
         <p className="mt-2 font-condensed text-sm text-white/50">
-          Taguez-nous sur Instagram pour rejoindre le mur de la communauté.
+          Taguez-nous sur Instagram pour rejoindre le mur de la communaute.
         </p>
       </div>
 

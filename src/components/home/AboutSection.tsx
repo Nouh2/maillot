@@ -3,9 +3,9 @@ import { ArrowRight, ShieldCheck, Ticket, Truck } from 'lucide-react'
 import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
 
 const LIST_ITEMS = [
-  { icon: ShieldCheck, text: 'Paiement 100% sécurisé via Stripe' },
-  { icon: Ticket, text: 'Suivi partagé dès l\'expédition' },
-  { icon: Truck, text: 'Livraison offerte dès 3 maillots commandés' },
+  { icon: ShieldCheck, text: 'Paiement 100% securise via Stripe' },
+  { icon: Ticket, text: 'Suivi partage des l expedition' },
+  { icon: Truck, text: 'Livraison offerte des 3 maillots commandes' },
 ]
 
 export function AboutSection() {
@@ -13,11 +13,10 @@ export function AboutSection() {
     <section className="bg-[var(--cream)] px-4 py-12 md:px-6 md:py-16">
       <div className="mx-auto max-w-7xl md:grid md:grid-cols-2 md:items-center md:gap-16">
         <div>
-          {/* Trust badge */}
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--terra)]/25 bg-[var(--terra-lt)] px-4 py-1.5">
-            <span className="text-base">🇫🇷</span>
+            <span className="text-base">FR</span>
             <span className="font-condensed text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--terra)]">
-              Boutique française · Confiance depuis 2024
+              Boutique francaise · Confiance depuis 2024
             </span>
           </div>
 
@@ -31,13 +30,13 @@ export function AboutSection() {
                 textUnderlineOffset: 5,
               }}
             >
-              vraiment la différence.
+              vraiment la difference.
             </span>
           </h2>
 
           <p className="mt-4 text-[14px] leading-relaxed text-[var(--grey)]">
-            On a construit MAILLOT ADDICT pour les vrais passionnés : une sélection resserrée des maillots les plus
-            recherchés, un parcours d'achat clair, et un suivi transmis sans friction.{' '}
+            On a construit MAILLOT ADDICT pour les vrais passionnes : une selection resserree des maillots les plus
+            recherches, un parcours d&apos;achat clair, et un suivi transmis sans friction.{' '}
             {LAUNCH_PROMO_ENABLED ? 'Prix promo en cours, ' : ''}
             pas de mauvaises surprises.
           </p>
@@ -67,7 +66,7 @@ export function AboutSection() {
         <div className="mt-8 grid grid-cols-2 gap-4 md:mt-0">
           <div className="rounded-xl bg-[var(--terra)] p-5 text-white">
             <p className="font-bebas text-4xl leading-none">+250K</p>
-            <p className="mt-1 font-condensed text-[11px] uppercase tracking-wider text-white/75">Maillots livrés</p>
+            <p className="mt-1 font-condensed text-[11px] uppercase tracking-wider text-white/75">Maillots livres</p>
           </div>
           <div className="rounded-xl bg-[var(--black)] p-5 text-white">
             <p className="font-bebas text-4xl leading-none">+30K</p>
