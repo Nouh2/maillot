@@ -7,6 +7,7 @@ import { CartItem } from '@/components/cart/CartItem'
 import { formatEuro } from '@/lib/cartPricing'
 import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { useCartStore } from '@/store/cart'
+import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
 
 export default function CartPage() {
   const { items, subtotal, shippingTotal, total, itemCount } = useCartStore()
@@ -42,7 +43,7 @@ export default function CartPage() {
           )}
         </section>
 
-        <aside className="space-y-5">
+        <aside className="space-y-5 pb-24 lg:pb-0">
           <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Resume</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Ta commande</h2>
@@ -90,6 +91,9 @@ export default function CartPage() {
           </section>
         </aside>
       </div>
+
+      {/* Barre sticky mobile */}
+      <MobileCheckoutBar />
     </div>
   )
 }
