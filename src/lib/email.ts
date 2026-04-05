@@ -115,7 +115,9 @@ function renderEmailFrame(options: EmailFrameOptions): string {
       ? `<p style="margin:18px 0 0;max-width:520px;font-size:15px;line-height:1.7;color:#ede8e2;-webkit-text-fill-color:#ede8e2;">${options.intro}</p>`
       : '',
     '</div>',
-    `<div style="padding:32px;">${options.sections.join('')}`,
+    '</td></tr>',
+    '<tr><td style="padding:0;" bgcolor="#ffffff">',
+    `<div style="padding:32px;background:#ffffff;">${options.sections.join('')}`,
     options.primaryCta || options.secondaryCta
       ? `<div style="margin:8px 0 24px;">${options.primaryCta ? renderCta(options.primaryCta) : ''}${options.primaryCta && options.secondaryCta ? '<span style="display:inline-block;width:10px;"></span>' : ''}${options.secondaryCta ? renderCta(options.secondaryCta) : ''}</div>`
       : '',
