@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const revalidate = 3600 // re-build toutes les heures
 import { ShieldCheck, Ticket } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
@@ -11,6 +13,11 @@ import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
 import { getPatches, getProductBySlug } from '@/lib/supabase/queries'
+
+export async function generateStaticParams() {
+  const products = await getProducts()
+  return products.map((p) => ({ slug: p.slug }))
+}
 
 interface Props {
   params: Promise<{ slug: string }>
