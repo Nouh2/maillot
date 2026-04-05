@@ -13,7 +13,10 @@ export default async function OpsPage() {
     redirect('/ops/login')
   }
 
-  const { data } = await getOpsOrders({ limit: 60 })
+  const { data } = await getOpsOrders({
+    statuses: ['paid', 'shipped', 'delivered', 'cancelled'],
+    limit: 60,
+  })
   const orders = (data as Order[] | null) ?? []
 
   return (
