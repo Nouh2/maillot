@@ -12,7 +12,7 @@ import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
-import { getPatches, getProductBySlug } from '@/lib/supabase/queries'
+import { getPatches, getProductBySlug, getProducts } from '@/lib/supabase/queries'
 
 export async function generateStaticParams() {
   const products = await getProducts()
