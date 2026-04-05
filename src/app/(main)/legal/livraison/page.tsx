@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { LegalPageLayout, LegalSection } from '@/components/legal/LegalPageLayout'
-import { calculateShippingAmount, formatEuro } from '@/lib/cartPricing'
+import { FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_PRICE, formatEuro } from '@/lib/cartPricing'
 
-const SHIPPING_PRICE_ONE = formatEuro(calculateShippingAmount(1))
-const SHIPPING_PRICE_TWO = formatEuro(calculateShippingAmount(2))
-const SHIPPING_PRICE_THREE = formatEuro(calculateShippingAmount(3))
+const STANDARD_SHIPPING_LABEL = formatEuro(STANDARD_SHIPPING_PRICE)
+const FREE_SHIPPING_LABEL = formatEuro(FREE_SHIPPING_THRESHOLD)
 
 export const metadata = { title: 'Livraison' }
 
@@ -13,19 +12,19 @@ export default function LivraisonPage() {
     <LegalPageLayout
       currentPath="/legal/livraison"
       title="Livraison"
-      intro="Cette page résume les conditions de livraison actuellement appliquées sur Maillot Addict: délais indicatifs, frais de port et suivi des commandes."
+      intro="Cette page resume les conditions de livraison actuellement appliquees sur Maillot Addict: delais indicatifs, frais de port et suivi des commandes."
     >
-      <LegalSection title="Délais indicatifs">
-        <p>Les commandes sont généralement livrées dans un délai estimé de 7 à 12 jours ouvrés après traitement.</p>
-        <p>Ces délais restent indicatifs et peuvent varier selon la période, la destination ou le transporteur.</p>
+      <LegalSection title="Delais indicatifs">
+        <p>Les commandes sont generalement livrees dans un delai estime de 7 a 12 jours ouvres apres traitement.</p>
+        <p>Ces delais restent indicatifs et peuvent varier selon la periode, la destination ou le transporteur.</p>
       </LegalSection>
 
       <LegalSection title="Frais de livraison">
-        <p>Les frais de livraison sont calculés selon le nombre total de maillots commandés:</p>
+        <p>Les frais de livraison sont calcules sur le montant du panier apres application des offres automatiques:</p>
         <ul className="list-disc space-y-2 pl-5">
-          <li>1 maillot: {SHIPPING_PRICE_ONE}</li>
-          <li>2 maillots: {SHIPPING_PRICE_TWO}</li>
-          <li>3 maillots ou plus: {SHIPPING_PRICE_THREE}</li>
+          <li>Livraison standard: {STANDARD_SHIPPING_LABEL}</li>
+          <li>Livraison offerte des {FREE_SHIPPING_LABEL} d&apos;achats</li>
+          <li>Offre panier: pour 2 maillots achetes, le 3e le moins cher est offert automatiquement</li>
         </ul>
       </LegalSection>
 
@@ -41,14 +40,14 @@ export default function LivraisonPage() {
 
       <LegalSection title="Adresse de livraison">
         <p>
-          Le client doit vérifier l’exactitude des informations de livraison avant validation de la commande. Toute erreur d’adresse peut
-          entraîner un retard ou empêcher la bonne réception du colis.
+          Le client doit verifier l&apos;exactitude des informations de livraison avant validation de la commande. Toute erreur d&apos;adresse peut
+          entrainer un retard ou empecher la bonne reception du colis.
         </p>
       </LegalSection>
 
       <LegalSection title="Incident de livraison">
         <p>
-          En cas de retard important, de colis non reçu ou de produit arrivé endommagé, le client est invité à contacter rapidement le
+          En cas de retard important, de colis non recu ou de produit arrive endommage, le client est invite a contacter rapidement le
           service client via la{' '}
           <Link href="/contact" className="font-semibold text-[var(--terra)] underline underline-offset-4">
             page contact

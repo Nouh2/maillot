@@ -218,7 +218,8 @@ export async function synchronizeOrderFromCheckoutSession(session: Stripe.Checko
   }
 
   const order = existingOrder as OrderRow
-  const paidAt = session.payment_status === 'paid' ? new Date().toISOString() : order.paid_at ?? null
+  const isCheckoutCompleted = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+  const paidAt = isCheckoutCompleted ? new Date().toISOString() : order.paid_at ?? null
 
   const { data: updatedOrder, error: updateError } = await service()
     .from('orders')
@@ -228,8 +229,8 @@ export async function synchronizeOrderFromCheckoutSession(session: Stripe.Checko
       customer_email: session.customer_details?.email?.trim().toLowerCase() ?? order.customer_email ?? null,
       customer_phone: session.customer_details?.phone ?? order.customer_phone ?? null,
       shipping_address: mapShippingAddress(session) ?? order.shipping_address ?? null,
-      total_amount: session.amount_total ? session.amount_total / 100 : order.total_amount ?? null,
-      status: order.status === 'pending' && session.payment_status === 'paid' ? 'paid' : order.status,
+      total_amount: session.amount_total != null ? session.amount_total / 100 : order.total_amount ?? null,
+      status: order.status === 'pending' && isCheckoutCompleted ? 'paid' : order.status,
       paid_at: paidAt,
     })
     .eq('id', order.id)

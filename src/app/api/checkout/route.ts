@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { calculateCartItemUnitPrice, calculateShippingAmount, getProductPricing } from '@/lib/cartPricing'
+import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, isLoyaltyCode, normalizePromoCode, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
+import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { getStripe } from '@/lib/stripe'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
 import type { CartItem } from '@/types/cart'
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
   let items: CartItem[]
   let email = ''
   let marketingOptIn = false
+  let promoCode = ''
   let attribution: AttributionPayload = {}
 
   try {
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
     items = body.items
     email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
     marketingOptIn = body.marketingOptIn === true
+    promoCode = normalizePromoCode(typeof body.promoCode === 'string' ? body.promoCode : '')
     attribution = normalizeAttributionPayload(body.attribution)
   } catch {
     return NextResponse.json({ error: 'Body invalide' }, { status: 400 })
@@ -78,6 +81,10 @@ export async function POST(request: NextRequest) {
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
+  }
+
+  if (promoCode && !isLoyaltyCode(promoCode)) {
+    return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
   }
 
   const productIds = [...new Set(items.map((item) => item.product_id))]
@@ -98,10 +105,27 @@ export async function POST(request: NextRequest) {
   }
 
   const normalizedItems = normalizeCartItems(items, retroMap)
-  const itemCount = normalizedItems.reduce((sum, item) => sum + item.qty, 0)
-  const shippingAmount = calculateShippingAmount(itemCount)
-  const itemsSubtotal = normalizedItems.reduce((sum, item) => sum + item.price * item.qty, 0)
-  const orderTotal = itemsSubtotal + shippingAmount
+  const { data: priorOrders } = await supabase
+    .from('orders')
+    .select('id, status, paid_at')
+    .eq('customer_email', email)
+    .limit(10)
+
+  const hasCompletedOrder = ((priorOrders as Array<{ status?: string | null; paid_at?: string | null }> | null) ?? []).some((order) =>
+    Boolean(order.paid_at) || ['paid', 'shipped', 'delivered', 'cancelled'].includes(order.status ?? ''),
+  )
+
+  if (promoCode === LOYALTY_CODE && hasCompletedOrder) {
+    return NextResponse.json({ error: 'Ce code est reserve a la premiere commande pour cet email.' }, { status: 400 })
+  }
+
+  const pricing = calculateCartPricing(normalizedItems, {
+    promoCode,
+    loyaltyEligible: promoCode === LOYALTY_CODE ? !hasCompletedOrder : false,
+  })
+  const itemCount = pricing.itemCount
+  const shippingAmount = pricing.shipping
+  const orderTotal = pricing.total
   const stripe = getStripe()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin
   const orderNumber = generateOrderNumber()
@@ -164,26 +188,30 @@ export async function POST(request: NextRequest) {
       client_reference_id: pendingOrder.id,
       customer_email: email,
       line_items: [
-        ...normalizedItems.map((item) => ({
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: [
-                item.name,
-                `Taille ${item.size}`,
-                item.patch_names.length > 0 ? `Patch ${item.patch_names.join(', ')}` : null,
-                item.flocage_name || item.flocage_number
-                  ? `Flocage ${[item.flocage_name, item.flocage_number].filter(Boolean).join(' #')}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(' - '),
-              images: item.photo ? [item.photo] : [],
+        ...pricing.discountedUnitGroups.map((group) => {
+          const item = normalizedItems[group.sourceIndex]
+
+          return {
+            price_data: {
+              currency: 'eur',
+              product_data: {
+                name: [
+                  item.name,
+                  `Taille ${item.size}`,
+                  item.patch_names.length > 0 ? `Patch ${item.patch_names.join(', ')}` : null,
+                  item.flocage_name || item.flocage_number
+                    ? `Flocage ${[item.flocage_name, item.flocage_number].filter(Boolean).join(' #')}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' - '),
+                images: item.photo ? [item.photo] : [],
+              },
+              unit_amount: Math.round(group.unitAmount * 100),
             },
-            unit_amount: Math.round(item.price * 100),
-          },
-          quantity: item.qty,
-        })),
+            quantity: group.quantity,
+          }
+        }),
         ...(shippingAmount > 0
           ? [
               {
@@ -191,12 +219,7 @@ export async function POST(request: NextRequest) {
                   currency: 'eur',
                   product_data: {
                     name: 'Livraison',
-                    description:
-                      itemCount >= 3
-                        ? 'Offerte des 3 maillots'
-                        : itemCount === 2
-                          ? 'Tarif 2 maillots'
-                          : 'Tarif 1 maillot',
+                    description: `Offerte des ${FREE_SHIPPING_THRESHOLD} EUR d achats`,
                   },
                   unit_amount: Math.round(shippingAmount * 100),
                 },
@@ -217,6 +240,10 @@ export async function POST(request: NextRequest) {
         public_tracking_token: pendingOrder.public_tracking_token,
         item_count: String(itemCount),
         shipping_amount: String(shippingAmount),
+        loyalty_code: promoCode || '',
+        loyalty_applied: pricing.loyaltyCodeApplied ? 'true' : 'false',
+        bundle_discount: String(pricing.bundleDiscount),
+        loyalty_discount: String(pricing.loyaltyDiscount),
         marketing_opt_in: marketingOptIn ? 'true' : 'false',
         source_channel: sourceChannel,
       },

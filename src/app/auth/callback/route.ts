@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { linkOrdersToUserAccount } from '@/lib/orders'
 
@@ -10,8 +11,17 @@ function getSafeRedirectPath(candidate: string | null) {
   return candidate
 }
 
+function getOtpType(candidate: string | null): EmailOtpType | null {
+  if (!candidate) return null
+
+  const supportedTypes: EmailOtpType[] = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email']
+  return supportedTypes.includes(candidate as EmailOtpType) ? (candidate as EmailOtpType) : null
+}
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code')
+  const tokenHash = request.nextUrl.searchParams.get('token_hash')
+  const type = getOtpType(request.nextUrl.searchParams.get('type'))
   const nextPath = getSafeRedirectPath(request.nextUrl.searchParams.get('next'))
   const redirectUrl = new URL(nextPath, request.url)
   const response = NextResponse.redirect(redirectUrl, { status: 303 })
@@ -33,11 +43,16 @@ export async function GET(request: NextRequest) {
     },
   )
 
-  if (!code) {
+  if (!code && !(tokenHash && type)) {
     return NextResponse.redirect(new URL('/compte?error=auth', request.url), { status: 303 })
   }
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  const { error } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : await supabase.auth.verifyOtp({
+        token_hash: tokenHash!,
+        type: type!,
+      })
 
   if (error) {
     return NextResponse.redirect(new URL('/compte?error=auth', request.url), { status: 303 })

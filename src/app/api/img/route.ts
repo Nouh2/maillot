@@ -37,13 +37,24 @@ export async function GET(request: NextRequest) {
     return new NextResponse('Image fetch failed', { status: res.status })
   }
 
-  const contentType = res.headers.get('content-type') ?? 'image/jpeg'
-  const buffer = await res.arrayBuffer()
+  const headers = new Headers()
+  headers.set('Content-Type', res.headers.get('content-type') ?? 'image/jpeg')
+  headers.set('Cache-Control', `public, max-age=${IMAGE_CACHE_SECONDS}, s-maxage=${IMAGE_CACHE_SECONDS}, stale-while-revalidate=${IMAGE_STALE_SECONDS}, immutable`)
 
-  return new NextResponse(buffer, {
-    headers: {
-      'Content-Type': contentType,
-      'Cache-Control': `public, max-age=${IMAGE_CACHE_SECONDS}, s-maxage=${IMAGE_CACHE_SECONDS}, stale-while-revalidate=${IMAGE_STALE_SECONDS}, immutable`,
-    },
-  })
+  const contentLength = res.headers.get('content-length')
+  if (contentLength) {
+    headers.set('Content-Length', contentLength)
+  }
+
+  const etag = res.headers.get('etag')
+  if (etag) {
+    headers.set('ETag', etag)
+  }
+
+  const lastModified = res.headers.get('last-modified')
+  if (lastModified) {
+    headers.set('Last-Modified', lastModified)
+  }
+
+  return new NextResponse(res.body, { headers })
 }

@@ -31,8 +31,8 @@ type CatalogListRow = Pick<
   | 'created_at'
 >
 
-const CATALOG_REVALIDATE_SECONDS = 300
-const STATIC_REVALIDATE_SECONDS = 3600
+const CATALOG_REVALIDATE_SECONDS = 1800
+const STATIC_REVALIDATE_SECONDS = 86400
 
 async function fetchAllProducts(
   queryFactory: (from: number, to: number) => PromiseLike<ProductQueryPage>,

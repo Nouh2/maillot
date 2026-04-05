@@ -12,7 +12,7 @@ interface CheckoutButtonProps {
 }
 
 export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonProps) {
-  const { items, total, customerEmail, marketingOptIn } = useCartStore()
+  const { items, total, customerEmail, marketingOptIn, promoCode } = useCartStore()
 
   const handleCheckout = async () => {
     if (items.length === 0) return
@@ -36,6 +36,7 @@ export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonPr
           items,
           email: customerEmail,
           marketingOptIn,
+          promoCode,
           attribution,
         }),
       })
@@ -56,7 +57,7 @@ export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonPr
       }
     } catch (error) {
       console.error('Checkout echoue', error)
-      window.alert('Impossible de lancer le paiement pour le moment.')
+      window.alert(error instanceof Error ? error.message : 'Impossible de lancer le paiement pour le moment.')
     }
   }
 

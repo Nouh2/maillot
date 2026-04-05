@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
   description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
 }
-export const revalidate = 300
+export const revalidate = 1800
 
 function dedupeProducts(...groups: Product[][]): Product[] {
   return dedupeCatalogProducts(groups.flat())

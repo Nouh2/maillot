@@ -1,4 +1,11 @@
-import { LAUNCH_PROMO_CTA, LAUNCH_PROMO_DURATION_DAYS, LAUNCH_PROMO_ENABLED, LAUNCH_PROMO_LABEL, LAUNCH_PROMO_START_ISO } from './siteConfig'
+import {
+  LAUNCH_PROMO_CTA,
+  LAUNCH_PROMO_DURATION_DAYS,
+  LAUNCH_PROMO_ENABLED,
+  LAUNCH_PROMO_LABEL,
+  LAUNCH_PROMO_START_ISO,
+  LOYALTY_CODE,
+} from './siteConfig'
 
 export const FLOCAGE_PRICE = 5
 export const PATCH_PRICE = 2.5
@@ -6,11 +13,53 @@ export const STANDARD_PRICE = 27.99
 export const STANDARD_PROMO_PRICE = 19.99
 export const RETRO_PRICE = 34.99
 export const RETRO_PROMO_PRICE = 27.99
+export const STANDARD_SHIPPING_PRICE = 6
+export const FREE_SHIPPING_THRESHOLD = 60
+export const LOYALTY_DISCOUNT_RATE = 0.1
+
+type PriceableCartItem = {
+  price: number
+  qty: number
+}
+
+type DiscountedUnitGroup = {
+  sourceIndex: number
+  unitAmount: number
+  quantity: number
+}
+
+type CartPricingOptions = {
+  promoCode?: string | null
+  loyaltyEligible?: boolean
+}
+
+export type CartPricingBreakdown = {
+  itemCount: number
+  subtotal: number
+  bundleDiscount: number
+  loyaltyDiscount: number
+  discountedSubtotal: number
+  shipping: number
+  total: number
+  freeItemsCount: number
+  freeShippingUnlocked: boolean
+  loyaltyCodeRequested: boolean
+  loyaltyCodeApplied: boolean
+  discountedUnitGroups: DiscountedUnitGroup[]
+}
 
 const euroFormatter = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'EUR',
 })
+
+function toCents(value: number): number {
+  return Math.round(value * 100)
+}
+
+function fromCents(value: number): number {
+  return value / 100
+}
 
 function getPromoWindowEnd(): number {
   if (!LAUNCH_PROMO_START_ISO) return 0
@@ -49,20 +98,110 @@ export function getProductPricing(params: { isRetro: boolean; now?: Date }) {
   }
 }
 
-export function calculateShippingAmount(itemCount: number): number {
-  if (itemCount >= 3) return 0
-  if (itemCount === 2) return 5
-  if (itemCount === 1) return 6
-  return 0
+export function normalizePromoCode(code?: string | null): string {
+  return code?.trim().toUpperCase() ?? ''
 }
 
-export function calculateItemsSubtotal(items: Array<{ price: number; qty: number }>): number {
+export function isLoyaltyCode(value?: string | null): boolean {
+  return normalizePromoCode(value) === LOYALTY_CODE
+}
+
+export function calculateShippingAmount(itemCount: number, discountedSubtotal = 0): number {
+  if (itemCount <= 0) return 0
+  if (discountedSubtotal >= FREE_SHIPPING_THRESHOLD) return 0
+  return STANDARD_SHIPPING_PRICE
+}
+
+export function calculateItemsSubtotal(items: PriceableCartItem[]): number {
   return items.reduce((sum, item) => sum + (item.price * item.qty), 0)
 }
 
-export function calculateCartGrandTotal(items: Array<{ price: number; qty: number }>): number {
-  const quantity = items.reduce((sum, item) => sum + item.qty, 0)
-  return calculateItemsSubtotal(items) + calculateShippingAmount(quantity)
+export function calculateCartPricing(items: PriceableCartItem[], options: CartPricingOptions = {}): CartPricingBreakdown {
+  const itemCount = items.reduce((sum, item) => sum + item.qty, 0)
+  const subtotalCents = items.reduce((sum, item) => sum + (toCents(item.price) * item.qty), 0)
+  const freeItemsCount = Math.floor(itemCount / 3)
+  const loyaltyCodeRequested = isLoyaltyCode(options.promoCode)
+  const loyaltyCodeApplied = loyaltyCodeRequested && options.loyaltyEligible !== false
+
+  const units = items.flatMap((item, sourceIndex) =>
+    Array.from({ length: item.qty }, (_, unitIndex) => ({
+      sourceIndex,
+      priceCents: toCents(item.price),
+      unitIndex,
+    })),
+  )
+
+  const freeUnitKeys = new Set(
+    [...units]
+      .sort((left, right) => {
+        if (left.priceCents !== right.priceCents) return left.priceCents - right.priceCents
+        if (left.sourceIndex !== right.sourceIndex) return left.sourceIndex - right.sourceIndex
+        return left.unitIndex - right.unitIndex
+      })
+      .slice(0, freeItemsCount)
+      .map((unit) => `${unit.sourceIndex}:${unit.unitIndex}`),
+  )
+
+  let bundleDiscountCents = 0
+  let loyaltyDiscountCents = 0
+  let subtotalAfterBundleCents = 0
+  const groupedUnits = new Map<string, DiscountedUnitGroup>()
+
+  for (const unit of units) {
+    const unitKey = `${unit.sourceIndex}:${unit.unitIndex}`
+    const isFreeUnit = freeUnitKeys.has(unitKey)
+
+    if (isFreeUnit) {
+      bundleDiscountCents += unit.priceCents
+    } else {
+      subtotalAfterBundleCents += unit.priceCents
+    }
+
+    const payableCents = isFreeUnit
+      ? 0
+      : loyaltyCodeApplied
+        ? Math.round(unit.priceCents * (1 - LOYALTY_DISCOUNT_RATE))
+        : unit.priceCents
+
+    if (!isFreeUnit && loyaltyCodeApplied) {
+      loyaltyDiscountCents += unit.priceCents - payableCents
+    }
+
+    const groupKey = `${unit.sourceIndex}:${payableCents}`
+    const existingGroup = groupedUnits.get(groupKey)
+
+    if (existingGroup) {
+      existingGroup.quantity += 1
+    } else {
+      groupedUnits.set(groupKey, {
+        sourceIndex: unit.sourceIndex,
+        unitAmount: fromCents(payableCents),
+        quantity: 1,
+      })
+    }
+  }
+
+  const discountedSubtotalCents = subtotalCents - bundleDiscountCents - loyaltyDiscountCents
+  const shippingCents = toCents(calculateShippingAmount(itemCount, fromCents(subtotalAfterBundleCents)))
+
+  return {
+    itemCount,
+    subtotal: fromCents(subtotalCents),
+    bundleDiscount: fromCents(bundleDiscountCents),
+    loyaltyDiscount: fromCents(loyaltyDiscountCents),
+    discountedSubtotal: fromCents(discountedSubtotalCents),
+    shipping: fromCents(shippingCents),
+    total: fromCents(discountedSubtotalCents + shippingCents),
+    freeItemsCount,
+    freeShippingUnlocked: shippingCents === 0 && itemCount > 0,
+    loyaltyCodeRequested,
+    loyaltyCodeApplied,
+    discountedUnitGroups: Array.from(groupedUnits.values()),
+  }
+}
+
+export function calculateCartGrandTotal(items: PriceableCartItem[], options: CartPricingOptions = {}): number {
+  return calculateCartPricing(items, options).total
 }
 
 export function calculateCartItemUnitPrice(params: {

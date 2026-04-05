@@ -19,7 +19,7 @@ export default async function OrderConfirmedPage({ searchParams }: OrderConfirme
   if (sessionId) {
     try {
       const session = await getStripe().checkout.sessions.retrieve(sessionId)
-      if (session.payment_status === 'paid') {
+      if (session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
         order = await synchronizeOrderFromCheckoutSession(session)
       } else {
         const { data } = await getOrderByStripeSessionId(sessionId)

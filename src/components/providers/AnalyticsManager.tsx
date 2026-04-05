@@ -20,7 +20,7 @@ export function AnalyticsManager() {
 
   useEffect(() => {
     captureAttribution(searchParams)
-  }, [pathname, searchParams, consent])
+  }, [pathname, searchParams])
 
   useEffect(() => {
     if (consent === 'granted') {

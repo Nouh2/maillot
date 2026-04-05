@@ -13,12 +13,11 @@ function getPromoEndDate() {
 function getTimeUntilPromoEnd() {
   const now = new Date()
   const promoEnd = getPromoEndDate()
-  if (!promoEnd) return { h: 0, m: 0, s: 0 }
+  if (!promoEnd) return { h: 0, m: 0 }
   const diff = Math.max(0, promoEnd.getTime() - now.getTime())
   const h = Math.floor(diff / 1000 / 60 / 60)
   const m = Math.floor((diff / 1000 / 60) % 60)
-  const s = Math.floor((diff / 1000) % 60)
-  return { h, m, s }
+  return { h, m }
 }
 
 function Pad({ n }: { n: number }) {
@@ -26,14 +25,14 @@ function Pad({ n }: { n: number }) {
 }
 
 export function CountdownBanner() {
-  const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
+  const [time, setTime] = useState({ h: 0, m: 0 })
 
   useEffect(() => {
     if (!LAUNCH_PROMO_ENABLED || !LAUNCH_PROMO_START_ISO) return
 
     const syncTime = () => setTime(getTimeUntilPromoEnd())
     const timeoutId = window.setTimeout(syncTime, 0)
-    const intervalId = window.setInterval(syncTime, 1000)
+    const intervalId = window.setInterval(syncTime, 60_000)
 
     return () => {
       window.clearTimeout(timeoutId)
@@ -57,7 +56,6 @@ export function CountdownBanner() {
           {[
             { value: time.h, label: 'H' },
             { value: time.m, label: 'MIN' },
-            { value: time.s, label: 'SEC' },
           ].map(({ value, label }, index) => (
             <div key={label} className="flex items-center gap-3">
               <div className="flex flex-col items-center">
@@ -66,7 +64,7 @@ export function CountdownBanner() {
                 </div>
                 <span className="mt-1 font-condensed text-[10px] uppercase tracking-widest text-[var(--grey-lt)]">{label}</span>
               </div>
-              {index < 2 ? <span className="pb-4 font-condensed text-2xl font-bold text-white/40">:</span> : null}
+              {index < 1 ? <span className="pb-4 font-condensed text-2xl font-bold text-white/40">:</span> : null}
             </div>
           ))}
         </div>
