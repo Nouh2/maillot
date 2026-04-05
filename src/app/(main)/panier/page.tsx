@@ -22,7 +22,7 @@ export default function CartPage() {
       </div>
 
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
+        <section className="order-2 rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8 lg:order-1">
           {items.length === 0 ? (
             <div className="py-20 text-center">
               <p className="font-bebas text-4xl text-[var(--cream-3)]">Panier vide</p>
@@ -43,7 +43,7 @@ export default function CartPage() {
           )}
         </section>
 
-        <aside className="space-y-5 pb-24 lg:pb-0">
+        <aside className="order-1 space-y-5 pb-24 lg:order-2 lg:pb-0">
           <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Resume</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Ta commande</h2>
