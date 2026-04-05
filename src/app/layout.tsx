@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
 import './globals.css'
-import { AppShell } from '@/components/layout/AppShell'
 import { Providers } from '@/components/providers/Providers'
 
 const barlow = Barlow({
@@ -54,7 +53,7 @@ export default function RootLayout({
     >
       <body className="antialiased overflow-x-hidden">
         <Providers>
-          <AppShell>{children}</AppShell>
+          {children}
         </Providers>
       </body>
     </html>

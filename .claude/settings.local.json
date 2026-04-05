@@ -25,7 +25,10 @@
       "Skill(commit-commands:commit-push-pr)",
       "Bash(gh pr:*)",
       "mcp__plugin_supabase_supabase__list_projects",
-      "mcp__claude_ai_Supabase__execute_sql"
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__get_advisors",
+      "Bash(mkdir -p \"\\(main\\)\")",
+      "Bash(mv compte:*)"
     ]
   }
 }
