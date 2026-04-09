@@ -205,7 +205,85 @@ export async function sendTrackingEmailForOrder(orderId: string): Promise<boolea
   return true
 }
 
-export async function synchronizeOrderFromCheckoutSession(session: Stripe.Checkout.Session): Promise<OrderRow | null> {
+async function updateCheckoutLeadRecovery(order: OrderRow): Promise<void> {
+  if (!order.customer_email) return
+
+  const { error } = await service()
+    .from('checkout_leads')
+    .update({
+      recovered_order_id: order.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('email', order.customer_email)
+
+  if (error) {
+    console.error('Failed to update checkout lead recovery:', error)
+  }
+}
+
+async function maybeSendOrderTelegramNotification(order: OrderRow): Promise<void> {
+  if (order.telegram_notified) return
+
+  const notified = await sendTelegramNotification(order)
+  if (!notified) return
+
+  order.telegram_notified = true
+  const { error } = await service()
+    .from('orders')
+    .update({ telegram_notified: true })
+    .eq('id', order.id)
+
+  if (error) {
+    console.error('Failed to mark Telegram notification as sent:', error)
+  }
+}
+
+async function maybeSendOrderPaidEmailNotification(order: OrderRow): Promise<void> {
+  if (order.payment_confirmation_sent_at || !order.customer_email) return
+
+  const sent = await sendOrderPaidEmail({
+    to: order.customer_email,
+    customerName: order.customer_name,
+    orderNumber: getOrderDisplayReference(order),
+    trackingToken: order.public_tracking_token,
+  })
+
+  if (!sent) return
+
+  const timestamp = new Date().toISOString()
+  order.payment_confirmation_sent_at = timestamp
+  const { error } = await service()
+    .from('orders')
+    .update({ payment_confirmation_sent_at: timestamp })
+    .eq('id', order.id)
+
+  if (error) {
+    console.error('Failed to mark payment confirmation email as sent:', error)
+  }
+}
+
+async function runOrderPostCheckoutTasksForOrder(order: OrderRow): Promise<void> {
+  await updateCheckoutLeadRecovery(order)
+  await maybeSendOrderTelegramNotification(order)
+  await maybeSendOrderPaidEmailNotification(order)
+}
+
+export async function runOrderPostCheckoutTasks(orderId: string): Promise<void> {
+  const { data, error } = await getOrderById(orderId)
+  const order = data as OrderRow | null
+
+  if (error || !order) {
+    console.error('Failed to load order for post-checkout tasks:', error ?? orderId)
+    return
+  }
+
+  await runOrderPostCheckoutTasksForOrder(order)
+}
+
+export async function synchronizeOrderFromCheckoutSession(
+  session: Stripe.Checkout.Session,
+  options?: { runPostProcessing?: boolean }
+): Promise<OrderRow | null> {
   const orderId = session.metadata?.order_id ?? session.client_reference_id
   const lookup = orderId
     ? service().from('orders').select('*').eq('id', orderId)
@@ -244,40 +322,8 @@ export async function synchronizeOrderFromCheckoutSession(session: Stripe.Checko
 
   const nextOrder = updatedOrder as OrderRow
 
-  if (nextOrder.customer_email) {
-    await service()
-      .from('checkout_leads')
-      .update({
-        recovered_order_id: nextOrder.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('email', nextOrder.customer_email)
-  }
-
-  if (!nextOrder.telegram_notified) {
-    const notified = await sendTelegramNotification(nextOrder)
-    if (notified) {
-      nextOrder.telegram_notified = true
-      await service().from('orders').update({ telegram_notified: true }).eq('id', nextOrder.id)
-    }
-  }
-
-  if (!nextOrder.payment_confirmation_sent_at && nextOrder.customer_email) {
-    const sent = await sendOrderPaidEmail({
-      to: nextOrder.customer_email,
-      customerName: nextOrder.customer_name,
-      orderNumber: getOrderDisplayReference(nextOrder),
-      trackingToken: nextOrder.public_tracking_token,
-    })
-
-    if (sent) {
-      const timestamp = new Date().toISOString()
-      nextOrder.payment_confirmation_sent_at = timestamp
-      await service()
-        .from('orders')
-        .update({ payment_confirmation_sent_at: timestamp })
-        .eq('id', nextOrder.id)
-    }
+  if (options?.runPostProcessing !== false) {
+    await runOrderPostCheckoutTasksForOrder(nextOrder)
   }
 
   return nextOrder

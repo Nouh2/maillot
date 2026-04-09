@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'MAILLOT ADDICT Ops',
-    short_name: 'Maillot Ops',
-    description: 'Webapp interne de gestion des commandes MAILLOT ADDICT.',
-    start_url: '/ops',
+    name: 'MAILLOT ADDICT',
+    short_name: 'Maillot Addict',
+    description: 'Maillots de football premium pour clubs, selections et retro.',
+    start_url: '/',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
@@ -13,14 +13,19 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#111111',
     icons: [
       {
-        src: '/logohead.jpg',
+        src: '/icon-192.png',
         sizes: '192x192',
-        type: 'image/jpeg',
+        type: 'image/png',
       },
       {
-        src: '/logohead.jpg',
+        src: '/icon-512.png',
         sizes: '512x512',
-        type: 'image/jpeg',
+        type: 'image/png',
+      },
+      {
+        src: '/apple-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
       },
     ],
   }
