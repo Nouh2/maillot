@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import type { Order } from '@/types/order'
 
@@ -188,12 +187,6 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
                 {filter === 'all' ? 'Toutes' : filter === 'paid' ? 'A payer fournisseur' : 'Expediees'}
               </button>
             ))}
-            <Link
-              href="/ops/emails"
-              className="rounded-full border border-[var(--cream-3)] px-4 py-2 text-xs font-condensed uppercase tracking-[0.16em] text-[var(--black)]"
-            >
-              Emails
-            </Link>
             <button
               type="button"
               onClick={logout}

@@ -1,4 +1,5 @@
 import catalogEntities from '../../data/catalog-entities.json'
+import { normalizeProductManualOverride } from '@/lib/productOverrides'
 import type { Product } from '@/types/product'
 
 type CatalogEntity = (typeof catalogEntities)[number]
@@ -117,12 +118,13 @@ export function findCatalogEntity(product: Partial<ProductIdentitySource>): Cata
 export function normalizeCatalogProduct<T extends ProductIdentitySource>(product: T): T {
   const entity = findCatalogEntity(product)
   const normalizedClub = entity?.club ?? cleanupCatalogClubLabel(product.club || product.name || '')
+  const manualOverride = normalizeProductManualOverride((product as T & { manual_override?: unknown }).manual_override)
 
   return {
     ...product,
-    club: normalizedClub || product.club,
-    league: entity?.league ?? product.league,
-    country: entity?.country ?? product.country,
+    club: manualOverride.club ? product.club : normalizedClub || product.club,
+    league: manualOverride.league ? product.league : entity?.league ?? product.league,
+    country: manualOverride.country ? product.country : entity?.country ?? product.country,
   }
 }
 

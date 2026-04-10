@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { OpsDashboardClient } from '@/components/ops/OpsDashboardClient'
-import { OpsInstallPrompt } from '@/components/ops/OpsInstallPrompt'
+import { OpsPageShell } from '@/components/ops/OpsPageShell'
 import { getOpsSession } from '@/lib/opsAuth'
 import { getOpsOrders } from '@/lib/orders'
 import type { Order } from '@/types/order'
@@ -20,11 +20,8 @@ export default async function OpsPage() {
   const orders = (data as Order[] | null) ?? []
 
   return (
-    <div className="min-h-screen bg-[var(--cream)] px-4 py-6 sm:px-6">
-      <div className="mx-auto max-w-3xl space-y-4">
-        <OpsInstallPrompt />
-        <OpsDashboardClient initialOrders={orders} />
-      </div>
-    </div>
+    <OpsPageShell maxWidth="3xl">
+      <OpsDashboardClient initialOrders={orders} />
+    </OpsPageShell>
   )
 }

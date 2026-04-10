@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import type { Club, League, Patch, Product } from '@/types/product'
 import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
-import { normalizeCatalogProduct, normalizeCatalogProducts } from '@/lib/catalogEntityRegistry'
+import { CATALOG_CACHE_TAG, toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabasePublicClient } from './server'
 
 type ProductQueryPage = {
@@ -29,10 +29,22 @@ type CatalogListRow = Pick<
   | 'source_title'
   | 'source_category_key'
   | 'created_at'
->
+> & {
+  manual_override?: unknown
+}
 
 const CATALOG_REVALIDATE_SECONDS = 1800
 const STATIC_REVALIDATE_SECONDS = 86400
+
+function isMissingManualOverrideColumn(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string' &&
+    error.message.includes('manual_override')
+  )
+}
 
 async function fetchAllProducts(
   queryFactory: (from: number, to: number) => PromiseLike<ProductQueryPage>,
@@ -55,40 +67,43 @@ async function fetchAllProducts(
   return all
 }
 
-function toCachedCatalogProduct(row: CatalogListRow): Product {
-  return {
-    ...row,
-    description: null,
-    sizes: [],
-    available_patches: Array.isArray(row.available_patches) ? row.available_patches : [],
-    photos: Array.isArray(row.photos) ? row.photos.slice(0, 2) : [],
-    stock: 0,
-    is_active: true,
-    source_provider: null,
-    source_album_id: null,
-    source_album_url: null,
-    last_synced_at: null,
-  }
-}
-
 const getCachedProducts = unstable_cache(
   async (): Promise<Product[]> => {
     const supabase = getSupabasePublicClient()
-    const rawProducts = await fetchAllProducts((from, to) =>
-      supabase
-        .from('products')
-        .select(
-          'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at',
-        )
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .range(from, to),
-    )
+    let rawProducts: Product[]
 
-    return normalizeCatalogProducts((rawProducts as CatalogListRow[]).map(toCachedCatalogProduct))
+    try {
+      rawProducts = await fetchAllProducts((from, to) =>
+        supabase
+          .from('products')
+          .select(
+            'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override',
+          )
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .range(from, to),
+      )
+    } catch (error) {
+      if (!isMissingManualOverrideColumn(error)) {
+        throw error
+      }
+
+      rawProducts = await fetchAllProducts((from, to) =>
+        supabase
+          .from('products')
+          .select(
+            'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at',
+          )
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .range(from, to),
+      )
+    }
+
+    return (rawProducts as CatalogListRow[]).map((row) => toCatalogProduct(row, { photoLimit: 2 }))
   },
   ['catalog-products'],
-  { revalidate: CATALOG_REVALIDATE_SECONDS },
+  { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
 
 const getCachedLeagues = unstable_cache(
@@ -113,10 +128,10 @@ const getCachedProductBySlug = unstable_cache(
 
     if (error) return null
 
-    return normalizeCatalogProduct(data)
+    return toCatalogProduct(data as Product & { manual_override?: unknown })
   },
   ['catalog-product-by-slug'],
-  { revalidate: CATALOG_REVALIDATE_SECONDS },
+  { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
 
 const getCachedPatches = unstable_cache(
