@@ -7,15 +7,12 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
-import type { Product } from '@/types/product'
+import type { HomepageFastMoverGroup } from '@/types/homepageCuration'
 
-export function CollectionsTabs({ products }: { products: Product[] }) {
-  const countries = Array.from(new Set(products.map((product) => product.club))).sort((left, right) =>
-    left.localeCompare(right, 'fr-FR', { sensitivity: 'base' }),
-  )
-
-  const [activeCountry, setActiveCountry] = useState(countries[0] ?? '')
-  const display = products.filter((product) => product.club === activeCountry).slice(0, 6)
+export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }) {
+  const [activeCountry, setActiveCountry] = useState(groups[0]?.key ?? '')
+  const activeGroup = groups.find((group) => group.key === activeCountry) ?? groups[0]
+  const display = activeGroup?.products ?? []
 
   return (
     <section className="bg-[var(--cream)] px-4 pt-6 pb-8 md:px-6 md:pt-10 md:pb-12">
@@ -43,15 +40,15 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
       </p>
 
       <div className="mt-3 flex gap-4 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {countries.map((country) => (
+        {groups.map((group) => (
           <button
-            key={country}
-            onClick={() => setActiveCountry(country)}
+            key={group.key}
+            onClick={() => setActiveCountry(group.key)}
             className={`-mb-px whitespace-nowrap border-b-2 pb-2 font-condensed text-[11px] uppercase tracking-wide transition-all ${
-              activeCountry === country ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
+              activeCountry === group.key ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
             }`}
           >
-            {country}
+            {group.label}
           </button>
         ))}
       </div>
@@ -95,13 +92,13 @@ export function CollectionsTabs({ products }: { products: Product[] }) {
         <p className="py-8 text-center font-condensed text-sm text-[var(--grey)]">Collection bientot disponible</p>
       )}
 
-      {activeCountry ? (
+      {activeGroup ? (
         <Link
-          href={`/coupe-du-monde?club=${encodeURIComponent(activeCountry)}`}
+          href={activeGroup.href}
           className="mt-4 block w-full border border-[var(--black)] py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] transition-colors hover:bg-[var(--black)] hover:text-white"
           style={{ borderRadius: 2 }}
         >
-          Voir tous les maillots {activeCountry}
+          Voir tous les maillots {activeGroup.label}
         </Link>
       ) : null}
       </div>

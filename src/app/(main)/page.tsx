@@ -12,10 +12,13 @@ import { ReassuranceBar } from '@/components/home/ReassuranceBar'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
 import { TrustScrollBar } from '@/components/home/TrustScrollBar'
 import { WhyUsSection } from '@/components/home/WhyUsSection'
-import { dedupeCatalogProducts, filterStandardCatalogProducts } from '@/lib/catalogPresentation'
-import { sortProductsByDefaultOrder } from '@/lib/productFilters'
+import {
+  buildHomepageBestsellerTabs,
+  buildHomepageCatalogSource,
+  buildHomepageFastMoverGroups,
+  getHomepageCurationAssignments,
+} from '@/lib/homepageCuration'
 import { getLeagues, getProducts } from '@/lib/supabase/queries'
-import type { Product } from '@/types/product'
 
 export const metadata: Metadata = {
   title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
@@ -23,75 +26,26 @@ export const metadata: Metadata = {
 }
 export const revalidate = 1800
 
-function dedupeProducts(...groups: Product[][]): Product[] {
-  return dedupeCatalogProducts(groups.flat())
-}
-
-function pickNewestProducts(products: Product[], limit: number, distinctKey?: (product: Product) => string): Product[] {
-  const sorted = sortProductsByDefaultOrder(products)
-
-  if (!distinctKey) return sorted.slice(0, limit)
-
-  const picked: Product[] = []
-  const seenKeys = new Set<string>()
-  const seenIds = new Set<string>()
-
-  for (const product of sorted) {
-    const key = distinctKey(product)
-    if (seenKeys.has(key)) continue
-    picked.push(product)
-    seenKeys.add(key)
-    seenIds.add(product.id)
-    if (picked.length === limit) return picked
-  }
-
-  for (const product of sorted) {
-    if (seenIds.has(product.id)) continue
-    picked.push(product)
-    if (picked.length === limit) return picked
-  }
-
-  return picked
-}
-
 export default async function HomePage() {
-  const [allLeagues, rawCatalogProducts] = await Promise.all([
+  const [allLeagues, rawCatalogProducts, assignments] = await Promise.all([
     getLeagues(),
     getProducts(),
+    getHomepageCurationAssignments(),
   ])
-  const leagues = allLeagues.filter((league) => league.slug !== 'champions-league')
-  const homeLeagues = leagues.slice(0, 4)
-  const allCatalogProducts = dedupeCatalogProducts(filterStandardCatalogProducts(rawCatalogProducts))
-  const worldCupProducts = dedupeCatalogProducts(
-    allCatalogProducts.filter((product) => product.league === 'Selections nationales' && ['2026', '2026-2027'].includes(product.season)),
-  )
-  const recentProducts = sortProductsByDefaultOrder(allCatalogProducts)
-  const preMatchProducts = allCatalogProducts.filter((product) => product.product_kind === 'pre_match')
-
-  const leagueProductGroups = homeLeagues.map((league) => ({
-    leagueName: league.name,
-    products: pickNewestProducts(
-      allCatalogProducts.filter((product) => product.league === league.name),
-      8,
-      (product) => product.club,
-    ),
-  }))
-
-  const homeCatalogProducts = dedupeProducts(...leagueProductGroups.map((group) => group.products))
-  const topProducts = pickNewestProducts(homeCatalogProducts, 3, (product) => `${product.league}:${product.club}`)
-  const latestPreMatch = pickNewestProducts(preMatchProducts, 1)[0] ?? null
-  const heroProducts = [recentProducts[0] ?? null, recentProducts[1] ?? null, recentProducts[2] ?? null, latestPreMatch]
+  const source = buildHomepageCatalogSource(allLeagues, rawCatalogProducts)
+  const bestsellersTabs = buildHomepageBestsellerTabs(source, assignments)
+  const fastMoverGroups = buildHomepageFastMoverGroups(source, assignments)
 
   return (
     <>
-      <EmojiCategoryBar leagues={leagues} />
-      <HeroSlideshow heroProducts={heroProducts} />
+      <EmojiCategoryBar leagues={allLeagues.filter((league) => league.slug !== 'champions-league')} />
+      <HeroSlideshow heroProducts={source.heroProducts} />
       <PromoStrip />
-      <BestsellersTabs leagueProductGroups={leagueProductGroups} leagues={homeLeagues} topProducts={topProducts} />
+      <BestsellersTabs tabs={bestsellersTabs} />
       <TrustScrollBar />
-      <CollectionsTabs products={worldCupProducts} />
+      <CollectionsTabs groups={fastMoverGroups} />
       <ReassuranceBar />
-      <LeaguesStrip leagues={leagues} />
+      <LeaguesStrip leagues={allLeagues.filter((league) => league.slug !== 'champions-league')} />
       <CountdownBanner />
       <WhyUsSection />
       <ReviewsSection />

@@ -8,35 +8,18 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
-import type { League, Product } from '@/types/product'
-
-interface LeagueProductGroup {
-  leagueName: string
-  products: Product[]
-}
+import type { HomepageBestsellerTab } from '@/types/homepageCuration'
 
 export function BestsellersTabs({
-  leagueProductGroups,
-  leagues,
-  topProducts = [],
+  tabs,
 }: {
-  leagueProductGroups: LeagueProductGroup[]
-  leagues: League[]
-  topProducts?: (Product | null)[]
+  tabs: HomepageBestsellerTab[]
 }) {
-  const topLeagues = leagues.slice(0, 4)
-  const tabs = ['Tous', ...topLeagues.map((league) => league.name)]
-  const [activeTab, setActiveTab] = useState('Tous')
-
-  const filtered =
-    activeTab === 'Tous'
-      ? (topProducts.filter(Boolean) as Product[])
-      : leagueProductGroups.find((group) => group.leagueName === activeTab)?.products ?? []
-
-  const featured = filtered[0]
-  const rest = filtered.slice(1)
-  const activeLeague = leagues.find((league) => league.name === activeTab)
-  const collectionHref = activeTab === 'Tous' ? '/shop' : `/ligue/${activeLeague?.slug ?? ''}`
+  const [activeTab, setActiveTab] = useState(tabs[0]?.key ?? 'all')
+  const activeGroup = tabs.find((tab) => tab.key === activeTab) ?? tabs[0]
+  const featured = activeGroup?.featuredProduct ?? null
+  const rest = activeGroup?.cards ?? []
+  const collectionHref = activeGroup?.href ?? '/shop'
 
   return (
     <section className="bg-[var(--cream)] px-4 pt-8 pb-4 md:px-6 md:pt-12 md:pb-8">
@@ -59,26 +42,26 @@ export function BestsellersTabs({
       <div className="mt-4 flex gap-5 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
         {tabs.map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
             className={`-mb-px whitespace-nowrap border-b-2 pb-2 font-condensed text-[12px] uppercase tracking-wide transition-all ${
-              activeTab === tab ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
+              activeTab === tab.key ? 'border-[var(--black)] font-bold text-[var(--black)]' : 'border-transparent text-[var(--grey-lt)]'
             }`}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>
 
-      {featured ? (
+      {activeGroup ? (
         <>
           {/* Mobile : featured card + 2 petites */}
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Link href={collectionHref} className="relative row-span-2 block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2, minHeight: 200 }}>
-              {activeTab === 'Tous' ? (
-                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
-              ) : featured.photos[0] ? (
+              {featured?.photos[0] ? (
                 <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="45vw" />
+              ) : activeGroup.key === 'all' ? (
+                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
               ) : null}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-3">
@@ -109,10 +92,10 @@ export function BestsellersTabs({
           {/* Desktop : grille 4 colonnes */}
           <div className="mt-3 hidden md:grid md:grid-cols-4 lg:grid-cols-4 gap-4">
             <Link href={collectionHref} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
-              {activeTab === 'Tous' ? (
-                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
-              ) : featured.photos[0] ? (
+              {featured?.photos[0] ? (
                 <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="25vw" />
+              ) : activeGroup.key === 'all' ? (
+                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
               ) : null}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-4">
@@ -151,7 +134,7 @@ export function BestsellersTabs({
         className="mt-4 block w-full border border-[var(--black)] py-3 text-center font-condensed text-[12px] uppercase tracking-[0.15em] text-[var(--black)] transition-colors hover:bg-[var(--black)] hover:text-white"
         style={{ borderRadius: 2 }}
       >
-        Voir tous les maillots {activeTab !== 'Tous' ? activeTab : ''}
+        Voir tous les maillots {activeGroup?.key !== 'all' ? activeGroup?.label : ''}
       </Link>
       </div>
     </section>
