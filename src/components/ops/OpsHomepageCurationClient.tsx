@@ -129,7 +129,7 @@ export function OpsHomepageCurationClient({
     const normalizedQuery = normalizeCatalogText(deferredSearch)
 
     return productOptions.filter((product) => {
-      if (!showAllProducts && !relevantProductIds.has(product.id)) return false
+      if (!normalizedQuery && !showAllProducts && !relevantProductIds.has(product.id)) return false
       if (!normalizedQuery) return true
 
       const haystack = normalizeCatalogText(

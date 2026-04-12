@@ -6,9 +6,9 @@ import {
   getHomepageCurationAssignmentsForOps,
   HOMEPAGE_CURATION_CACHE_TAG,
   replaceHomepageCurationAssignments,
+  toHomepageCurationProductOptions,
 } from '@/lib/homepageCuration'
 import { requireOpsSession } from '@/lib/opsAuth'
-import { getOpsProductSummaries } from '@/lib/opsCatalog'
 import { getLeagues, getProducts } from '@/lib/supabase/queries'
 import type { HomepageCurationAssignment } from '@/types/homepageCuration'
 
@@ -41,15 +41,15 @@ export async function GET() {
   }
 
   try {
-    const [rawCatalogProducts, allLeagues, productOptions, assignments] = await Promise.all([
+    const [rawCatalogProducts, allLeagues, assignments] = await Promise.all([
       getProducts(),
       getLeagues(),
-      getOpsProductSummaries(),
       getHomepageCurationAssignmentsForOps(),
     ])
 
     const source = buildHomepageCatalogSource(allLeagues, rawCatalogProducts)
     const sections = buildHomepageCurationEditorSections(source, assignments)
+    const productOptions = toHomepageCurationProductOptions(source.allCatalogProducts)
 
     return NextResponse.json({ sections, productOptions })
   } catch {
@@ -95,4 +95,3 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: message }, { status })
   }
 }
-

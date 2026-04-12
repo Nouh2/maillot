@@ -8,7 +8,6 @@ import {
   toHomepageCurationProductOptions,
 } from '@/lib/homepageCuration'
 import { getOpsSession } from '@/lib/opsAuth'
-import { getOpsProductSummaries } from '@/lib/opsCatalog'
 import { getLeagues, getProducts } from '@/lib/supabase/queries'
 
 export const metadata = { title: 'Ops Landing' }
@@ -19,10 +18,9 @@ export default async function OpsLandingPage() {
     redirect('/ops/login')
   }
 
-  const [rawCatalogProducts, allLeagues, productOptions, assignments] = await Promise.all([
+  const [rawCatalogProducts, allLeagues, assignments] = await Promise.all([
     getProducts(),
     getLeagues(),
-    getOpsProductSummaries(),
     getHomepageCurationAssignmentsForOps(),
   ])
 
@@ -33,7 +31,7 @@ export default async function OpsLandingPage() {
     <OpsPageShell maxWidth="7xl">
       <OpsHomepageCurationClient
         initialSections={sections}
-        productOptions={toHomepageCurationProductOptions(productOptions)}
+        productOptions={toHomepageCurationProductOptions(source.allCatalogProducts)}
       />
     </OpsPageShell>
   )
