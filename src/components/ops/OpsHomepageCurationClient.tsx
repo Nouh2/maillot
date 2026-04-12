@@ -312,7 +312,11 @@ export function OpsHomepageCurationClient({
               <div className="grid gap-3 md:grid-cols-2">
                 {activeGroup.slot_labels.map((label, index) => {
                   const assignedId = activeGroup.assignments[index]
+                  const displayedId = activeGroup.displayed_product_ids[index] ?? null
+                  const displayedProduct = displayedId ? productMap.get(displayedId) ?? null : null
                   const assignedProduct = assignedId ? productMap.get(assignedId) ?? null : null
+                  const slotProduct = assignedProduct ?? displayedProduct
+                  const isManualSlot = Boolean(assignedProduct)
                   const isActiveSlot = index === selectedSlotIndex
 
                   return (
@@ -326,7 +330,7 @@ export function OpsHomepageCurationClient({
                         <div>
                           <p className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">{label}</p>
                           <p className="mt-1 text-sm text-[var(--black)]">
-                            {assignedProduct ? assignedProduct.name : 'Aucun maillot selectionne'}
+                            {slotProduct ? slotProduct.name : 'Aucun maillot affiche'}
                           </p>
                         </div>
                         <span className="rounded-full bg-white px-3 py-1 text-[11px] font-condensed uppercase tracking-[0.16em] text-[var(--black)]">
@@ -336,10 +340,10 @@ export function OpsHomepageCurationClient({
 
                       <div className="grid gap-3 sm:grid-cols-[92px_minmax(0,1fr)]">
                         <div className="relative h-28 overflow-hidden rounded-[1rem] bg-[var(--cream)]">
-                          {assignedProduct?.photos[0] ? (
+                          {slotProduct?.photos[0] ? (
                             <ExternalProductImage
-                              src={assignedProduct.photos[0]}
-                              alt={assignedProduct.name}
+                              src={slotProduct.photos[0]}
+                              alt={slotProduct.name}
                               fill
                               unoptimized
                               fallbackMode="proxy"
@@ -355,20 +359,21 @@ export function OpsHomepageCurationClient({
                         </div>
 
                         <div className="min-w-0">
-                          {assignedProduct ? (
+                          {slotProduct ? (
                             <>
-                              <p className="truncate font-condensed text-xs uppercase tracking-[0.08em] text-[var(--black)]">{assignedProduct.club}</p>
-                              <p className="mt-1 truncate text-xs text-[var(--grey)]">{assignedProduct.league}</p>
-                              <p className="mt-1 truncate text-xs text-[var(--grey)]">Saison {assignedProduct.season}</p>
+                              <p className="truncate font-condensed text-xs uppercase tracking-[0.08em] text-[var(--black)]">{slotProduct.club}</p>
+                              <p className="mt-1 truncate text-xs text-[var(--grey)]">{slotProduct.league}</p>
+                              <p className="mt-1 truncate text-xs text-[var(--grey)]">Saison {slotProduct.season}</p>
                               <div className="mt-2 flex flex-wrap gap-1.5">
-                                <StatusPill active={assignedProduct.is_active} label={assignedProduct.is_active ? 'Actif' : 'Inactif'} />
-                                {assignedProduct.is_retro ? <StatusPill active label="Retro" /> : null}
-                                {assignedProduct.is_concept ? <StatusPill active label="Concept" /> : null}
+                                <StatusPill active={slotProduct.is_active} label={slotProduct.is_active ? 'Actif' : 'Inactif'} />
+                                {slotProduct.is_retro ? <StatusPill active label="Retro" /> : null}
+                                {slotProduct.is_concept ? <StatusPill active label="Concept" /> : null}
+                                <StatusPill active={isManualSlot} label={isManualSlot ? 'Manuel' : 'Auto'} />
                               </div>
                             </>
                           ) : (
                             <p className="text-sm text-[var(--grey)]">
-                              Clique sur ce slot, puis choisis un produit dans la librairie a droite.
+                              Aucun maillot n est actuellement affiche pour ce slot.
                             </p>
                           )}
                         </div>
@@ -384,14 +389,14 @@ export function OpsHomepageCurationClient({
                         >
                           {isActiveSlot ? 'Slot cible' : 'Selectionner ce slot'}
                         </button>
-                        {assignedProduct ? (
+                        {isManualSlot ? (
                           <button
                             type="button"
                             onClick={() => clearSlot(index)}
                             className="inline-flex items-center gap-2 rounded-full border border-[var(--cream-3)] px-4 py-2 text-xs font-condensed uppercase tracking-[0.16em] text-red-600"
                           >
                             <Trash2 className="h-4 w-4" />
-                            Vider
+                            Revenir en auto
                           </button>
                         ) : null}
                       </div>

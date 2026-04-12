@@ -358,6 +358,8 @@ export function buildHomepageCurationEditorSections(
   source: HomepageCatalogSource,
   assignments: HomepageCurationAssignment[],
 ): HomepageCurationEditorSection[] {
+  const bestsellerTabs = buildHomepageBestsellerTabs(source, assignments)
+  const fastMoverGroupsWithDisplay = buildHomepageFastMoverGroups(source, assignments)
   const assignmentsByTopMomentGroup = getAssignmentsByGroup(assignments, 'top_moment')
   const assignmentsByFastMoversGroup = getAssignmentsByGroup(assignments, 'fast_movers')
 
@@ -369,6 +371,10 @@ export function buildHomepageCurationEditorSections(
       href: '/shop',
       slot_labels: [...TOP_MOMENT_SLOT_LABELS],
       assignments: Array.from({ length: TOP_MOMENT_SLOT_LABELS.length }, (_, index) => assignmentsByTopMomentGroup.get('all')?.[index] ?? null),
+      displayed_product_ids: (() => {
+        const tab = bestsellerTabs.find((entry) => entry.key === 'all')
+        return [tab?.featuredProduct?.id ?? null, ...(tab?.cards.map((product) => product.id) ?? [])]
+      })(),
       suggested_product_ids: source.allCatalogProducts.slice(0, 24).map((product) => product.id),
     },
     ...source.homeLeagueProducts.map((group) => ({
@@ -378,6 +384,10 @@ export function buildHomepageCurationEditorSections(
       href: group.href,
       slot_labels: [...TOP_MOMENT_SLOT_LABELS],
       assignments: Array.from({ length: TOP_MOMENT_SLOT_LABELS.length }, (_, index) => assignmentsByTopMomentGroup.get(group.key)?.[index] ?? null),
+      displayed_product_ids: (() => {
+        const tab = bestsellerTabs.find((entry) => entry.key === group.key)
+        return [tab?.featuredProduct?.id ?? null, ...(tab?.cards.map((product) => product.id) ?? [])]
+      })(),
       suggested_product_ids: group.candidateProducts.slice(0, 32).map((product) => product.id),
     })),
   ]
@@ -388,6 +398,7 @@ export function buildHomepageCurationEditorSections(
 
   const fastMoverGroups: HomepageCurationEditorGroup[] = fastMoverCountries.map((country) => {
     const key = toGroupKey(country)
+    const displayedGroup = fastMoverGroupsWithDisplay.find((group) => group.key === key)
     return {
       key,
       label: country,
@@ -395,6 +406,7 @@ export function buildHomepageCurationEditorSections(
       href: `/coupe-du-monde?club=${encodeURIComponent(country)}`,
       slot_labels: [...FAST_MOVER_SLOT_LABELS],
       assignments: Array.from({ length: FAST_MOVER_SLOT_LABELS.length }, (_, index) => assignmentsByFastMoversGroup.get(key)?.[index] ?? null),
+      displayed_product_ids: displayedGroup?.products.map((product) => product.id) ?? [],
       suggested_product_ids: source.worldCupProducts.filter((product) => product.club === country).slice(0, 32).map((product) => product.id),
     }
   })

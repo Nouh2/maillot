@@ -37,6 +37,7 @@ export type HomepageCurationEditorGroup = {
   href: string
   slot_labels: string[]
   assignments: Array<string | null>
+  displayed_product_ids: Array<string | null>
   suggested_product_ids: string[]
 }
 
@@ -46,4 +47,3 @@ export type HomepageCurationEditorSection = {
   description: string
   groups: HomepageCurationEditorGroup[]
 }
-
