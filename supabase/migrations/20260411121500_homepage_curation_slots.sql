@@ -1,5 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE IF NOT EXISTS homepage_curation_slots (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   section TEXT NOT NULL CHECK (section IN ('top_moment', 'fast_movers')),
   group_key TEXT NOT NULL,
   slot_index INTEGER NOT NULL CHECK (slot_index >= 0),
