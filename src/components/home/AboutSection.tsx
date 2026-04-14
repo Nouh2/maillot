@@ -65,11 +65,11 @@ export function AboutSection() {
 
         <div className="mt-8 grid grid-cols-2 gap-4 md:mt-0">
           <div className="rounded-xl bg-[var(--terra)] p-5 text-white">
-            <p className="font-bebas text-4xl leading-none">+ de 1 000</p>
-            <p className="mt-1 font-condensed text-[11px] uppercase tracking-wider text-white/75">Maillots livres</p>
+            <p className="font-bebas text-4xl leading-none">+ de 1000</p>
+            <p className="mt-1 font-condensed text-[11px] uppercase tracking-wider text-white/75">Maillots livrés</p>
           </div>
           <div className="rounded-xl bg-[var(--black)] p-5 text-white">
-            <p className="font-bebas text-4xl leading-none">+ de 1 000</p>
+            <p className="font-bebas text-4xl leading-none">+ de 1000</p>
             <p className="mt-1 font-condensed text-[11px] uppercase tracking-wider text-white/75">Clients satisfaits</p>
           </div>
         </div>

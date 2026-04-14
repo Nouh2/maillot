@@ -19,7 +19,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
   return (
     <div className={`rounded-2xl border border-[var(--cream-3)] bg-white ${compact ? 'p-4' : 'p-5'}`}>
       <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Avant le paiement</p>
-      <label className="mt-3 block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--black)]">
+      <label className={`${compact ? 'mt-2.5' : 'mt-3'} block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--black)]`}>
         Email de suivi
       </label>
       <input
@@ -27,13 +27,13 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
         value={customerEmail}
         onChange={(event) => setCustomerEmail(event.target.value)}
         placeholder="vous@exemple.com"
-        className="mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 py-3 text-sm text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]"
+        className={`mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 ${compact ? 'py-2.5' : 'py-3'} text-sm text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]`}
       />
       <p className="mt-2 text-xs leading-relaxed text-[var(--grey)]">
         Cet email sert a confirmer la commande, envoyer le lien de suivi et rattacher la commande a ton compte.
       </p>
 
-      <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--black)]">
+      <label className={`${compact ? 'mt-3' : 'mt-4'} block text-xs font-semibold uppercase tracking-[0.18em] text-[var(--black)]`}>
         Code promo
       </label>
       <input
@@ -41,7 +41,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
         value={promoCode}
         onChange={(event) => setPromoCode(event.target.value)}
         placeholder={LOYALTY_CODE}
-        className="mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 py-3 text-sm uppercase text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]"
+        className={`mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 ${compact ? 'py-2.5' : 'py-3'} text-sm uppercase text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]`}
       />
       <p className={`mt-2 text-xs leading-relaxed ${isLoyaltyPreview ? 'text-[var(--terra)]' : 'text-[var(--grey)]'}`}>
         {isLoyaltyPreview
@@ -49,7 +49,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
           : `Code premiere commande: ${LOYALTY_CODE}. Il fonctionne une seule fois par email.`}
       </p>
 
-      <label className="mt-4 flex items-start gap-3 text-xs leading-relaxed text-[var(--grey)]">
+      <label className={`${compact ? 'mt-3' : 'mt-4'} flex items-start gap-3 text-xs leading-relaxed text-[var(--grey)]`}>
         <input
           type="checkbox"
           checked={marketingOptIn}

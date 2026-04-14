@@ -92,7 +92,7 @@ export function ReviewsSection() {
           </div>
 
           <h2 className="mt-2 font-bebas text-5xl leading-none text-[var(--black)] sm:text-6xl md:text-[5.5rem]">
-            + DE 1 000 MAILLOTS{' '}
+            + DE 1000 MAILLOTS{' '}
             <span
               style={{
                 WebkitTextStroke: '2px var(--black)',
@@ -150,7 +150,7 @@ export function ReviewsSection() {
             href="/shop"
             className="w-full rounded-none bg-[var(--black)] px-8 py-4 text-center font-condensed text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[var(--terra)] sm:w-auto"
           >
-            Rejoindre + de 1 000 clients →
+            Rejoindre + de 1000 clients →
           </Link>
           <p className="font-condensed text-xs text-[var(--grey)]">Livraison suivie · Retour 14 jours</p>
         </div>

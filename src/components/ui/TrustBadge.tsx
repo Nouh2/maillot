@@ -25,7 +25,7 @@ export function TrustBadge({ className = '' }: TrustBadgeProps) {
       <span className="h-4 w-px bg-[var(--cream-3)]" />
       <span className="font-condensed text-sm font-bold text-[var(--terra)]">4.5 / 5</span>
       <span className="h-4 w-px bg-[var(--cream-3)]" />
-      <span className="font-condensed text-xs text-[var(--grey)]">+1 000 clients satisfaits</span>
+      <span className="font-condensed text-xs text-[var(--grey)]">+1000 clients satisfaits</span>
     </div>
   )
 }
