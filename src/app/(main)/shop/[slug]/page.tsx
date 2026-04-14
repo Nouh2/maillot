@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
 import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
+import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { TrustBadge } from '@/components/ui/TrustBadge'
@@ -11,6 +12,7 @@ import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
 import { getPatches, getProductBySlug, getProducts } from '@/lib/supabase/queries'
+import type { Product } from '@/types/product'
 
 export const revalidate = 3600 // re-build toutes les heures
 
@@ -21,6 +23,29 @@ export async function generateStaticParams() {
 
 interface Props {
   params: Promise<{ slug: string }>
+}
+
+function getRelatedProducts(product: Product, catalog: Product[]): Product[] {
+  return catalog
+    .filter((candidate) => candidate.id !== product.id)
+    .map((candidate) => {
+      let score = 0
+
+      if (candidate.club === product.club) score += 8
+      if (candidate.league === product.league) score += 5
+      if (candidate.product_kind === product.product_kind) score += 3
+      if (candidate.type === product.type) score += 2
+      if (candidate.season === product.season) score += 1
+      if (candidate.is_retro === product.is_retro) score += 1
+
+      return { candidate, score }
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score
+      return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
+    })
+    .map(({ candidate }) => candidate)
+    .slice(0, 4)
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -49,10 +74,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const [product, patches] = await Promise.all([getProductBySlug(slug), getPatches()])
+  const [product, patches, catalog] = await Promise.all([getProductBySlug(slug), getPatches(), getProducts()])
   if (!product) notFound()
 
   const pricing = getProductPricing({ isRetro: product.is_retro })
+  const relatedProducts = getRelatedProducts(product, catalog)
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--cream)] md:pb-0">
@@ -127,6 +153,16 @@ export default async function ProductPage({ params }: Props) {
             <div className="h-28 md:hidden" />
           </div>
         </div>
+
+        {relatedProducts.length > 0 ? (
+          <section className="mt-14 border-t border-[var(--cream-3)] pt-10 md:mt-20 md:pt-14">
+            <ProductsGrid
+              products={relatedProducts}
+              sub={product.club}
+              title="Vous pourriez aimer"
+            />
+          </section>
+        ) : null}
       </div>
     </div>
   )
