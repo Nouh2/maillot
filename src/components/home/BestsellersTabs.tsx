@@ -10,6 +10,14 @@ import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { HomepageBestsellerTab } from '@/types/homepageCuration'
 
+const FEATURED_TAB_IMAGES: Record<string, string> = {
+  all: '/images/tous.jpg',
+  'ligue-1': '/images/ligue1tous.jpg',
+  'premier-league': '/images/pltous.jpg',
+  'la-liga': '/images/ligatous.jpg',
+  bundesliga: '/images/bundesligatous.jpg',
+}
+
 export function BestsellersTabs({
   tabs,
 }: {
@@ -17,9 +25,9 @@ export function BestsellersTabs({
 }) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.key ?? 'all')
   const activeGroup = tabs.find((tab) => tab.key === activeTab) ?? tabs[0]
-  const featured = activeGroup?.featuredProduct ?? null
   const rest = activeGroup?.cards ?? []
   const collectionHref = activeGroup?.href ?? '/shop'
+  const featuredTabImage = activeGroup ? FEATURED_TAB_IMAGES[activeGroup.key] ?? FEATURED_TAB_IMAGES.all : FEATURED_TAB_IMAGES.all
 
   return (
     <section className="bg-[var(--cream)] px-4 pt-8 pb-4 md:px-6 md:pt-12 md:pb-8">
@@ -58,11 +66,7 @@ export function BestsellersTabs({
           {/* Mobile : featured card + 2 petites */}
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Link href={collectionHref} className="relative row-span-2 block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2, minHeight: 200 }}>
-              {featured?.photos[0] ? (
-                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="45vw" />
-              ) : activeGroup.key === 'all' ? (
-                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="45vw" />
-              ) : null}
+              <Image src={featuredTabImage} alt={`Les plus demandes ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="45vw" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-3">
                 <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Selection</p>
@@ -92,11 +96,7 @@ export function BestsellersTabs({
           {/* Desktop : grille 4 colonnes */}
           <div className="mt-3 hidden md:grid md:grid-cols-4 lg:grid-cols-4 gap-4">
             <Link href={collectionHref} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
-              {featured?.photos[0] ? (
-                <ExternalProductImage src={featured.photos[0]} alt={featured.name} fill unoptimized fallbackMode="proxy" bunnyTransform="grid" className="object-cover" sizes="25vw" />
-              ) : activeGroup.key === 'all' ? (
-                <Image src="/images/france-kit.jpg" alt="Les plus demandes" fill className="object-cover object-top" sizes="25vw" />
-              ) : null}
+              <Image src={featuredTabImage} alt={`Les plus demandes ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="25vw" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-4">
                 <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Selection</p>

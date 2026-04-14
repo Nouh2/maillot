@@ -38,7 +38,7 @@ const SLIDE_META = [
     bigText: "Maillots\nd'Avant-Match",
     cta: 'Voir la collection',
     href: '/shop',
-    staticImage: '/images/maillot.jpg',
+    staticImage: '/images/entrainement.jpg',
   },
 ]
 
@@ -70,7 +70,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                 {/* Image du produit */}
                 {imgSrc ? (
                   slide.staticImage ? (
-                    <Image src={imgSrc} alt={slide.bigText} fill className="object-cover" priority={i === 0} />
+                    <Image src={imgSrc} alt={slide.bigText} fill className="object-cover object-center" priority={i === 0} />
                   ) : (
                     <ExternalProductImage
                       src={imgSrc}

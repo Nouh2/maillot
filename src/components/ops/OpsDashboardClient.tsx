@@ -16,6 +16,11 @@ type OrderFormState = {
 }
 
 const STATUS_OPTIONS: Array<Order['status']> = ['paid', 'shipped', 'delivered', 'cancelled']
+const DEFAULT_TRACKING_URL = 'https://parcelsapp.com/fr'
+
+function getTrackingUrlValue(trackingUrl?: string | null, fallback = DEFAULT_TRACKING_URL) {
+  return trackingUrl?.trim() || fallback
+}
 
 function buildInitialForms(orders: Order[]): Record<string, OrderFormState> {
   return Object.fromEntries(
@@ -25,7 +30,7 @@ function buildInitialForms(orders: Order[]): Record<string, OrderFormState> {
         supplierReference: order.supplier_reference ?? '',
         supplierStatus: order.supplier_status ?? '',
         trackingNumber: order.tracking_number ?? '',
-        trackingUrl: order.tracking_url ?? '',
+        trackingUrl: getTrackingUrlValue(order.tracking_url),
         status: order.status,
       },
     ]),
@@ -71,16 +76,20 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
 
   function syncOrderIntoState(updatedOrder: Order) {
     setOrders((current) => current.map((order) => (order.id === updatedOrder.id ? updatedOrder : order)))
-    setForms((current) => ({
-      ...current,
-      [updatedOrder.id]: {
-        supplierReference: updatedOrder.supplier_reference ?? '',
-        supplierStatus: updatedOrder.supplier_status ?? '',
-        trackingNumber: updatedOrder.tracking_number ?? '',
-        trackingUrl: updatedOrder.tracking_url ?? '',
-        status: updatedOrder.status,
-      },
-    }))
+    setForms((current) => {
+      const existingForm = current[updatedOrder.id]
+
+      return {
+        ...current,
+        [updatedOrder.id]: {
+          supplierReference: updatedOrder.supplier_reference ?? '',
+          supplierStatus: updatedOrder.supplier_status ?? '',
+          trackingNumber: updatedOrder.tracking_number ?? '',
+          trackingUrl: getTrackingUrlValue(updatedOrder.tracking_url, existingForm?.trackingUrl ?? DEFAULT_TRACKING_URL),
+          status: updatedOrder.status,
+        },
+      }
+    })
   }
 
   async function saveOrder(orderId: string, options?: { sentToSupplier?: boolean }): Promise<Order | null> {
