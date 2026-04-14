@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-
-export const revalidate = 3600 // re-build toutes les heures
-import { ShieldCheck, Ticket } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
 import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { TrustBadge } from '@/components/ui/TrustBadge'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
 import { getPatches, getProductBySlug, getProducts } from '@/lib/supabase/queries'
+
+export const revalidate = 3600 // re-build toutes les heures
 
 export async function generateStaticParams() {
   const products = await getProducts()
@@ -78,22 +78,8 @@ export default async function ProductPage({ params }: Props) {
 
             <PhotoGallery photos={product.photos} name={normalizeProductTextSeasons(product.name)} />
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--cream-3)] bg-white p-4">
-                <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Paiement</p>
-                <div className="mt-3 flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
-                  <p className="text-sm leading-relaxed text-[var(--black)]">Paiement carte bancaire via Stripe, sans stockage de donnees CB sur le site.</p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--cream-3)] bg-white p-4">
-                <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Suivi</p>
-                <div className="mt-3 flex items-start gap-3">
-                  <Ticket className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
-                  <p className="text-sm leading-relaxed text-[var(--black)]">Confirmation par email puis lien de suivi unique des que l expedition est disponible.</p>
-                </div>
-              </div>
+            <div className="mt-6 flex justify-center md:justify-start">
+              <TrustBadge />
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Star } from 'lucide-react'
+import { TrustBadge } from '@/components/ui/TrustBadge'
 
 const REVIEWS = [
   {
@@ -86,16 +87,12 @@ export function ReviewsSection() {
     <section className="overflow-hidden bg-[var(--cream)] py-12 md:py-16">
       <div className="mx-auto mb-10 max-w-7xl px-4 sm:px-6">
         <div className="text-center">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--cream-3)] bg-white px-4 py-2 shadow-sm">
-            <StarRating size="md" />
-            <span className="font-condensed text-sm font-bold text-[var(--black)]">Excellent</span>
-            <span className="font-condensed text-sm font-bold text-[var(--terra)]">4.5 / 5</span>
-            <span className="h-4 w-px bg-[var(--cream-3)]" />
-            <span className="font-condensed text-xs text-[var(--grey)]">+30 000 clients satisfaits</span>
+          <div className="mb-3">
+            <TrustBadge />
           </div>
 
           <h2 className="mt-2 font-bebas text-5xl leading-none text-[var(--black)] sm:text-6xl md:text-[5.5rem]">
-            +250 000 MAILLOTS{' '}
+            + DE 10000 MAILLOTS{' '}
             <span
               style={{
                 WebkitTextStroke: '2px var(--black)',
@@ -153,7 +150,7 @@ export function ReviewsSection() {
             href="/shop"
             className="w-full rounded-none bg-[var(--black)] px-8 py-4 text-center font-condensed text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[var(--terra)] sm:w-auto"
           >
-            Rejoindre +30 000 clients →
+            Rejoindre + de 1000 clients →
           </Link>
           <p className="font-condensed text-xs text-[var(--grey)]">Livraison suivie · Retour 14 jours</p>
         </div>

@@ -21,9 +21,9 @@ const WHY_ITEMS = [
 ] as const
 
 const STATS = [
-  { value: '+30 000', label: 'clients satisfaits' },
+  { value: '+ de 1000', label: 'clients satisfaits' },
   { value: '4.5 / 5', label: 'note moyenne' },
-  { value: '+250 000', label: 'maillots livres' },
+  { value: '+ de 10000', label: 'maillots livres' },
 ] as const
 
 export function WhyUsSection() {
@@ -39,7 +39,7 @@ export function WhyUsSection() {
               Pourquoi nous choisir
             </p>
             <h2 className="font-bebas text-5xl leading-none md:text-7xl">
-              PLUS DE 30 000 FANS
+              PLUS DE 1000 FANS
               <br />
               NOUS FONT CONFIANCE
             </h2>
