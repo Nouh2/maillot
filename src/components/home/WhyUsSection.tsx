@@ -21,9 +21,9 @@ const WHY_ITEMS = [
 ] as const
 
 const STATS = [
-  { value: '+ de 1000', label: 'clients satisfaits' },
+  { value: '+ de 1 000', label: 'clients satisfaits' },
   { value: '4.5 / 5', label: 'note moyenne' },
-  { value: '+ de 10000', label: 'maillots livres' },
+  { value: '+ de 1 000', label: 'maillots livres' },
 ] as const
 
 export function WhyUsSection() {
@@ -39,7 +39,7 @@ export function WhyUsSection() {
               Pourquoi nous choisir
             </p>
             <h2 className="font-bebas text-5xl leading-none md:text-7xl">
-              PLUS DE 1000 FANS
+              PLUS DE 1 000 FANS
               <br />
               NOUS FONT CONFIANCE
             </h2>
@@ -59,8 +59,8 @@ export function WhyUsSection() {
         </div>
 
         <div className="mb-12 grid grid-cols-3 divide-x divide-white/10 rounded-xl border border-white/10 bg-white/[0.03]">
-          {STATS.map((stat) => (
-            <div key={stat.value} className="flex flex-col items-center gap-1 px-3 py-5 text-center">
+          {STATS.map((stat, index) => (
+            <div key={index} className="flex flex-col items-center justify-center gap-1 px-3 py-5 text-center">
               <p className="font-bebas text-3xl leading-none text-[var(--terra)] sm:text-4xl">{stat.value}</p>
               <p className="font-condensed text-[10px] uppercase tracking-wider text-white/50">{stat.label}</p>
             </div>

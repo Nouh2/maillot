@@ -10,6 +10,8 @@ import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { HomepageBestsellerTab } from '@/types/homepageCuration'
 
+import { TrustBadge } from '@/components/ui/TrustBadge'
+
 const FEATURED_TAB_IMAGES: Record<string, string> = {
   all: '/images/tous.jpg',
   'ligue-1': '/images/ligue1tous.jpg',
@@ -32,6 +34,9 @@ export function BestsellersTabs({
   return (
     <section className="bg-[var(--cream)] px-4 pt-8 pb-4 md:px-6 md:pt-12 md:pb-8">
       <div className="mx-auto max-w-7xl">
+      <div className="mb-4">
+        <TrustBadge />
+      </div>
       <h2 className="font-condensed text-[26px] md:text-4xl font-normal leading-tight text-[var(--black)]">
         Le top du{' '}
         <span
