@@ -126,6 +126,8 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
   const [error, setError] = useState<string | null>(null)
   const [isLoadingProduct, setIsLoadingProduct] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [deleteArmed, setDeleteArmed] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const deferredSearch = useDeferredValue(search)
   const leagueMap = useMemo(() => new Map(leagues.map((league) => [league.name, league])), [leagues])
@@ -187,6 +189,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
 
   function updateDraft(patch: Partial<OpsProductDraft>) {
     setDraft((current) => (current ? { ...current, ...patch } : current))
+    setDeleteArmed(false)
   }
 
   function selectProduct(productId: string) {
@@ -197,6 +200,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
     setDraft(null)
     setMessage(null)
     setError(null)
+    setDeleteArmed(false)
   }
 
   function resetDraft() {
@@ -204,6 +208,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
     setDraft(toDraft(loadedProduct))
     setMessage(null)
     setError(null)
+    setDeleteArmed(false)
   }
 
   function updatePhoto(index: number, value: string) {
@@ -250,11 +255,34 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
       setLoadedProduct(nextProduct)
       setDraft(toDraft(nextProduct))
       setProducts((current) => current.map((product) => (product.id === nextProduct.id ? toSummary(nextProduct) : product)))
+      setDeleteArmed(false)
       setMessage('Produit sauvegarde et publie sur le site')
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Sauvegarde impossible')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function deleteProductFromSite() {
+    if (!selectedProductId || !loadedProduct || isDeleting) return
+    setIsDeleting(true)
+    setMessage(null)
+    setError(null)
+    try {
+      const response = await fetch(`/api/internal/products/${selectedProductId}`, { method: 'DELETE' })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) throw new Error(data?.error ?? 'Suppression impossible')
+      const nextProduct = data.product as OpsProductDetail
+      setLoadedProduct(nextProduct)
+      setDraft(toDraft(nextProduct))
+      setProducts((current) => current.map((product) => (product.id === nextProduct.id ? toSummary(nextProduct) : product)))
+      setDeleteArmed(false)
+      setMessage('Maillot supprime du site')
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Suppression impossible')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -511,12 +539,49 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                   <section className="rounded-[1.5rem] border border-[var(--cream-3)] p-4">
                     <p className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">Publication</p>
                     <div className="mt-3 grid gap-2">
-                      <button type="button" disabled={isSaving || !draftIsDirty} onClick={() => void saveProduct()} className="rounded-full bg-[var(--black)] px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-white disabled:opacity-50">
+                      <button type="button" disabled={isSaving || isDeleting || !draftIsDirty} onClick={() => void saveProduct()} className="rounded-full bg-[var(--black)] px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-white disabled:opacity-50">
                         <span className="inline-flex items-center gap-2">{isSaving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Sauvegarder</span>
                       </button>
-                      <button type="button" disabled={!draftIsDirty || isSaving} onClick={resetDraft} className="rounded-full border border-[var(--cream-3)] px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-[var(--black)] disabled:opacity-50">
+                      <button type="button" disabled={!draftIsDirty || isSaving || isDeleting} onClick={resetDraft} className="rounded-full border border-[var(--cream-3)] px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-[var(--black)] disabled:opacity-50">
                         <span className="inline-flex items-center gap-2"><RefreshCcw className="h-4 w-4" />Annuler le brouillon</span>
                       </button>
+                    </div>
+                  </section>
+
+                  <section className="rounded-[1.5rem] border border-red-100 bg-red-50 p-4">
+                    <p className="text-xs font-condensed uppercase tracking-[0.16em] text-red-700">Suppression du site</p>
+                    <p className="mt-2 text-xs leading-relaxed text-red-700/80">
+                      Retire le maillot du site public sans effacer l'historique admin.
+                    </p>
+                    <div className="mt-3 grid gap-2">
+                      <button
+                        type="button"
+                        disabled={isSaving || isDeleting || !loadedProduct.is_active}
+                        onClick={() => {
+                          setDeleteArmed(true)
+                          setMessage(null)
+                          setError(null)
+                        }}
+                        className="rounded-full border border-red-200 bg-white px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-red-700 disabled:opacity-50"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Trash2 className="h-4 w-4" />
+                          {loadedProduct.is_active ? 'Supprimer du site' : 'Deja supprime du site'}
+                        </span>
+                      </button>
+                      {deleteArmed && loadedProduct.is_active ? (
+                        <button
+                          type="button"
+                          disabled={isDeleting}
+                          onClick={() => void deleteProductFromSite()}
+                          className="rounded-full bg-red-600 px-4 py-3 text-xs font-condensed uppercase tracking-[0.16em] text-white disabled:opacity-50"
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            {isDeleting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            Valider la suppression
+                          </span>
+                        </button>
+                      ) : null}
                     </div>
                   </section>
                 </aside>

@@ -320,3 +320,22 @@ export async function saveOpsProductDraft(productId: string, draftInput: unknown
 
   return toOpsProductDetail(updatedRow as ProductRow)
 }
+
+export async function deleteOpsProductFromSite(productId: string): Promise<OpsProductDetail | null> {
+  const { data: updatedRow, error } = await service()
+    .from('products')
+    .update({ is_active: false })
+    .eq('id', productId)
+    .select('*')
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  if (!updatedRow) {
+    return null
+  }
+
+  return toOpsProductDetail(updatedRow as ProductRow)
+}
