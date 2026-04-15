@@ -26,6 +26,7 @@ const VALID_PRODUCT_KINDS: Product['product_kind'][] = [
 ]
 
 const VALID_PRODUCT_TYPES: Product['type'][] = ['domicile', 'exterieur', 'third']
+const VALID_JERSEY_VERSIONS: Product['jersey_version'][] = ['fan', 'player']
 
 const OPS_PRODUCT_LIST_SELECT = [
   'id',
@@ -35,6 +36,7 @@ const OPS_PRODUCT_LIST_SELECT = [
   'league',
   'country',
   'product_kind',
+  'jersey_version',
   'type',
   'season',
   'photos',
@@ -59,13 +61,13 @@ function service() {
   return getSupabaseServiceClient() as any
 }
 
-function isMissingManualOverrideColumn(error: unknown): boolean {
+function isMissingOptionalCatalogColumn(error: unknown): boolean {
   return (
     typeof error === 'object' &&
     error !== null &&
     'message' in error &&
     typeof error.message === 'string' &&
-    error.message.includes('manual_override')
+    (error.message.includes('manual_override') || error.message.includes('jersey_version'))
   )
 }
 
@@ -101,6 +103,8 @@ function toOpsProductSummary(row: ProductRow): OpsProductSummary {
     club: product.club,
     league: product.league,
     season: product.season,
+    product_kind: product.product_kind,
+    jersey_version: product.jersey_version,
     photos: product.photos,
     is_active: product.is_active,
     is_retro: product.is_retro,
@@ -155,10 +159,10 @@ export async function getOpsProductSummaries(filters?: {
     .select(OPS_PRODUCT_LIST_SELECT)
     .order('created_at', { ascending: false })
 
-  if (initialQuery.error && isMissingManualOverrideColumn(initialQuery.error)) {
+  if (initialQuery.error && isMissingOptionalCatalogColumn(initialQuery.error)) {
     const fallbackQuery = await service()
       .from('products')
-      .select(OPS_PRODUCT_LIST_SELECT.replace(', manual_override, manual_override_updated_at', ''))
+      .select(OPS_PRODUCT_LIST_SELECT.replace('jersey_version, ', '').replace(', manual_override, manual_override_updated_at', ''))
       .order('created_at', { ascending: false })
 
     if (fallbackQuery.error) {
@@ -220,18 +224,23 @@ function sanitizeDraftValue(
   const league = normalizeString((value as OpsProductDraft | null)?.league)
   const season = normalizeString((value as OpsProductDraft | null)?.season)
   const productKind = normalizeString((value as OpsProductDraft | null)?.product_kind) as Product['product_kind'] | null
+  const jerseyVersion = normalizeString((value as OpsProductDraft | null)?.jersey_version) as Product['jersey_version'] | null
   const type = normalizeString((value as OpsProductDraft | null)?.type) as Product['type'] | null
   const isRetro = (value as OpsProductDraft | null)?.is_retro
   const isConcept = (value as OpsProductDraft | null)?.is_concept
   const isActive = (value as OpsProductDraft | null)?.is_active
   const photos = normalizeStringArray((value as OpsProductDraft | null)?.photos)
 
-  if (!name || !club || !league || !season || !productKind || !type) {
+  if (!name || !club || !league || !season || !productKind || !jerseyVersion || !type) {
     throw new Error('Champs produit invalides')
   }
 
   if (!VALID_PRODUCT_KINDS.includes(productKind)) {
     throw new Error('Type de produit invalide')
+  }
+
+  if (!VALID_JERSEY_VERSIONS.includes(jerseyVersion)) {
+    throw new Error('Version de maillot invalide')
   }
 
   if (!VALID_PRODUCT_TYPES.includes(type)) {
@@ -251,6 +260,7 @@ function sanitizeDraftValue(
     country,
     season,
     product_kind: productKind,
+    jersey_version: jerseyVersion,
     type,
     is_retro: isRetro,
     is_concept: isConcept,
@@ -302,8 +312,8 @@ export async function saveOpsProductDraft(productId: string, draftInput: unknown
     .single()
 
   if (updateError) {
-    if (isMissingManualOverrideColumn(updateError)) {
-      throw new Error('La migration Supabase 006_product_manual_overrides.sql doit etre appliquee avant la sauvegarde catalogue')
+    if (isMissingOptionalCatalogColumn(updateError)) {
+      throw new Error('Les migrations Supabase catalogue doivent etre appliquees avant la sauvegarde produit')
     }
     throw updateError
   }

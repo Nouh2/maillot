@@ -22,7 +22,12 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const [error, setError] = useState('')
 
   const addItem = useCartStore((state) => state.addItem)
-  const pricing = getProductPricing({ isRetro: product.is_retro })
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+  })
 
   const availablePatches =
     product.available_patches.length > 0

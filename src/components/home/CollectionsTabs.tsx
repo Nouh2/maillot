@@ -56,7 +56,12 @@ export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }
       {display.length > 0 ? (
         <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
           {display.map((product) => {
-            const pricing = getProductPricing({ isRetro: product.is_retro })
+            const pricing = getProductPricing({
+              isRetro: product.is_retro,
+              isConcept: product.is_concept,
+              productKind: product.product_kind,
+              jerseyVersion: product.jersey_version,
+            })
 
             return (
               <Link key={product.id} href={`/shop/${product.slug}`} className="block overflow-hidden" style={{ borderRadius: 2 }}>

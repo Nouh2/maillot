@@ -33,6 +33,7 @@ function getProductSignature(product: Product): string {
     normalizeCatalogText(normalized.league),
     normalizeCatalogText(normalized.club),
     normalized.is_retro ? 'retro' : 'standard',
+    normalized.is_concept ? 'concept' : normalized.jersey_version,
   ].join('|')
 }
 
@@ -64,6 +65,7 @@ function getSearchHaystack(product: Product): string {
     normalized.club,
     resolveProductSeasonLabel(normalized),
     normalized.product_kind,
+    normalized.jersey_version,
     normalized.type,
   ]
     .map(normalizeCatalogText)

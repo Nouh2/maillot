@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
+import { ProductFamilyBadge } from '@/components/products/ProductFamilyBadge'
 import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
@@ -56,7 +57,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const productDescriptor = `${getProductKindLabel(product.product_kind)}${
     showProductType(product.product_kind) ? ` ${getProductTypeLabel(product.type)}` : ''
   }`
-  const pricing = getProductPricing({ isRetro: product.is_retro })
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+  })
   const season = resolveProductSeasonLabel(product)
 
   return {
@@ -77,7 +83,12 @@ export default async function ProductPage({ params }: Props) {
   const [product, patches, catalog] = await Promise.all([getProductBySlug(slug), getPatches(), getProducts()])
   if (!product) notFound()
 
-  const pricing = getProductPricing({ isRetro: product.is_retro })
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+  })
   const relatedProducts = getRelatedProducts(product, catalog)
 
   return (
@@ -110,6 +121,9 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <div className="min-w-0">
+            <div className="mb-3">
+              <ProductFamilyBadge product={product} />
+            </div>
             <h1 className="mb-2 font-bebas text-4xl leading-tight text-[var(--black)] md:text-5xl">
               {normalizeProductTextSeasons(product.name)}
             </h1>

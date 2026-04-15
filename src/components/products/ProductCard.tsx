@@ -8,11 +8,17 @@ import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
+import { ProductFamilyBadge } from './ProductFamilyBadge'
 
 export function ProductCard({ product }: { product: Product }) {
   const [hovered, setHovered] = useState(false)
   const photo = hovered && product.photos[1] ? product.photos[1] : product.photos[0]
-  const pricing = getProductPricing({ isRetro: product.is_retro })
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+  })
 
   return (
     <Link href={`/shop/${product.slug}`} className="group block">
@@ -40,6 +46,10 @@ export function ProductCard({ product }: { product: Product }) {
               <Badge>Bestseller</Badge>
             </div>
           ) : null}
+
+          <div className={`absolute left-3 ${product.is_featured ? 'top-10' : 'top-3'}`}>
+            <ProductFamilyBadge product={product} />
+          </div>
 
           <div className="absolute right-3 bottom-3 left-3 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="bg-[var(--terra)] py-2 text-center font-condensed text-xs uppercase tracking-widest text-white">

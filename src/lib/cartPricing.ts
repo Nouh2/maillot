@@ -9,6 +9,8 @@ import {
 
 export const FLOCAGE_PRICE = 5
 export const PATCH_PRICE = 2.5
+export const FAN_JERSEY_PRICE = 19.9
+export const PLAYER_JERSEY_PRICE = 27.99
 export const STANDARD_PRICE = 27.99
 export const STANDARD_PROMO_PRICE = 19.99
 export const RETRO_PRICE = 34.99
@@ -82,8 +84,28 @@ export function formatEuro(value: number): string {
   return euroFormatter.format(value)
 }
 
-export function getProductPricing(params: { isRetro: boolean; now?: Date }) {
-  const { isRetro, now = new Date() } = params
+export function getProductPricing(params: {
+  isRetro: boolean
+  isConcept?: boolean
+  productKind?: 'jersey' | string
+  jerseyVersion?: 'fan' | 'player' | string
+  now?: Date
+}) {
+  const { isRetro, isConcept = false, productKind, jerseyVersion = 'fan', now = new Date() } = params
+
+  if (!isRetro && !isConcept && productKind === 'jersey') {
+    const jerseyPrice = jerseyVersion === 'player' ? PLAYER_JERSEY_PRICE : FAN_JERSEY_PRICE
+
+    return {
+      originalPrice: jerseyPrice,
+      currentPrice: jerseyPrice,
+      promoPrice: jerseyPrice,
+      promoActive: false,
+      promoLabel: null,
+      promoDescription: null,
+    }
+  }
+
   const originalPrice = isRetro ? RETRO_PRICE : STANDARD_PRICE
   const promoPrice = isRetro ? RETRO_PROMO_PRICE : STANDARD_PROMO_PRICE
   const promoActive = isLaunchPromoActive(now)

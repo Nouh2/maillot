@@ -17,6 +17,7 @@ export function toCatalogProduct(
     league: row.league ?? '',
     country: row.country ?? '',
     product_kind: row.product_kind ?? 'jersey',
+    jersey_version: row.jersey_version ?? 'fan',
     type: row.type ?? 'domicile',
     season: row.season ?? 'A definir',
     price: typeof row.price === 'number' ? row.price : 0,

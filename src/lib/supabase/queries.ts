@@ -18,6 +18,7 @@ type CatalogListRow = Pick<
   | 'league'
   | 'country'
   | 'product_kind'
+  | 'jersey_version'
   | 'type'
   | 'season'
   | 'price'
@@ -36,13 +37,13 @@ type CatalogListRow = Pick<
 const CATALOG_REVALIDATE_SECONDS = 1800
 const STATIC_REVALIDATE_SECONDS = 86400
 
-function isMissingManualOverrideColumn(error: unknown): boolean {
+function isMissingCatalogOptionalColumn(error: unknown): boolean {
   return (
     typeof error === 'object' &&
     error !== null &&
     'message' in error &&
     typeof error.message === 'string' &&
-    error.message.includes('manual_override')
+    (error.message.includes('manual_override') || error.message.includes('jersey_version'))
   )
 }
 
@@ -77,14 +78,14 @@ const getCachedProducts = unstable_cache(
         supabase
           .from('products')
           .select(
-            'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override',
+            'id, slug, name, club, league, country, product_kind, jersey_version, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override',
           )
           .eq('is_active', true)
           .order('created_at', { ascending: false })
           .range(from, to),
       )
     } catch (error) {
-      if (!isMissingManualOverrideColumn(error)) {
+      if (!isMissingCatalogOptionalColumn(error)) {
         throw error
       }
 

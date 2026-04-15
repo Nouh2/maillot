@@ -80,7 +80,12 @@ export function BestsellersTabs({
               </div>
             </Link>
             {rest.slice(0, 2).map((product) => {
-              const pricing = getProductPricing({ isRetro: product.is_retro })
+              const pricing = getProductPricing({
+                isRetro: product.is_retro,
+                isConcept: product.is_concept,
+                productKind: product.product_kind,
+                jerseyVersion: product.jersey_version,
+              })
               return (
                 <Link key={product.id} href={`/shop/${product.slug}`} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
                   <div className="relative" style={{ aspectRatio: '3/4' }}>
@@ -111,7 +116,12 @@ export function BestsellersTabs({
               <div className="absolute inset-0" style={{ aspectRatio: '3/4' }} />
             </Link>
             {rest.slice(0, 3).map((product) => {
-              const pricing = getProductPricing({ isRetro: product.is_retro })
+              const pricing = getProductPricing({
+                isRetro: product.is_retro,
+                isConcept: product.is_concept,
+                productKind: product.product_kind,
+                jerseyVersion: product.jersey_version,
+              })
               return (
                 <Link key={product.id} href={`/shop/${product.slug}`} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
                   <div className="relative" style={{ aspectRatio: '3/4' }}>

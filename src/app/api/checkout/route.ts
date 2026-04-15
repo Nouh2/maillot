@@ -4,8 +4,10 @@ import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload }
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
 import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { getStripe } from '@/lib/stripe'
+import { toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
 import type { CartItem } from '@/types/cart'
+import type { Product } from '@/types/product'
 
 type PersistedOrderItem = {
   product_id: string
@@ -22,9 +24,11 @@ type PersistedOrderItem = {
   qty: number
 }
 
-function normalizeCartItems(items: CartItem[], retroMap: Record<string, boolean>): PersistedOrderItem[] {
+function normalizeCartItems(items: CartItem[], productMap: Record<string, Product>): PersistedOrderItem[] {
   return items.map((item) => {
-    if (!(item.product_id in retroMap)) {
+    const product = productMap[item.product_id]
+
+    if (!product) {
       throw new Error(`Produit manquant pour ${item.product_id}`)
     }
 
@@ -33,7 +37,12 @@ function normalizeCartItems(items: CartItem[], retroMap: Record<string, boolean>
     const flocageName = item.flocage_name?.trim() || null
     const flocageNumber = item.flocage_number?.trim() || null
     const qty = Number.isFinite(item.qty) && item.qty > 0 ? Math.floor(item.qty) : 1
-    const basePrice = getProductPricing({ isRetro: retroMap[item.product_id] }).currentPrice
+    const basePrice = getProductPricing({
+      isRetro: product.is_retro,
+      isConcept: product.is_concept,
+      productKind: product.product_kind,
+      jerseyVersion: product.jersey_version,
+    }).currentPrice
     const price = calculateCartItemUnitPrice({
       basePrice,
       patchCount: patches.length,
@@ -92,19 +101,20 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseServiceClient() as any
   const { data: products, error: dbError } = await supabase
     .from('products')
-    .select('id, is_retro')
+    .select('*')
     .in('id', productIds)
 
   if (dbError || !products) {
     return NextResponse.json({ error: 'Erreur base de donnees' }, { status: 500 })
   }
 
-  const retroMap: Record<string, boolean> = {}
+  const productMap: Record<string, Product> = {}
   for (const product of products) {
-    retroMap[product.id] = Boolean(product.is_retro)
+    const normalizedProduct = toCatalogProduct(product as Product & { manual_override?: unknown })
+    productMap[normalizedProduct.id] = normalizedProduct
   }
 
-  const normalizedItems = normalizeCartItems(items, retroMap)
+  const normalizedItems = normalizeCartItems(items, productMap)
   const { data: priorOrders } = await supabase
     .from('orders')
     .select('id, status, paid_at')

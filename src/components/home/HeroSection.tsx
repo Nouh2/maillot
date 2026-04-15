@@ -54,7 +54,12 @@ export function HeroSection({ featured }: { featured: Product[] }) {
           <div className="absolute left-1/2 top-1/2 -z-10 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--terra)]/5 blur-3xl" />
           {featured.slice(0, 4).map((product) => (
             (() => {
-              const pricing = getProductPricing({ isRetro: product.is_retro })
+              const pricing = getProductPricing({
+                isRetro: product.is_retro,
+                isConcept: product.is_concept,
+                productKind: product.product_kind,
+                jerseyVersion: product.jersey_version,
+              })
 
               return (
                 <Link

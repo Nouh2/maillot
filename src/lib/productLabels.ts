@@ -1,6 +1,21 @@
 import type { Product } from '@/types/product'
 import { resolveProductSeasonLabel } from '@/lib/season'
 
+export type ProductFamily = 'fan' | 'player' | 'concept' | 'retro' | 'other'
+
+export const JERSEY_VERSION_LABELS: Record<Product['jersey_version'], string> = {
+  fan: 'Fan',
+  player: 'Player',
+}
+
+export const PRODUCT_FAMILY_LABELS: Record<ProductFamily, string> = {
+  fan: 'Maillot fan',
+  player: 'Maillot player',
+  concept: 'Maillot concept',
+  retro: 'Maillot retro',
+  other: 'Produit',
+}
+
 export const PRODUCT_TYPE_LABELS: Record<Product['type'], string> = {
   domicile: 'Domicile',
   exterieur: 'Exterieur',
@@ -30,6 +45,21 @@ export function getProductKindLabel(kind: Product['product_kind']): string {
 
 export function showProductType(kind: Product['product_kind']): boolean {
   return kind === 'jersey' || kind === 'goalkeeper'
+}
+
+export function getProductFamily(
+  product: Pick<Product, 'product_kind' | 'jersey_version' | 'is_retro' | 'is_concept'>
+): ProductFamily {
+  if (product.is_retro) return 'retro'
+  if (product.is_concept) return 'concept'
+  if (product.product_kind === 'jersey') return product.jersey_version === 'player' ? 'player' : 'fan'
+  return 'other'
+}
+
+export function getProductFamilyLabel(
+  product: Pick<Product, 'product_kind' | 'jersey_version' | 'is_retro' | 'is_concept'>
+): string {
+  return PRODUCT_FAMILY_LABELS[getProductFamily(product)]
 }
 
 export function getProductMetaLine(

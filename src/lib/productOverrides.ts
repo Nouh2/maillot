@@ -8,6 +8,7 @@ export const PRODUCT_MANUAL_OVERRIDE_FIELDS: ProductManualOverrideField[] = [
   'country',
   'season',
   'product_kind',
+  'jersey_version',
   'type',
   'is_retro',
   'photos',
@@ -62,6 +63,9 @@ export function normalizeProductManualOverride(value: unknown): ProductManualOve
 
   const productKind = normalizeString(source.product_kind) as Product['product_kind'] | undefined
   if (productKind) override.product_kind = productKind
+
+  const jerseyVersion = normalizeString(source.jersey_version) as Product['jersey_version'] | undefined
+  if (jerseyVersion) override.jersey_version = jerseyVersion
 
   const type = normalizeString(source.type) as Product['type'] | undefined
   if (type) override.type = type

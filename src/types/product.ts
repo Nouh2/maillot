@@ -6,6 +6,7 @@ export interface Product {
   league: string
   country: string
   product_kind: 'jersey' | 'goalkeeper' | 'training' | 'pre_match' | 'lifestyle' | 'jacket' | 'pants' | 'shorts' | 'set' | 'vest'
+  jersey_version: 'fan' | 'player'
   type: 'domicile' | 'exterieur' | 'third'
   season: string
   price: number

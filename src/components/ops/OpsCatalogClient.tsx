@@ -39,6 +39,11 @@ const PRODUCT_TYPE_OPTIONS: Array<{ value: OpsProductDraft['type']; label: strin
   { value: 'third', label: 'Third' },
 ]
 
+const JERSEY_VERSION_OPTIONS: Array<{ value: OpsProductDraft['jersey_version']; label: string }> = [
+  { value: 'fan', label: 'Fan' },
+  { value: 'player', label: 'Player' },
+]
+
 function toDraft(product: OpsProductDetail): OpsProductDraft {
   return {
     name: product.name,
@@ -47,6 +52,7 @@ function toDraft(product: OpsProductDetail): OpsProductDraft {
     country: product.country,
     season: product.season,
     product_kind: product.product_kind,
+    jersey_version: product.jersey_version,
     type: product.type,
     is_retro: product.is_retro,
     is_concept: Boolean(product.is_concept),
@@ -68,6 +74,8 @@ function toSummary(product: OpsProductDetail): OpsProductSummary {
     club: product.club,
     league: product.league,
     season: product.season,
+    product_kind: product.product_kind,
+    jersey_version: product.jersey_version,
     photos: product.photos.slice(0, 2),
     is_active: product.is_active,
     is_retro: product.is_retro,
@@ -336,6 +344,11 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                         <span className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.14em] ${product.is_active ? 'bg-[#e8f4eb] text-[#1c6b3e]' : 'bg-[#f6e8e8] text-[#9d2f2f]'}`}>{product.is_active ? 'Actif' : 'Inactif'}</span>
                         {product.is_retro ? <span className="rounded-full bg-[var(--terra-lt)] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--terra)]">Retro</span> : null}
                         {product.is_concept ? <span className="rounded-full bg-[#eef2ff] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[#3f51b5]">Concept</span> : null}
+                        {!product.is_retro && !product.is_concept && product.product_kind === 'jersey' ? (
+                          <span className="rounded-full bg-white px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--black)] ring-1 ring-[var(--cream-3)]">
+                            {product.jersey_version === 'player' ? 'Player' : 'Fan'}
+                          </span>
+                        ) : null}
                         {product.has_manual_override ? <span className="rounded-full bg-[var(--black)] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white">Modifie</span> : null}
                       </div>
                     </div>
@@ -371,6 +384,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                   <StatPill active={draft.is_active} label={draft.is_active ? 'Actif' : 'Inactif'} />
                   <StatPill active={draft.is_retro} label="Retro" />
                   <StatPill active={draft.is_concept} label="Concept" />
+                  <StatPill active={draft.product_kind === 'jersey'} label={draft.jersey_version === 'player' ? 'Player' : 'Fan'} />
                   <StatPill active={loadedProduct.has_manual_override} label="Override manuel" />
                 </div>
               </div>
@@ -417,6 +431,19 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                       <span className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">Variation</span>
                       <select value={draft.type} onChange={(event) => updateDraft({ type: event.target.value as OpsProductDraft['type'] })} className="w-full rounded-2xl border border-[var(--cream-3)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--terra)]">
                         {PRODUCT_TYPE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="space-y-2">
+                      <span className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">Version maillot</span>
+                      <select
+                        value={draft.jersey_version}
+                        onChange={(event) => updateDraft({ jersey_version: event.target.value as OpsProductDraft['jersey_version'] })}
+                        disabled={draft.product_kind !== 'jersey'}
+                        className="w-full rounded-2xl border border-[var(--cream-3)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--terra)] disabled:bg-[var(--cream)] disabled:text-[var(--grey)]"
+                      >
+                        {JERSEY_VERSION_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                       </select>
