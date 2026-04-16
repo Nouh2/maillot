@@ -78,6 +78,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+import { TikTokWall } from '@/components/home/TikTokWall'
+
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
   const [product, patches, catalog] = await Promise.all([getProductBySlug(slug), getPatches(), getProducts()])
@@ -100,7 +102,7 @@ export default async function ProductPage({ params }: Props) {
         promoLabel={pricing.promoLabel}
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-16">
+      <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 md:pt-16">
         <div className="grid gap-2 md:grid-cols-2 md:gap-16">
           <div className="min-w-0">
             <nav className="mb-4 flex items-center gap-2 font-condensed text-[10px] uppercase tracking-wider text-[var(--grey)] sm:text-xs">
@@ -164,10 +166,14 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <AddToCartForm product={product} patches={patches} />
-            <div className="h-28 md:hidden" />
+            <div className="h-20" />
           </div>
         </div>
+      </div>
 
+      <TikTokWall />
+
+      <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 md:pb-24">
         {relatedProducts.length > 0 ? (
           <section className="mt-14 border-t border-[var(--cream-3)] pt-10 md:mt-20 md:pt-14">
             <ProductsGrid
