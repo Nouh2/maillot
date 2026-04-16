@@ -5,7 +5,7 @@ import { CollectionsTabs } from '@/components/home/CollectionsTabs'
 import { CountdownBanner } from '@/components/home/CountdownBanner'
 import { EmojiCategoryBar } from '@/components/home/EmojiCategoryBar'
 import { HeroSlideshow } from '@/components/home/HeroSlideshow'
-import { InstagramWall } from '@/components/home/InstagramWall'
+import { TikTokWall } from '@/components/home/TikTokWall'
 import { LeaguesStrip } from '@/components/home/LeaguesStrip'
 import { PromoStrip } from '@/components/home/PromoStrip'
 import { ReassuranceBar } from '@/components/home/ReassuranceBar'
@@ -49,7 +49,7 @@ export default async function HomePage() {
       <CountdownBanner />
       <WhyUsSection />
       <ReviewsSection />
-      <InstagramWall />
+      <TikTokWall />
       <AboutSection />
     </>
   )
