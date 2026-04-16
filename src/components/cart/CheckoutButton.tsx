@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button'
 import { formatEuro } from '@/lib/cartPricing'
-import { getStoredAttribution, trackEvent } from '@/lib/tracking'
+import { getStoredAttribution, trackBeginCheckout, trackEvent } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import { cn } from '@/lib/utils'
 
@@ -23,9 +23,11 @@ export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonPr
     }
 
     const attribution = getStoredAttribution()
-    trackEvent('begin_checkout', {
-      item_count: items.reduce((sum, item) => sum + item.qty, 0),
+    trackBeginCheckout({
+      items,
       value: total(),
+      marketingOptIn,
+      promoCode,
     })
 
     try {

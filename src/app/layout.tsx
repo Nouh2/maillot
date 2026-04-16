@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Barlow, Barlow_Condensed, Bebas_Neue } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { Providers } from '@/components/providers/Providers'
 
@@ -63,6 +64,7 @@ export default function RootLayout({
     >
       <body className="antialiased overflow-x-hidden">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   )

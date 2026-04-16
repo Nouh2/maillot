@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { TrackEventOnMount } from '@/components/analytics/TrackEventOnMount'
 import { getOrderByStripeSessionId, getOrderDisplayReference, synchronizeOrderFromCheckoutSession } from '@/lib/orders'
 import { getStripe } from '@/lib/stripe'
 import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
@@ -34,16 +33,17 @@ export default async function OrderConfirmedPage({ searchParams }: OrderConfirme
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--cream)]">
-      <OrderConfirmedClient />
-      {order ? (
-        <TrackEventOnMount
-          event="purchase_completed"
-          params={{
-            order_number: getOrderDisplayReference(order),
-            value: order.total_amount ?? null,
-          }}
-        />
-      ) : null}
+      <OrderConfirmedClient
+        purchase={order && order.total_amount !== null && order.total_amount !== undefined
+          ? {
+              dedupeKey: `purchase:${order.id}`,
+              orderNumber: getOrderDisplayReference(order),
+              value: order.total_amount,
+              items: order.items,
+              sourceChannel: order.source_channel,
+            }
+          : undefined}
+      />
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <div className="mb-6 text-7xl">OK</div>
         <h1 className="mb-4 font-bebas text-5xl text-[var(--black)] md:text-6xl">COMMANDE CONFIRMEE</h1>

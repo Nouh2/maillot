@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Check, Minus, Plus, ShieldCheck } from 'lucide-react'
 import { FLOCAGE_PRICE, calculateCartItemUnitPrice, formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { normalizeProductTextSeasons } from '@/lib/season'
-import { trackEvent } from '@/lib/tracking'
+import { trackAddToCart, trackEvent } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import type { Patch, Product } from '@/types/product'
 import { PatchSelector } from './PatchSelector'
@@ -76,13 +76,15 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       qty,
     })
 
-    trackEvent('add_to_cart', {
-      product_id: product.id,
-      product_name: normalizedName,
+    trackAddToCart({
+      productId: product.id,
+      productName: normalizedName,
+      club: product.club,
       quantity: qty,
       size,
-      patch_count: selectedPatches.length,
-      has_flocage: hasFlocage,
+      patchCount: selectedPatches.length,
+      hasFlocage,
+      unitPrice,
       value: totalPrice,
     })
   }
