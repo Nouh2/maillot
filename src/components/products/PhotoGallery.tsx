@@ -64,15 +64,17 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
         ) : null}
       </div>
 
-      <div className="scrollbar-hide flex max-w-full gap-2 overflow-x-auto px-1 pb-1">
+      <div className="scrollbar-hide flex max-w-full gap-3 overflow-x-auto px-1 pb-2">
         {photos.map((photo, index) => (
           <button
             key={`${photo}-${index}`}
             type="button"
             onClick={() => setActive(index)}
             aria-label={`Photo ${index + 1} de ${name}`}
-            className={`group relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all md:h-24 md:w-24 ${
-              active === index ? 'scale-105 border-[var(--black)] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
+            className={`group relative aspect-[4/5] w-16 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all sm:w-20 ${
+              active === index 
+                ? 'border-[var(--black)] ring-1 ring-[var(--black)]' 
+                : 'border-transparent opacity-80 hover:opacity-100'
             }`}
           >
             <ExternalProductImage
@@ -85,7 +87,6 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               sizes="80px"
               className="object-cover"
             />
-            {active !== index ? <div className="absolute inset-0 bg-white/10 transition-opacity group-hover:opacity-0" /> : null}
           </button>
         ))}
       </div>
