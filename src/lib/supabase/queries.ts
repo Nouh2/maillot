@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import type { Club, League, Patch, Product } from '@/types/product'
-import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
+import { dedupeCatalogProducts, filterConceptProducts, filterStandardCatalogProducts, getClubFilterOptions } from '@/lib/catalogPresentation'
 import { CATALOG_CACHE_TAG, toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabasePublicClient } from './server'
 
@@ -165,6 +165,15 @@ const getCachedClubs = unstable_cache(
   { revalidate: STATIC_REVALIDATE_SECONDS },
 )
 
+const getCachedSearchSuggestions = unstable_cache(
+  async (): Promise<string[]> => {
+    const products = await getCachedProducts()
+    return getClubFilterOptions(dedupeCatalogProducts(filterStandardCatalogProducts(products)))
+  },
+  ['catalog-search-suggestions'],
+  { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
+)
+
 export async function getProducts(filters?: {
   league?: string
   club?: string
@@ -245,4 +254,8 @@ export async function getPatches(): Promise<Patch[]> {
 
 export async function getClubs(leagueSlug?: string): Promise<Club[]> {
   return getCachedClubs(leagueSlug)
+}
+
+export async function getSearchSuggestions(): Promise<string[]> {
+  return getCachedSearchSuggestions()
 }

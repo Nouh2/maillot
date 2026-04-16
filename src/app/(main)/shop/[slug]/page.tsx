@@ -175,7 +175,7 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 md:pb-24">
         {relatedProducts.length > 0 ? (
-          <section className="mt-14 border-t border-[var(--cream-3)] pt-10 md:mt-20 md:pt-14">
+          <section className="border-t border-[var(--cream-3)] pt-10 md:pt-14">
             <ProductsGrid
               products={relatedProducts}
               sub={product.club}

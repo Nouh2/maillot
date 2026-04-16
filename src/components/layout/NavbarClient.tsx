@@ -1,10 +1,11 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { CartButton } from '@/components/cart/CartButton'
 import { CONCEPT_HREF, getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
+import { normalizeCatalogText } from '@/lib/catalogEntityRegistry'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { League } from '@/types/product'
 import {
@@ -21,9 +22,21 @@ import {
 
 interface NavbarClientProps {
   leagues: League[]
+  searchSuggestions: string[]
 }
 
-export function NavbarClient({ leagues }: NavbarClientProps) {
+const DEFAULT_SEARCH_TAGS = ['Real Madrid', 'France', 'Paris Saint-Germain', 'Barcelone', 'Maroc']
+
+function matchesSuggestionPrefix(suggestion: string, query: string): boolean {
+  const normalizedSuggestion = normalizeCatalogText(suggestion)
+  const normalizedQuery = normalizeCatalogText(query)
+
+  if (!normalizedQuery) return true
+
+  return normalizedSuggestion.startsWith(normalizedQuery)
+}
+
+export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) {
   const router = useRouter()
   const leagueNavigation = getLeagueNavigationOptions(leagues)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -32,6 +45,11 @@ export function NavbarClient({ leagues }: NavbarClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const deferredSearchQuery = useDeferredValue(searchQuery)
+  const normalizedSearchQuery = normalizeCatalogText(deferredSearchQuery)
+  const liveSuggestions = normalizedSearchQuery
+    ? searchSuggestions.filter((suggestion) => matchesSuggestionPrefix(suggestion, normalizedSearchQuery)).slice(0, 8)
+    : []
 
   const closeMobileMenu = () => {
     setMobileOpen(false)
@@ -45,6 +63,13 @@ export function NavbarClient({ leagues }: NavbarClientProps) {
       setSearchOpen(false)
       setSearchQuery('')
     }
+  }
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setSearchQuery(suggestion)
+    router.push(`/shop?q=${encodeURIComponent(suggestion)}`)
+    setSearchOpen(false)
+    setSearchQuery('')
   }
 
   useEffect(() => {
@@ -217,22 +242,44 @@ export function NavbarClient({ leagues }: NavbarClientProps) {
             </form>
 
             <div className="mt-12">
-              <p className="mb-6 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions</p>
-              <div className="flex flex-wrap gap-3">
-                {['Real Madrid', 'Equipe de France', 'Version Joueur', 'Nouveautes', 'Bons Plans'].map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => {
-                      setSearchQuery(tag)
-                      router.push(`/shop?q=${encodeURIComponent(tag)}`)
-                      setSearchOpen(false)
-                    }}
-                    className="rounded-full bg-[var(--cream)] px-6 py-2 text-[15px] font-bold transition-all hover:bg-[var(--black)] hover:text-white"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
+              {normalizedSearchQuery ? (
+                <div className="rounded-[2rem] border border-[var(--cream-3)] bg-[var(--cream)]/70 p-4 md:p-6">
+                  <p className="mb-4 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions clubs et selections</p>
+                  {liveSuggestions.length > 0 ? (
+                    <div className="grid gap-2">
+                      {liveSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                          className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 text-left transition-colors hover:bg-[var(--black)] hover:text-white"
+                        >
+                          <span className="font-condensed text-lg font-bold uppercase tracking-[0.08em]">{suggestion}</span>
+                          <ArrowRight className="h-5 w-5" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[#707072]">Aucun club ou selection ne commence par cette saisie.</p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <p className="mb-6 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions</p>
+                  <div className="flex flex-wrap gap-3">
+                    {DEFAULT_SEARCH_TAGS.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => handleSuggestionSelect(tag)}
+                        className="rounded-full bg-[var(--cream)] px-6 py-2 text-[15px] font-bold transition-all hover:bg-[var(--black)] hover:text-white"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

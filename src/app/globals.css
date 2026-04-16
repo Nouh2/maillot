@@ -67,3 +67,11 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.h-20 {
+    height: calc(var(--spacing) * 6);
+}
+
+.pb-16 {
+    padding-bottom: calc(var(--spacing) * 6);
+}

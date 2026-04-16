@@ -174,10 +174,6 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           </div>
 
           <div className="space-y-4">
-            <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4ADE80] py-3.5 text-center font-bebas text-2xl tracking-wide text-white shadow-sm">
-              <ShieldCheck className="h-6 w-6 text-white" />
-              Paiement 100 % securise
-            </div>
 
             <div className="flex flex-wrap items-center justify-center gap-2 py-2">
               {PAYMENT_METHODS.map((method) => (
