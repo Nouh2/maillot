@@ -10,7 +10,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
   }
 
-  revalidateTag(CATALOG_CACHE_TAG)
+  revalidateTag(CATALOG_CACHE_TAG, { expire: 0 })
 
   return NextResponse.json({ ok: true, tag: CATALOG_CACHE_TAG })
 }
