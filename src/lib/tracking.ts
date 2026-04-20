@@ -32,7 +32,6 @@ interface BeginCheckoutTrackingParams {
   items: CartItem[]
   value: number
   marketingOptIn: boolean
-  promoCode?: string
 }
 
 interface PurchaseTrackingParams {
@@ -253,7 +252,6 @@ export function trackBeginCheckout({
   items,
   value,
   marketingOptIn,
-  promoCode,
 }: BeginCheckoutTrackingParams) {
   const itemCount = getItemCount(items)
   const payload = {
@@ -263,7 +261,6 @@ export function trackBeginCheckout({
     unique_items: items.length,
     product_ids: items.map((item) => item.product_id).join(','),
     marketing_opt_in: marketingOptIn,
-    promo_code: promoCode?.trim() || null,
     items: toCommerceItems(items),
   }
 

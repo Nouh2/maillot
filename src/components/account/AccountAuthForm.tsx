@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { trackEvent } from '@/lib/tracking'
 
 export function AccountAuthForm() {
@@ -59,13 +58,6 @@ export function AccountAuthForm() {
       >
         {status === 'loading' ? 'Envoi...' : 'Recevoir le lien magique'}
       </button>
-
-      <div className="rounded-2xl border border-[var(--terra)]/20 bg-[var(--terra-lt)] px-4 py-3 text-sm text-[var(--black)]">
-        <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Offre fidelite</p>
-        <p className="mt-1">
-          Cree ton compte et beneficie de <strong>-10 %</strong> sur ta premiere commande avec le code <strong>{LOYALTY_CODE}</strong>, utilisable une seule fois par email.
-        </p>
-      </div>
 
       {message ? <p className={`text-sm ${status === 'error' ? 'text-red-600' : 'text-[var(--grey)]'}`}>{message}</p> : null}
     </form>

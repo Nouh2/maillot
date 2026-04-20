@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, isLoyaltyCode, normalizePromoCode, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
+import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
-import { LOYALTY_CODE } from '@/lib/siteConfig'
 import { getStripe } from '@/lib/stripe'
 import { toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
@@ -70,7 +69,6 @@ export async function POST(request: NextRequest) {
   let items: CartItem[]
   let email = ''
   let marketingOptIn = false
-  let promoCode = ''
   let attribution: AttributionPayload = {}
 
   try {
@@ -78,7 +76,6 @@ export async function POST(request: NextRequest) {
     items = body.items
     email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
     marketingOptIn = body.marketingOptIn === true
-    promoCode = normalizePromoCode(typeof body.promoCode === 'string' ? body.promoCode : '')
     attribution = normalizeAttributionPayload(body.attribution)
   } catch {
     return NextResponse.json({ error: 'Body invalide' }, { status: 400 })
@@ -90,10 +87,6 @@ export async function POST(request: NextRequest) {
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
-  }
-
-  if (promoCode && !isLoyaltyCode(promoCode)) {
-    return NextResponse.json({ error: 'Code promo invalide' }, { status: 400 })
   }
 
   const productIds = [...new Set(items.map((item) => item.product_id))]
@@ -115,24 +108,7 @@ export async function POST(request: NextRequest) {
   }
 
   const normalizedItems = normalizeCartItems(items, productMap)
-  const { data: priorOrders } = await supabase
-    .from('orders')
-    .select('id, status, paid_at')
-    .eq('customer_email', email)
-    .limit(10)
-
-  const hasCompletedOrder = ((priorOrders as Array<{ status?: string | null; paid_at?: string | null }> | null) ?? []).some((order) =>
-    Boolean(order.paid_at) || ['paid', 'shipped', 'delivered', 'cancelled'].includes(order.status ?? ''),
-  )
-
-  if (promoCode === LOYALTY_CODE && hasCompletedOrder) {
-    return NextResponse.json({ error: 'Ce code est reserve a la premiere commande pour cet email.' }, { status: 400 })
-  }
-
-  const pricing = calculateCartPricing(normalizedItems, {
-    promoCode,
-    loyaltyEligible: promoCode === LOYALTY_CODE ? !hasCompletedOrder : false,
-  })
+  const pricing = calculateCartPricing(normalizedItems)
   const itemCount = pricing.itemCount
   const shippingAmount = pricing.shipping
   const orderTotal = pricing.total
@@ -250,10 +226,6 @@ export async function POST(request: NextRequest) {
         public_tracking_token: pendingOrder.public_tracking_token,
         item_count: String(itemCount),
         shipping_amount: String(shippingAmount),
-        loyalty_code: promoCode || '',
-        loyalty_applied: pricing.loyaltyCodeApplied ? 'true' : 'false',
-        bundle_discount: String(pricing.bundleDiscount),
-        loyalty_discount: String(pricing.loyaltyDiscount),
         marketing_opt_in: marketingOptIn ? 'true' : 'false',
         source_channel: sourceChannel,
       },

@@ -8,7 +8,6 @@ interface CartState {
   isOpen: boolean
   customerEmail: string
   marketingOptIn: boolean
-  promoCode: string
   addItem: (item: CartItem) => void
   removeItem: (item: CartItem) => void
   updateQty: (item: CartItem, qty: number) => void
@@ -17,15 +16,10 @@ interface CartState {
   closeCart: () => void
   setCustomerEmail: (email: string) => void
   setMarketingOptIn: (marketingOptIn: boolean) => void
-  setPromoCode: (promoCode: string) => void
   subtotal: () => number
-  bundleDiscount: () => number
-  loyaltyDiscount: () => number
-  discountedSubtotal: () => number
   shippingTotal: () => number
   total: () => number
   itemCount: () => number
-  freeItemsCount: () => number
   freeShippingUnlocked: () => boolean
 }
 
@@ -42,17 +36,13 @@ const isSameItem = (a: CartItem, b: CartItem) => {
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => {
-      const getPricing = () => calculateCartPricing(get().items, {
-        promoCode: get().promoCode,
-        loyaltyEligible: true,
-      })
+      const getPricing = () => calculateCartPricing(get().items)
 
       return ({
       items: [],
       isOpen: false,
       customerEmail: '',
       marketingOptIn: false,
-      promoCode: '',
 
       addItem: (newItem) => set((state) => {
         const existing = state.items.find((item) => isSameItem(item, newItem))
@@ -82,21 +72,16 @@ export const useCartStore = create<CartState>()(
             ),
       })),
 
-      clearCart: () => set({ items: [], promoCode: '' }),
+      clearCart: () => set({ items: [] }),
       openCart: () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
       setCustomerEmail: (email) => set({ customerEmail: email.trim().toLowerCase() }),
       setMarketingOptIn: (marketingOptIn) => set({ marketingOptIn }),
-      setPromoCode: (promoCode) => set({ promoCode: promoCode.trim().toUpperCase() }),
 
       subtotal: () => getPricing().subtotal,
-      bundleDiscount: () => getPricing().bundleDiscount,
-      loyaltyDiscount: () => getPricing().loyaltyDiscount,
-      discountedSubtotal: () => getPricing().discountedSubtotal,
       shippingTotal: () => getPricing().shipping,
       total: () => getPricing().total,
       itemCount: () => getPricing().itemCount,
-      freeItemsCount: () => getPricing().freeItemsCount,
       freeShippingUnlocked: () => getPricing().freeShippingUnlocked,
     })
     },

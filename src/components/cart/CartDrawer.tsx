@@ -3,8 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
-import { formatEuro, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
-import { LOYALTY_CODE } from '@/lib/siteConfig'
+import { formatEuro } from '@/lib/cartPricing'
 import { CartItem } from './CartItem'
 import { CheckoutButton } from './CheckoutButton'
 import { CheckoutContactFields } from './CheckoutContactFields'
@@ -15,15 +14,10 @@ export function CartDrawer() {
     isOpen,
     closeCart,
     subtotal,
-    bundleDiscount,
-    loyaltyDiscount,
-    discountedSubtotal,
     shippingTotal,
     total,
-    freeItemsCount,
     freeShippingUnlocked,
   } = useCartStore()
-  const freeItems = freeItemsCount()
 
   useEffect(() => {
     if (!isOpen) return
@@ -86,24 +80,6 @@ export function CartDrawer() {
                   <span>Sous-total</span>
                   <span>{formatEuro(subtotal())}</span>
                 </div>
-                {bundleDiscount() > 0 ? (
-                  <div className="flex justify-between font-condensed text-sm tracking-wide text-emerald-700">
-                    <span>
-                      {freeItems} maillot{freeItems > 1 ? 's' : ''} offert{freeItems > 1 ? 's' : ''}
-                    </span>
-                    <span>-{formatEuro(bundleDiscount())}</span>
-                  </div>
-                ) : null}
-                {loyaltyDiscount() > 0 ? (
-                  <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--terra)]">
-                    <span>Code {LOYALTY_CODE}</span>
-                    <span>-{formatEuro(loyaltyDiscount())}</span>
-                  </div>
-                ) : null}
-                <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
-                  <span>Sous-total remisé</span>
-                  <span>{formatEuro(discountedSubtotal())}</span>
-                </div>
                 <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
                   <span>Livraison</span>
                   <span>{freeShippingUnlocked() ? 'Offerte' : formatEuro(shippingTotal())}</span>
@@ -112,14 +88,6 @@ export function CartDrawer() {
                   <span>Total</span>
                   <span className="font-bold">{formatEuro(total())}</span>
                 </div>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--terra)]/20 bg-[var(--terra-lt)] px-4 py-3 text-center">
-                <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Compte fidelite</p>
-                <p className="mt-1 text-sm text-[var(--black)]">
-                  Code <strong>{LOYALTY_CODE}</strong> reserve a la premiere commande. Livraison offerte des{' '}
-                  {formatEuro(FREE_SHIPPING_THRESHOLD)} d achats.
-                </p>
               </div>
 
               <Link
