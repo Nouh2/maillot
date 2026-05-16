@@ -1,6 +1,7 @@
 const YUPOO_HOSTS = ['photo.yupoo.com', 'x.yupoo.com', 'y.yupoo.com']
 const BUNNY_CDN_BASE_URL = process.env.NEXT_PUBLIC_BUNNY_CDN_BASE_URL?.trim().replace(/\/+$/, '') || 'https://maillotaddict.b-cdn.net'
 const BUNNY_OPTIMIZER_ENABLED = process.env.NEXT_PUBLIC_BUNNY_OPTIMIZER_ENABLED === 'true'
+const YUPOO_IMAGE_PROXY_ENABLED = process.env.NEXT_PUBLIC_YUPOO_IMAGE_PROXY_ENABLED === 'true'
 
 const BUNNY_TRANSFORMS = {
   cart: { width: 96, quality: 60, format: 'webp' },
@@ -46,8 +47,12 @@ export function getDirectImageUrl(url: string, preset?: BunnyTransformPreset): s
 
 export function getProxyImageUrl(url: string): string {
   if (!url) return url
-  if (!isYupooImage(url)) return url
+  if (!YUPOO_IMAGE_PROXY_ENABLED || !isYupooImage(url)) return url
   return `/api/img?url=${encodeURIComponent(url)}`
+}
+
+export function hasYupooImageProxyFallback(url: string): boolean {
+  return YUPOO_IMAGE_PROXY_ENABLED && isYupooImage(url)
 }
 
 export function proxyImage(url: string): string {

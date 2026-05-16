@@ -14,7 +14,7 @@ import type {
 import type { League, Product } from '@/types/product'
 
 export const HOMEPAGE_CURATION_CACHE_TAG = 'homepage-curation'
-const HOMEPAGE_CURATION_REVALIDATE_SECONDS = 1800
+const HOMEPAGE_CURATION_REVALIDATE_SECONDS = 60 * 60 * 6
 const TOP_MOMENT_SLOT_LABELS = ['Grande carte', 'Carte 2', 'Carte 3', 'Carte 4'] as const
 const FAST_MOVER_SLOT_LABELS = ['Carte 1', 'Carte 2', 'Carte 3', 'Carte 4', 'Carte 5', 'Carte 6'] as const
 

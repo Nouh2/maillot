@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image, { type ImageProps } from 'next/image'
-import { getDirectImageUrl, getProxyImageUrl, isYupooImage, type BunnyTransformPreset } from '@/lib/images'
+import { getDirectImageUrl, getProxyImageUrl, hasYupooImageProxyFallback, isYupooImage, type BunnyTransformPreset } from '@/lib/images'
 
 type ExternalProductImageProps = Omit<ImageProps, 'src'> & {
   src: string
@@ -23,6 +23,7 @@ export function ExternalProductImage({
 }: ExternalProductImageProps) {
   const directSrc = getDirectImageUrl(src, bunnyTransform)
   const proxySrc = getProxyImageUrl(src)
+  const canUseProxyFallback = fallbackMode === 'proxy' && hasYupooImageProxyFallback(src) && proxySrc !== directSrc
   const [currentSrc, setCurrentSrc] = useState(directSrc)
 
   return (
@@ -32,12 +33,12 @@ export function ExternalProductImage({
       alt={alt}
       referrerPolicy={currentSrc === directSrc && isYupooImage(directSrc) ? 'no-referrer' : referrerPolicy}
       onError={(event) => {
-        if (fallbackMode === 'proxy' && currentSrc !== proxySrc && proxySrc !== directSrc) {
+        if (canUseProxyFallback && currentSrc !== proxySrc) {
           setCurrentSrc(proxySrc)
           return
         }
 
-        if (fallbackMode === 'placeholder' && currentSrc !== placeholderSrc) {
+        if (currentSrc !== placeholderSrc) {
           setCurrentSrc(placeholderSrc)
           return
         }

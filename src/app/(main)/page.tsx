@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
   description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
 }
-export const revalidate = 1800
+export const revalidate = 21600
 
 export default async function HomePage() {
   const [allLeagues, rawCatalogProducts, assignments] = await Promise.all([

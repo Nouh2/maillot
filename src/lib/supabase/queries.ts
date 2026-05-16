@@ -34,7 +34,7 @@ type CatalogListRow = Pick<
   manual_override?: unknown
 }
 
-const CATALOG_REVALIDATE_SECONDS = 1800
+const CATALOG_REVALIDATE_SECONDS = 60 * 60 * 6
 const STATIC_REVALIDATE_SECONDS = 86400
 
 function isMissingCatalogOptionalColumn(error: unknown): boolean {

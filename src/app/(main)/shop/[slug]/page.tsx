@@ -15,12 +15,7 @@ import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/se
 import { getPatches, getProductBySlug, getProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
-export const revalidate = 3600 // re-build toutes les heures
-
-export async function generateStaticParams() {
-  const products = await getProducts()
-  return products.map((p) => ({ slug: p.slug }))
-}
+export const revalidate = 86400
 
 interface Props {
   params: Promise<{ slug: string }>
