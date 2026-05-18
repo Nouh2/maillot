@@ -1,6 +1,3 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
@@ -11,8 +8,7 @@ import type { Product } from '@/types/product'
 import { ProductFamilyBadge } from './ProductFamilyBadge'
 
 export function ProductCard({ product }: { product: Product }) {
-  const [hovered, setHovered] = useState(false)
-  const photo = hovered && product.photos[1] ? product.photos[1] : product.photos[0]
+  const photo = product.photos[0]
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -24,8 +20,6 @@ export function ProductCard({ product }: { product: Product }) {
     <Link href={`/shop/${product.slug}`} className="group block">
       <div
         className="border border-[var(--cream-3)] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[var(--terra)] hover:shadow-[0_8px_24px_rgba(193,68,14,0.12)]"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream)]">
           {photo ? (

@@ -2,11 +2,10 @@
 import { useDeferredValue, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { AuthAccountLink } from '@/components/layout/AuthAccountLink'
 import { CartButton } from '@/components/cart/CartButton'
 import { CONCEPT_HREF, getLeagueNavigationOptions, NATIONAL_TEAMS_HREF, REST_OF_WORLD_HREF } from '@/lib/catalog'
 import { normalizeCatalogText } from '@/lib/catalogEntityRegistry'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { League } from '@/types/product'
 import {
   ArrowRight,
@@ -43,7 +42,6 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
   const [showLeagues, setShowLeagues] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [userEmail, setUserEmail] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const normalizedSearchQuery = normalizeCatalogText(deferredSearchQuery)
@@ -93,29 +91,6 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
       document.body.style.overflow = ''
     }
   }, [mobileOpen, searchOpen])
-
-  useEffect(() => {
-    const supabase = getSupabaseBrowserClient()
-    let cancelled = false
-
-    void (async () => {
-      const { data } = await supabase.auth.getUser()
-      if (!cancelled) {
-        setUserEmail(data.user?.email ?? null)
-      }
-    })()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-      setUserEmail(session?.user?.email ?? null)
-    })
-
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [])
 
   return (
     <>
@@ -186,12 +161,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
               <Search className="h-6 w-6 transition-transform group-hover:scale-110" />
             </button>
 
-            <Link
-              href="/compte"
-              className="hidden rounded-full border border-[var(--black)] px-5 py-2 text-[14px] font-bold text-[var(--black)] transition-all hover:bg-[var(--black)] hover:text-white md:inline-flex"
-            >
-              {userEmail ? 'Mon Compte' : 'Se Connecter'}
-            </Link>
+            <AuthAccountLink />
             <CartButton />
             <button
               className="rounded-full p-2 text-[var(--black)] transition-colors hover:bg-[var(--cream)] md:hidden"
