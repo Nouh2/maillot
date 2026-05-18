@@ -42,6 +42,10 @@ export interface Order {
   utm_medium?: string | null
   utm_campaign?: string | null
   utm_content?: string | null
+  utm_term?: string | null
+  gclid?: string | null
+  fbclid?: string | null
+  ttclid?: string | null
   source_channel?: string | null
   marketing_opt_in?: boolean
   payment_confirmation_sent_at?: string | null

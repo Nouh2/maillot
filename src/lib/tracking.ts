@@ -9,12 +9,27 @@ export type StoredAttribution = {
   utm_medium?: string
   utm_campaign?: string
   utm_content?: string
+  utm_term?: string
+  gclid?: string
+  fbclid?: string
+  ttclid?: string
   source_channel?: string
 }
 
 type TrackingParams = Record<string, unknown>
 type FlatTrackingValue = string | number | boolean | null | undefined
 type CommerceItem = CartItem | Order['items'][number]
+
+type AnalyticsWindow = Window & {
+  dataLayer?: unknown[]
+  gtag?: (...args: unknown[]) => void
+  ttq?: TikTokAnalyticsQueue
+}
+
+type TikTokAnalyticsQueue = unknown[] & {
+  page?: () => void
+  track?: (name: string, params?: Record<string, unknown>) => void
+}
 
 interface AddToCartTrackingParams {
   productId: string
@@ -32,6 +47,7 @@ interface BeginCheckoutTrackingParams {
   items: CartItem[]
   value: number
   marketingOptIn: boolean
+  promoCode?: string | null
 }
 
 interface PurchaseTrackingParams {
@@ -47,6 +63,7 @@ const ATTRIBUTION_STORAGE_KEY = 'kitlab-attribution'
 const CONSENT_COOKIE_KEY = 'kitlab_consent'
 const CONSENT_CHANGE_EVENT = 'kitlab-consent-change'
 const TRACKED_EVENT_STORAGE_KEY_PREFIX = 'kitlab-tracked-event:'
+const MARKETING_SESSION_STORAGE_KEY = 'kitlab-marketing-session'
 
 function getConsentVersion(): string {
   return process.env.NEXT_PUBLIC_COOKIE_CONSENT_VERSION || 'v1'
@@ -116,15 +133,132 @@ function toFlatTrackingParams(params: TrackingParams) {
 }
 
 function pushToDataLayer(name: string, params: TrackingParams = {}) {
-  const currentDataLayer = (window as Window & { dataLayer?: unknown[] }).dataLayer ?? []
+  const currentDataLayer = (window as AnalyticsWindow).dataLayer ?? []
   currentDataLayer.push({ event: name, ...params })
-  ;(window as Window & { dataLayer?: unknown[] }).dataLayer = currentDataLayer
+  ;(window as AnalyticsWindow).dataLayer = currentDataLayer
+}
+
+function sendToGtag(name: string, params: TrackingParams = {}) {
+  const analyticsWindow = window as AnalyticsWindow
+
+  analyticsWindow.dataLayer = analyticsWindow.dataLayer ?? []
+  analyticsWindow.gtag =
+    analyticsWindow.gtag ??
+    function gtag(...args: unknown[]) {
+      analyticsWindow.dataLayer?.push(args)
+    }
+
+  analyticsWindow.gtag('event', name, params)
+}
+
+function getTikTokPixelId() {
+  return process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim()
+}
+
+function toTikTokContents(items: unknown) {
+  if (!Array.isArray(items)) return undefined
+
+  return items.map((item) => {
+    if (!item || typeof item !== 'object') return {}
+
+    const record = item as Record<string, unknown>
+    return {
+      content_id: record.item_id,
+      content_name: record.item_name,
+      content_category: record.item_category,
+      price: record.price,
+      quantity: record.quantity,
+    }
+  })
+}
+
+function toTikTokPayload(params: TrackingParams = {}) {
+  const contents = toTikTokContents(params.items)
+
+  return {
+    currency: params.currency,
+    value: params.value,
+    content_type: 'product',
+    content_id: params.product_id ?? params.product_ids,
+    content_name: params.product_name,
+    contents,
+    quantity: params.quantity ?? params.item_count,
+    order_id: params.transaction_id ?? params.order_number,
+  }
+}
+
+function sendToTikTok(name: string, params: TrackingParams = {}) {
+  if (!getTikTokPixelId()) return
+
+  const analyticsWindow = window as AnalyticsWindow
+  if (!analyticsWindow.ttq) {
+    const queue = [] as TikTokAnalyticsQueue
+    queue.page = () => queue.push(['page'])
+    queue.track = (eventName, eventParams) => queue.push(['track', eventName, eventParams])
+    analyticsWindow.ttq = queue
+  }
+
+  const ttq = analyticsWindow.ttq
+  if (name === 'page_view') {
+    ttq.page?.()
+    return
+  }
+
+  const eventMap: Record<string, string> = {
+    product_view: 'ViewContent',
+    add_to_cart: 'AddToCart',
+    begin_checkout: 'InitiateCheckout',
+    purchase: 'Purchase',
+  }
+  const tiktokEventName = eventMap[name]
+  if (!tiktokEventName) return
+
+  ttq.track?.(tiktokEventName, toTikTokPayload(params))
 }
 
 function sendToVercel(name: string, params: TrackingParams = {}) {
   if (name === 'page_view') return
 
   trackVercelEvent(name, toFlatTrackingParams(params))
+}
+
+function getMarketingSessionId(): string | null {
+  const storage = getStorageSafe()
+  if (!storage) return null
+
+  const existing = storage.getItem(MARKETING_SESSION_STORAGE_KEY)
+  if (existing) return existing
+
+  const sessionId =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+  storage.setItem(MARKETING_SESSION_STORAGE_KEY, sessionId)
+  return sessionId
+}
+
+function sendToFirstPartyAnalytics(name: string, params: TrackingParams = {}) {
+  const payload = JSON.stringify({
+    event_name: name,
+    page_path: window.location.pathname,
+    page_location: window.location.href,
+    session_id: getMarketingSessionId(),
+    attribution: getStoredAttribution(),
+    params,
+  })
+
+  if ('sendBeacon' in navigator) {
+    const sent = navigator.sendBeacon('/api/marketing-events', new Blob([payload], { type: 'application/json' }))
+    if (sent) return
+  }
+
+  fetch('/api/marketing-events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {})
 }
 
 export function getTrackingConsent(): 'granted' | 'denied' | null {
@@ -169,18 +303,28 @@ export function captureAttribution(searchParams: URLSearchParams) {
   const utmMedium = searchParams.get('utm_medium')?.trim()
   const utmCampaign = searchParams.get('utm_campaign')?.trim()
   const utmContent = searchParams.get('utm_content')?.trim()
+  const utmTerm = searchParams.get('utm_term')?.trim()
+  const gclid = searchParams.get('gclid')?.trim()
+  const fbclid = searchParams.get('fbclid')?.trim()
+  const ttclid = searchParams.get('ttclid')?.trim()
 
-  if (!utmSource && !utmMedium && !utmCampaign && !utmContent) return
+  if (!utmSource && !utmMedium && !utmCampaign && !utmContent && !utmTerm && !gclid && !fbclid && !ttclid) return
 
   const storage = getStorageSafe()
   if (!storage) return
+
+  const sourceChannel = utmSource || (gclid ? 'google' : fbclid ? 'meta' : ttclid ? 'tiktok' : 'direct')
 
   const payload: StoredAttribution = {
     ...(utmSource ? { utm_source: utmSource } : {}),
     ...(utmMedium ? { utm_medium: utmMedium } : {}),
     ...(utmCampaign ? { utm_campaign: utmCampaign } : {}),
     ...(utmContent ? { utm_content: utmContent } : {}),
-    source_channel: utmSource || 'direct',
+    ...(utmTerm ? { utm_term: utmTerm } : {}),
+    ...(gclid ? { gclid } : {}),
+    ...(fbclid ? { fbclid } : {}),
+    ...(ttclid ? { ttclid } : {}),
+    source_channel: sourceChannel,
   }
 
   storage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(payload))
@@ -206,7 +350,10 @@ export function trackEvent(name: string, params: Record<string, unknown> = {}) {
   if (!hasTrackingConsent() || typeof window === 'undefined') return
 
   pushToDataLayer(name, params)
+  sendToGtag(name, params)
+  sendToTikTok(name, params)
   sendToVercel(name, params)
+  sendToFirstPartyAnalytics(name, params)
 }
 
 export function trackAddToCart({
@@ -252,6 +399,7 @@ export function trackBeginCheckout({
   items,
   value,
   marketingOptIn,
+  promoCode,
 }: BeginCheckoutTrackingParams) {
   const itemCount = getItemCount(items)
   const payload = {
@@ -261,6 +409,7 @@ export function trackBeginCheckout({
     unique_items: items.length,
     product_ids: items.map((item) => item.product_id).join(','),
     marketing_opt_in: marketingOptIn,
+    promo_code: promoCode ?? null,
     items: toCommerceItems(items),
   }
 

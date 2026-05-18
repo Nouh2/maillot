@@ -1,3 +1,5 @@
+import { ABANDONED_CART_PROMO_CODE } from '@/lib/promoCodes'
+
 type EmailPayload = {
   to: string
   subject: string
@@ -16,7 +18,9 @@ export type EmailTemplateId =
   | 'support_ack'
   | 'account_welcome'
   | 'delivered'
-  | 'abandoned_cart'
+  | 'abandoned_cart_30m'
+  | 'abandoned_cart_6h'
+  | 'abandoned_cart_24h'
   | 'post_purchase'
   | 'win_back'
 
@@ -46,12 +50,28 @@ type EmailFrameOptions = {
   note?: string
 }
 
+export type AbandonedCartStage = '30m' | '6h' | '24h'
+
+type AbandonedCartItem = {
+  name?: string | null
+  slug?: string | null
+  size?: string | null
+  qty?: number | null
+  price?: number | null
+}
+
 function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.maillotaddict.fr'
 }
 
+function getLandingUrl(): string {
+  return getBaseUrl()
+}
+
 function getSiteName(): string {
-  return process.env.NEXT_PUBLIC_SITE_NAME?.trim() || 'MAILLOT ADDICT'
+  const configuredName = process.env.NEXT_PUBLIC_SITE_NAME?.trim()
+  if (!configuredName || /kitlab/i.test(configuredName)) return 'MAILLOT ADDICT'
+  return configuredName
 }
 
 function getTransactionalSender(): string | null {
@@ -68,6 +88,10 @@ function escapeHtml(value: string): string {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
+}
+
+function encodeEmailCharacters(value: string): string {
+  return value.replace(/[^\x00-\x7F]/g, (char) => `&#${char.codePointAt(0)};`)
 }
 
 function paragraph(text: string): string {
@@ -87,17 +111,29 @@ function renderCta(cta: EmailCta): string {
         ? 'background:#ffffff;color:#1c1712;border:1px solid #e8dfd0;'
         : 'background:#1c1712;color:#ffffff;border:1px solid #1c1712;'
 
-  return `<a href="${cta.href}" style="display:inline-block;padding:14px 22px;border-radius:999px;text-decoration:none;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;${palette}">${escapeHtml(cta.label)}</a>`
+  return `<a href="${cta.href}" style="display:inline-block;box-sizing:border-box;max-width:100%;padding:14px 22px;border-radius:999px;text-align:center;text-decoration:none;font-size:13px;line-height:1.25;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;${palette}">${escapeHtml(cta.label)}</a>`
+}
+
+function renderCtaGroup(primaryCta?: EmailCta, secondaryCta?: EmailCta): string {
+  if (!primaryCta && !secondaryCta) return ''
+
+  return [
+    '<div style="margin:8px 0 24px;">',
+    primaryCta ? `<div style="display:block;margin:0 0 12px;">${renderCta(primaryCta)}</div>` : '',
+    secondaryCta ? `<div style="display:block;margin:0;">${renderCta(secondaryCta)}</div>` : '',
+    '</div>',
+  ].join('')
 }
 
 function renderEmailFrame(options: EmailFrameOptions): string {
   const supportEmail = getSupportEmail()
 
-  return [
+  return encodeEmailCharacters([
     '<!DOCTYPE html>',
     '<html lang="fr">',
     '<head>',
-    '<meta charSet="utf-8" />',
+    '<meta charset="UTF-8" />',
+    '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />',
     '<meta name="color-scheme" content="light only" />',
     '<meta name="supported-color-schemes" content="light only" />',
     `<title>${escapeHtml(options.title)}</title>`,
@@ -118,13 +154,11 @@ function renderEmailFrame(options: EmailFrameOptions): string {
     '</td></tr>',
     '<tr><td style="padding:0;" bgcolor="#ffffff">',
     `<div style="padding:32px;background:#ffffff;">${options.sections.join('')}`,
-    options.primaryCta || options.secondaryCta
-      ? `<div style="margin:8px 0 24px;">${options.primaryCta ? renderCta(options.primaryCta) : ''}${options.primaryCta && options.secondaryCta ? '<span style="display:inline-block;width:10px;"></span>' : ''}${options.secondaryCta ? renderCta(options.secondaryCta) : ''}</div>`
-      : '',
+    renderCtaGroup(options.primaryCta, options.secondaryCta),
     options.note
       ? `<div style="margin:24px 0 0;padding:16px 18px;border:1px solid #d8cfc4;border-radius:20px;background:#f5ede0;color:#3a2f28;font-size:13px;line-height:1.7;">${options.note}</div>`
       : '',
-    `<div style="margin-top:28px;padding-top:20px;border-top:1px solid #e8dfd0;"><p style="margin:0 0 10px;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#c1440e;font-weight:700;">${escapeHtml(getSiteName())}</p><p style="margin:0;color:#3d3229;font-size:13px;line-height:1.7;">Paiement securise, suivi partage des qu il est disponible, et support centralise pour les questions de commande.</p>${supportEmail ? `<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.7;">Besoin d aide ? Reponds a cet email ou ecris a ${escapeHtml(supportEmail)}.</p>` : ''}</div>`,
+    `<div style="margin-top:28px;padding-top:20px;border-top:1px solid #e8dfd0;"><p style="margin:0 0 10px;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#c1440e;font-weight:700;">${escapeHtml(getSiteName())}</p><p style="margin:0;color:#3d3229;font-size:13px;line-height:1.7;">Sélection de maillots, paiement sécurisé et suivi partagé dès qu’il est disponible.</p>${supportEmail ? `<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.7;">Besoin d’aide ? Réponds à cet email ou écris à ${escapeHtml(supportEmail)}.</p>` : ''}</div>`,
     '</div>',
     '</td></tr>',
     '</table>',
@@ -132,7 +166,7 @@ function renderEmailFrame(options: EmailFrameOptions): string {
     '</table>',
     '</body>',
     '</html>',
-  ].join('')
+  ].join(''))
 }
 
 async function sendWithResend(payload: EmailPayload): Promise<boolean> {
@@ -189,20 +223,20 @@ function orderPaidTemplate(params: {
   const trackingLink = `${getBaseUrl()}/suivi/${params.trackingToken}`
 
   return {
-    subject: `Commande confirmee ${params.orderNumber}`,
-    preview: `Ta commande ${params.orderNumber} est bien confirmee. Le suivi sera partage des qu il est disponible.`,
+    subject: `Commande confirmée ${params.orderNumber}`,
+    preview: `Ta commande ${params.orderNumber} est bien confirmée. Le suivi sera partagé dès qu’il est disponible.`,
     html: renderEmailFrame({
-      eyebrow: 'Commande confirmee',
-      title: 'Commande validee',
-      preview: `Ta commande ${params.orderNumber} est bien confirmee.`,
-      intro: 'Ton paiement a bien ete recu. Nous preparons maintenant la commande pour transmission et suivi.',
+      eyebrow: 'Commande confirmée',
+      title: 'Commande validée',
+      preview: `Ta commande ${params.orderNumber} est bien confirmée.`,
+      intro: 'Ton paiement a bien été reçu. La commande passe maintenant en préparation avant transmission du suivi.',
       sections: [
         paragraph(customerGreeting(params)),
-        paragraph(`Ta commande <strong>${escapeHtml(params.orderNumber)}</strong> a bien ete confirmee.`),
+        paragraph(`Ta commande <strong>${escapeHtml(params.orderNumber)}</strong> est confirmée. Tu n’as rien d’autre à faire pour le moment.`),
         bulletList([
-          'un email de confirmation vient d etre enregistre',
-          'ta reference de commande est conservee pour le suivi',
-          'tu recevras un nouvel email des que le lien transporteur sera disponible',
+          'la référence est conservée pour le suivi',
+          'le lien transporteur sera envoyé dès qu’il sera disponible',
+          'ton espace compte peut regrouper tes commandes avec le même email',
         ]),
       ],
       primaryCta: {
@@ -214,7 +248,7 @@ function orderPaidTemplate(params: {
         href: `${getBaseUrl()}/faq`,
         tone: 'ghost',
       },
-      note: 'Garde cet email: il contient le point d entree pour suivre la commande et retrouver facilement la reference.',
+      note: 'Garde cet email : il contient le point d’entrée le plus simple pour retrouver ta commande.',
     }),
   }
 }
@@ -234,17 +268,17 @@ function trackingTemplate(params: {
     subject: `Suivi disponible ${params.orderNumber}`,
     preview: `Le suivi de ta commande ${params.orderNumber} est maintenant disponible.`,
     html: renderEmailFrame({
-      eyebrow: 'Expedition',
+      eyebrow: 'Expédition',
       title: 'Suivi disponible',
       preview: `Le suivi de ta commande ${params.orderNumber} est maintenant disponible.`,
       intro: 'Le transporteur a transmis les informations utiles. Tu peux maintenant consulter le suivi.',
       sections: [
         paragraph(customerGreeting(params)),
         paragraph(`Le suivi de la commande <strong>${escapeHtml(params.orderNumber)}</strong> est maintenant disponible.`),
-        trackingNumber ? paragraph(`Numero de suivi: <strong>${escapeHtml(trackingNumber)}</strong>`) : '',
+        trackingNumber ? paragraph(`Numéro de suivi : <strong>${escapeHtml(trackingNumber)}</strong>`) : '',
         carrierLink
-          ? paragraph(`Un lien transporteur direct est egalement disponible pour cette expedition.`)
-          : paragraph('Le suivi detaille est accessible depuis l espace de suivi de commande.'),
+          ? paragraph(`Un lien transporteur direct est également disponible pour cette expédition.`)
+          : paragraph('Le suivi détaillé est accessible depuis l’espace de suivi de commande.'),
       ],
       primaryCta: {
         label: 'Voir le suivi',
@@ -258,7 +292,7 @@ function trackingTemplate(params: {
             tone: 'ghost',
           }
         : undefined,
-      note: 'Si le transporteur met quelques heures a actualiser les etapes, c est normal apres la mise a disposition du suivi.',
+      note: 'Si le transporteur met quelques heures à actualiser les étapes, c’est normal après la mise à disposition du suivi.',
     }),
   }
 }
@@ -271,44 +305,44 @@ function supportAckTemplate(params: {
   const orderReference = params.orderNumber?.trim()
 
   return {
-    subject: 'Nous avons bien recu ton message',
-    preview: 'Le support a bien recu ta demande et revient vers toi des que possible.',
+    subject: 'Nous avons bien reçu ton message',
+    preview: 'Le support a bien reçu ta demande et revient vers toi dès que possible.',
     html: renderEmailFrame({
       eyebrow: 'Support',
-      title: 'Message bien recu',
-      preview: 'Le support a bien recu ta demande.',
-      intro: 'Ta demande est en file de traitement. Nous revenons vers toi rapidement avec une reponse claire.',
+      title: 'Message bien reçu',
+      preview: 'Le support a bien reçu ta demande.',
+      intro: 'Ta demande est en file de traitement. Nous revenons vers toi rapidement avec une réponse claire.',
       sections: [
         paragraph(`Bonjour ${escapeHtml(params.customerName)},`),
-        paragraph(`Nous avons bien recu ton message au sujet de <strong>${escapeHtml(params.subject)}</strong>.`),
-        orderReference ? paragraph(`Reference transmise: <strong>${escapeHtml(orderReference)}</strong>.`) : '',
+        paragraph(`Nous avons bien reçu ton message au sujet de <strong>${escapeHtml(params.subject)}</strong>.`),
+        orderReference ? paragraph(`Référence transmise : <strong>${escapeHtml(orderReference)}</strong>.`) : '',
       ],
       primaryCta: {
         label: 'Voir la page contact',
         href: `${getBaseUrl()}/contact`,
         tone: 'ghost',
       },
-      note: 'Si ton message concerne une commande deja expediee, pense a conserver egalement le lien de suivi pour accelerer la reponse.',
+      note: 'Si ton message concerne une commande déjà expédiée, pense à conserver également le lien de suivi pour accélérer la réponse.',
     }),
   }
 }
 
 function accountWelcomeTemplate() {
   return {
-    subject: 'Ton espace Maillot Addict est pret',
+    subject: 'Ton espace Maillot Addict est prêt',
     preview: 'Retrouve tes commandes et ton suivi depuis ton espace compte.',
     html: renderEmailFrame({
       eyebrow: 'Compte client',
-      title: 'Espace pret',
+      title: 'Espace prêt',
       preview: 'Retrouve tes commandes et ton suivi depuis ton espace compte.',
-      intro: 'Ton acces compte est pret. Tu peux y retrouver automatiquement les commandes liees au meme email.',
+      intro: 'Ton accès compte est prêt. Il sert surtout à retrouver tes commandes et ton suivi sans fouiller dans tes emails.',
       sections: [
         paragraph('Bonjour,'),
-        paragraph('Ton espace compte te permet de retrouver plus facilement tes commandes, ton suivi et les prochaines etapes apres achat.'),
+        paragraph('Ton espace compte regroupe les commandes liées à ton email. Pratique si tu commandes plusieurs maillots ou si tu veux revenir au suivi plus tard.'),
         bulletList([
-          'voir les commandes liees a ton email',
+          'voir les commandes liées à ton email',
           'ouvrir le suivi sans rechercher un ancien message',
-          'garder un point d acces propre pour tes prochaines commandes',
+          'garder un point d’accès propre pour tes prochaines commandes',
         ]),
       ],
       primaryCta: {
@@ -324,17 +358,18 @@ function deliveredTemplate(params: {
   orderNumber: string
 }) {
   return {
-    subject: `Commande livree ${params.orderNumber}`,
-    preview: `Ta commande ${params.orderNumber} devrait maintenant etre arrivee.`,
+    subject: `Commande livrée ${params.orderNumber}`,
+    preview: `Ta commande ${params.orderNumber} devrait maintenant être arrivée.`,
     html: renderEmailFrame({
       eyebrow: 'Livraison',
-      title: 'Commande livree',
-      preview: `Ta commande ${params.orderNumber} devrait maintenant etre arrivee.`,
-      intro: 'Le suivi indique que la commande est livree ou en toute fin d acheminement.',
+      title: 'Commande livrée',
+      preview: `Ta commande ${params.orderNumber} devrait maintenant être arrivée.`,
+      intro: 'Le suivi indique que la commande est livrée ou en toute fin d’acheminement.',
       sections: [
         paragraph(customerGreeting(params)),
-        paragraph(`La commande <strong>${escapeHtml(params.orderNumber)}</strong> devrait maintenant etre arrivee.`),
-        paragraph('Si tout est bon, profite du maillot. Si tu constates un souci, passe directement par la page contact pour que nous puissions regarder rapidement.'),
+        paragraph(`La commande <strong>${escapeHtml(params.orderNumber)}</strong> devrait maintenant être arrivée.`),
+        paragraph('Si tout est bon, profite du maillot. Si tu veux compléter avec un autre club ou une autre sélection, la boutique reste ouverte.'),
+        paragraph('Si tu constates un souci, passe par la page contact pour que nous puissions regarder rapidement.'),
       ],
       primaryCta: {
         label: 'Contacter le support',
@@ -343,28 +378,155 @@ function deliveredTemplate(params: {
       },
       secondaryCta: {
         label: 'Explorer la boutique',
-        href: `${getBaseUrl()}/shop`,
+        href: getLandingUrl(),
       },
     }),
   }
 }
 
 function abandonedCartTemplate() {
+  return abandonedCartStageTemplate({ stage: '30m' })
+}
+
+function formatCartItems(items?: AbandonedCartItem[] | null): string {
+  const normalizedItems = (items ?? [])
+    .filter((item) => item?.name)
+    .slice(0, 4)
+
+  if (normalizedItems.length === 0) {
+    return ''
+  }
+
+  const lines = normalizedItems.map((item) => {
+    const qty = item.qty && item.qty > 1 ? ` x${item.qty}` : ''
+    const size = item.size ? ` - Taille ${escapeHtml(item.size)}` : ''
+    return `${escapeHtml(item.name!)}${size}${qty}`
+  })
+
+  return bulletList(lines)
+}
+
+function promoCodeBlock(code: string): string {
+  return [
+    '<div style="margin:0 0 18px;padding:18px 20px;border:1px solid #e8dfd0;border-radius:22px;background:#fff7ed;">',
+    '<p style="margin:0 0 8px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#c1440e;font-weight:700;">Code panier</p>',
+    `<p style="margin:0;color:#1c1712;font-size:28px;line-height:1;font-weight:900;letter-spacing:0.12em;">${escapeHtml(code)}</p>`,
+    '<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.6;">-10 % appliqués automatiquement depuis le lien si tu veux finaliser aujourd’hui.</p>',
+    '</div>',
+  ].join('')
+}
+
+function getCartSummary(items?: AbandonedCartItem[] | null): { itemCount: number; total: number } {
+  return (items ?? []).reduce(
+    (summary, item) => {
+      const qty = Number.isFinite(item.qty) && item.qty && item.qty > 0 ? item.qty : 1
+      const price = Number.isFinite(item.price) && item.price ? item.price : 0
+
+      return {
+        itemCount: summary.itemCount + qty,
+        total: summary.total + (price * qty),
+      }
+    },
+    { itemCount: 0, total: 0 },
+  )
+}
+
+function abandonedCartStageTemplate(params: {
+  stage: AbandonedCartStage
+  items?: AbandonedCartItem[] | null
+}) {
+  const resumeLink = `${getBaseUrl()}/panier`
+  const promoResumeLink = `${getBaseUrl()}/panier?promo=${ABANDONED_CART_PROMO_CODE}`
+  const landingLink = getLandingUrl()
+  const summary = getCartSummary(params.items)
+  const itemSummary = formatCartItems(params.items)
+  const totalLine = summary.total > 0
+    ? paragraph(`Panier estimé : <strong>${summary.total.toFixed(2)} EUR</strong>${summary.itemCount > 0 ? ` pour ${summary.itemCount} article${summary.itemCount > 1 ? 's' : ''}` : ''}.`)
+    : ''
+
+  if (params.stage === '6h') {
+    return {
+      subject: 'Toujours intéressé par ton maillot ?',
+      preview: 'Ton panier est encore disponible, avec paiement sécurisé et suivi après expédition.',
+      html: renderEmailFrame({
+        eyebrow: 'Panier en attente',
+        title: 'Toujours dispo',
+        preview: 'Ton panier est encore disponible.',
+        intro: 'Tu avais repéré un maillot plus tôt. Si c’était le bon, tu peux reprendre la commande sans repartir de zéro.',
+        sections: [
+          paragraph('Bonjour,'),
+          paragraph('On te remet simplement le panier sous la main. Les tailles et options sélectionnées sont plus faciles à retrouver maintenant que plus tard.'),
+          itemSummary,
+          totalLine,
+          paragraph('Le paiement passe par Stripe, et le suivi est transmis dès qu’il est disponible. Si tu hésitais encore, tu peux vérifier le panier avant de payer.'),
+        ],
+        primaryCta: {
+          label: 'Vérifier mon panier',
+          href: resumeLink,
+          tone: 'terra',
+        },
+        secondaryCta: {
+          label: 'Voir l’accueil',
+          href: landingLink,
+          tone: 'ghost',
+        },
+      }),
+    }
+  }
+
+  if (params.stage === '24h') {
+    return {
+      subject: '10 % pour finaliser ton panier',
+      preview: `Ton panier est encore accessible avec le code ${ABANDONED_CART_PROMO_CODE}.`,
+      html: renderEmailFrame({
+        eyebrow: 'Offre panier',
+        title: '-10 % aujourd’hui',
+        preview: `Ton panier est encore accessible avec le code ${ABANDONED_CART_PROMO_CODE}.`,
+        intro: 'Dernière relance pour ton panier. Pour te laisser une vraie raison de trancher, on te laisse un code de 10 %.',
+        sections: [
+          paragraph('Bonjour,'),
+          paragraph('Si le maillot te plaît toujours, utilise le code ci-dessous au paiement. Sinon, tu peux simplement ignorer cet email.'),
+          promoCodeBlock(ABANDONED_CART_PROMO_CODE),
+          itemSummary,
+          totalLine,
+          bulletList([
+            'paiement sécurisé via Stripe',
+            'flocage et patchs selon les modèles compatibles',
+            'suivi transmis après expédition',
+          ]),
+        ],
+        primaryCta: {
+          label: 'Utiliser le code',
+          href: promoResumeLink,
+          tone: 'terra',
+        },
+        secondaryCta: {
+          label: 'Voir l’accueil',
+          href: landingLink,
+          tone: 'ghost',
+        },
+        note: `Code ${ABANDONED_CART_PROMO_CODE} : la remise est appliquée automatiquement depuis ce lien panier.`,
+      }),
+    }
+  }
+
   return {
-    subject: 'Ton panier Maillot Addict t attend',
-    preview: 'Ton maillot est encore en attente. Reprends la commande quand tu veux.',
+    subject: 'Ton maillot est encore là',
+    preview: 'Ton panier est sauvegardé. Tu peux reprendre la commande quand tu veux.',
     html: renderEmailFrame({
       eyebrow: 'Panier en attente',
-      title: 'Tu etais presque',
+      title: 'Tu étais presque',
       preview: 'Ton panier est encore en attente.',
-      intro: 'Tu as commence une commande sans aller jusqu au paiement. Le panier peut etre repris quand tu veux.',
+      intro: 'Tu as commencé une commande sans aller jusqu’au paiement. On a gardé le panier accessible pour que tu puisses reprendre tranquillement.',
       sections: [
         paragraph('Bonjour,'),
-        paragraph('Ton panier Maillot Addict est toujours la. Si tu voulais finaliser, tu peux reprendre la commande en quelques clics.'),
+        paragraph('Le maillot que tu avais sélectionné est toujours dans ton panier. Si tu voulais juste prendre le temps de vérifier, le récap est disponible en un clic.'),
+        itemSummary,
+        totalLine,
         bulletList([
-          'catalogue premium clubs et selections',
-          'flocage et patchs selon les modeles',
-          'paiement securise via Stripe',
+          'sélection clubs et sélections',
+          'options flocage et patchs selon les modèles',
+          'paiement sécurisé via Stripe',
         ]),
       ],
       primaryCta: {
@@ -372,8 +534,8 @@ function abandonedCartTemplate() {
         href: `${getBaseUrl()}/panier`,
       },
       secondaryCta: {
-        label: 'Voir la boutique',
-        href: `${getBaseUrl()}/shop`,
+        label: 'Voir l’accueil',
+        href: landingLink,
         tone: 'ghost',
       },
     }),
@@ -382,16 +544,17 @@ function abandonedCartTemplate() {
 
 function postPurchaseTemplate() {
   return {
-    subject: 'Bien recu ? Voici quoi regarder ensuite',
+    subject: 'Garde le suivi sous la main',
     preview: 'Commandes, suivi et prochaines collections depuis ton espace Maillot Addict.',
     html: renderEmailFrame({
-      eyebrow: 'Apres achat',
+      eyebrow: 'Après achat',
       title: 'La suite',
       preview: 'Commandes, suivi et prochaines collections depuis ton espace Maillot Addict.',
-      intro: 'Une fois la commande en route, le plus simple est de garder un point d acces propre pour le suivi et les prochaines collections.',
+      intro: 'Une fois la commande en route, le plus simple est de garder un point d’accès propre pour le suivi.',
       sections: [
         paragraph('Bonjour,'),
-        paragraph('Merci encore pour ta commande. En attendant le suivi ou la reception, tu peux deja retrouver tes commandes depuis ton espace compte et jeter un oeil aux autres collections.'),
+        paragraph('Merci encore pour ta commande. En attendant le suivi ou la réception, ton espace compte te permet de retrouver les infos utiles sans rechercher les emails.'),
+        paragraph('Tu peux aussi garder la boutique sous la main si tu veux compléter plus tard avec un autre maillot.'),
       ],
       primaryCta: {
         label: 'Ouvrir mon compte',
@@ -399,7 +562,7 @@ function postPurchaseTemplate() {
       },
       secondaryCta: {
         label: 'Explorer les collections',
-        href: `${getBaseUrl()}/shop`,
+        href: getLandingUrl(),
         tone: 'ghost',
       },
     }),
@@ -408,20 +571,21 @@ function postPurchaseTemplate() {
 
 function winBackTemplate() {
   return {
-    subject: 'Les collections Maillot Addict ont bouge',
-    preview: 'Retourne voir les maillots clubs, selections et concepts du moment.',
+    subject: 'Les collections Maillot Addict ont bougé',
+    preview: 'Retourne voir les maillots clubs, sélections et concepts du moment.',
     html: renderEmailFrame({
       eyebrow: 'Retour boutique',
-      title: 'Revenir jeter un oeil',
-      preview: 'Retourne voir les maillots clubs, selections et concepts du moment.',
-      intro: 'Le catalogue bouge regulierement. Si tu n es pas repasse depuis un moment, il y a probablement du nouveau a voir.',
+      title: 'Revenir jeter un œil',
+      preview: 'Retourne voir les maillots clubs, sélections et concepts du moment.',
+      intro: 'Le catalogue bouge régulièrement. Si tu n’es pas repassé depuis un moment, il y a probablement du nouveau à voir.',
       sections: [
         paragraph('Bonjour,'),
-        paragraph('Nouveaux drops, nouvelles selections, nouvelles idees de maillots: si tu voulais revenir jeter un oeil, c est le bon moment.'),
+        paragraph('Nouveaux drops, sélections, concepts et modèles rétro : si tu voulais revenir jeter un œil, c’est le bon moment.'),
+        paragraph('Pas besoin de choisir tout de suite. Reviens simplement voir les modèles qui ont été ajoutés.'),
       ],
       primaryCta: {
         label: 'Revenir sur la boutique',
-        href: `${getBaseUrl()}/shop`,
+        href: getLandingUrl(),
       },
       secondaryCta: {
         label: 'Voir les concepts',
@@ -480,7 +644,7 @@ function buildEmailTemplatePreview(templateId: EmailTemplateId): EmailTemplatePr
       return {
         id: templateId,
         category: 'transactional',
-        label: 'Accuse support',
+        label: 'Accusé support',
         subject: template.subject,
         preview: template.preview,
         html: template.html,
@@ -505,18 +669,41 @@ function buildEmailTemplatePreview(templateId: EmailTemplateId): EmailTemplatePr
       return {
         id: templateId,
         category: 'transactional',
-        label: 'Commande livree',
+        label: 'Commande livrée',
         subject: template.subject,
         preview: template.preview,
         html: template.html,
       }
     }
-    case 'abandoned_cart': {
-      const template = abandonedCartTemplate()
+    case 'abandoned_cart_30m':
+    case 'abandoned_cart_6h':
+    case 'abandoned_cart_24h': {
+      const stage = templateId === 'abandoned_cart_6h'
+        ? '6h'
+        : templateId === 'abandoned_cart_24h'
+          ? '24h'
+          : '30m'
+      const template = abandonedCartStageTemplate({
+        stage,
+        items: [
+          {
+            name: 'Belgique Maillot Exterieur 2026',
+            size: 'M',
+            qty: 1,
+            price: 19.9,
+          },
+          {
+            name: 'France Maillot Domicile 2026',
+            size: 'L',
+            qty: 1,
+            price: 19.9,
+          },
+        ],
+      })
       return {
         id: templateId,
         category: 'lifecycle',
-        label: 'Panier abandonne',
+        label: `Panier abandonné ${stage}`,
         subject: template.subject,
         preview: template.preview,
         html: template.html,
@@ -554,7 +741,9 @@ export function getEmailTemplatePreviews(): EmailTemplatePreview[] {
     'support_ack',
     'account_welcome',
     'delivered',
-    'abandoned_cart',
+    'abandoned_cart_30m',
+    'abandoned_cart_6h',
+    'abandoned_cart_24h',
     'post_purchase',
     'win_back',
   ] as const).map((templateId) => buildEmailTemplatePreview(templateId))
@@ -581,6 +770,21 @@ export async function sendOrderPaidEmail(params: {
   trackingToken: string
 }): Promise<boolean> {
   const template = orderPaidTemplate(params)
+
+  return sendTransactionalEmail({
+    to: params.to,
+    subject: template.subject,
+    html: template.html,
+    replyTo: getSupportEmail() ?? undefined,
+  })
+}
+
+export async function sendAbandonedCartEmail(params: {
+  to: string
+  stage: AbandonedCartStage
+  items?: AbandonedCartItem[] | null
+}): Promise<boolean> {
+  const template = abandonedCartStageTemplate(params)
 
   return sendTransactionalEmail({
     to: params.to,

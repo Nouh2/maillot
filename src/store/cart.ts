@@ -8,6 +8,7 @@ interface CartState {
   isOpen: boolean
   customerEmail: string
   marketingOptIn: boolean
+  promoCode: string | null
   addItem: (item: CartItem) => void
   removeItem: (item: CartItem) => void
   updateQty: (item: CartItem, qty: number) => void
@@ -16,7 +17,9 @@ interface CartState {
   closeCart: () => void
   setCustomerEmail: (email: string) => void
   setMarketingOptIn: (marketingOptIn: boolean) => void
+  setPromoCode: (promoCode: string | null) => void
   subtotal: () => number
+  discountTotal: () => number
   shippingTotal: () => number
   total: () => number
   itemCount: () => number
@@ -36,13 +39,14 @@ const isSameItem = (a: CartItem, b: CartItem) => {
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => {
-      const getPricing = () => calculateCartPricing(get().items)
+      const getPricing = () => calculateCartPricing(get().items, { promoCode: get().promoCode })
 
       return ({
       items: [],
       isOpen: false,
       customerEmail: '',
       marketingOptIn: false,
+      promoCode: null,
 
       addItem: (newItem) => set((state) => {
         const existing = state.items.find((item) => isSameItem(item, newItem))
@@ -72,13 +76,15 @@ export const useCartStore = create<CartState>()(
             ),
       })),
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], promoCode: null }),
       openCart: () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
       setCustomerEmail: (email) => set({ customerEmail: email.trim().toLowerCase() }),
       setMarketingOptIn: (marketingOptIn) => set({ marketingOptIn }),
+      setPromoCode: (promoCode) => set({ promoCode: promoCode?.trim().toUpperCase() || null }),
 
       subtotal: () => getPricing().subtotal,
+      discountTotal: () => getPricing().discount,
       shippingTotal: () => getPricing().shipping,
       total: () => getPricing().total,
       itemCount: () => getPricing().itemCount,

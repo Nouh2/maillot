@@ -8,6 +8,7 @@ const OPS_LINKS = [
   { href: '/ops/catalogue', label: 'Catalogue' },
   { href: '/ops/landing', label: 'Landing' },
   { href: '/ops/emails', label: 'Emails' },
+  { href: '/ops/marketing', label: 'Marketing' },
 ]
 
 export function OpsNavigation() {

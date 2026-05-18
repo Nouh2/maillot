@@ -5,6 +5,7 @@ import {
   LAUNCH_PROMO_LABEL,
   LAUNCH_PROMO_START_ISO,
 } from './siteConfig'
+import { getPromoDiscountRate, normalizePromoCode } from './promoCodes'
 
 export const FLOCAGE_PRICE = 5
 export const PATCH_PRICE = 2.5
@@ -28,13 +29,18 @@ type DiscountedUnitGroup = {
   quantity: number
 }
 
-type CartPricingOptions = Record<string, never>
+type CartPricingOptions = {
+  promoCode?: string | null
+}
 
 export type CartPricingBreakdown = {
   itemCount: number
   subtotal: number
+  discount: number
   shipping: number
   total: number
+  promoCode: string | null
+  promoDiscountRate: number
   freeShippingUnlocked: boolean
   discountedUnitGroups: DiscountedUnitGroup[]
 }
@@ -125,10 +131,14 @@ export function calculateItemsSubtotal(items: PriceableCartItem[]): number {
 export function calculateCartPricing(items: PriceableCartItem[], options: CartPricingOptions = {}): CartPricingBreakdown {
   const itemCount = items.reduce((sum, item) => sum + item.qty, 0)
   const subtotalCents = items.reduce((sum, item) => sum + (toCents(item.price) * item.qty), 0)
+  const promoCode = normalizePromoCode(options.promoCode)
+  const promoDiscountRate = getPromoDiscountRate(promoCode)
+  const discountCents = Math.round(subtotalCents * promoDiscountRate)
+  const discountedSubtotalCents = Math.max(0, subtotalCents - discountCents)
 
   const groupedUnits = new Map<string, DiscountedUnitGroup>()
   for (const [sourceIndex, item] of items.entries()) {
-    const priceCents = toCents(item.price)
+    const priceCents = Math.max(0, Math.round(toCents(item.price) * (1 - promoDiscountRate)))
     const groupKey = `${sourceIndex}:${priceCents}`
     groupedUnits.set(groupKey, {
       sourceIndex,
@@ -137,13 +147,16 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     })
   }
 
-  const shippingCents = toCents(calculateShippingAmount(itemCount, fromCents(subtotalCents)))
+  const shippingCents = toCents(calculateShippingAmount(itemCount, fromCents(discountedSubtotalCents)))
 
   return {
     itemCount,
     subtotal: fromCents(subtotalCents),
+    discount: fromCents(discountCents),
     shipping: fromCents(shippingCents),
-    total: fromCents(subtotalCents + shippingCents),
+    total: fromCents(discountedSubtotalCents + shippingCents),
+    promoCode: promoDiscountRate > 0 ? promoCode : null,
+    promoDiscountRate,
     freeShippingUnlocked: shippingCents === 0 && itemCount > 0,
     discountedUnitGroups: Array.from(groupedUnits.values()),
   }

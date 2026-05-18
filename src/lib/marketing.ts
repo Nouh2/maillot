@@ -3,6 +3,10 @@ export type AttributionPayload = {
   utm_medium?: string | null
   utm_campaign?: string | null
   utm_content?: string | null
+  utm_term?: string | null
+  gclid?: string | null
+  fbclid?: string | null
+  ttclid?: string | null
   source_channel?: string | null
 }
 
@@ -23,6 +27,10 @@ export function normalizeAttributionPayload(value: unknown): AttributionPayload 
     utm_medium: pick('utm_medium'),
     utm_campaign: pick('utm_campaign'),
     utm_content: pick('utm_content'),
+    utm_term: pick('utm_term'),
+    gclid: pick('gclid'),
+    fbclid: pick('fbclid'),
+    ttclid: pick('ttclid'),
     source_channel: pick('source_channel'),
   }
 }

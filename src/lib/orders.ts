@@ -1,14 +1,26 @@
 import crypto from 'node:crypto'
 import type Stripe from 'stripe'
-import { sendOrderPaidEmail, sendTrackingEmail } from '@/lib/email'
+import { sendAbandonedCartEmail, sendOrderPaidEmail, sendTrackingEmail, type AbandonedCartStage } from '@/lib/email'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
+import type { CartItem } from '@/types/cart'
 import type { Order } from '@/types/order'
 
 type OrderRow = Order & {
   payment_confirmation_sent_at?: string | null
   tracking_email_sent_at?: string | null
   marketing_opt_in?: boolean
+}
+
+type CheckoutLeadRow = {
+  id: string
+  email: string
+  cart_snapshot: CartItem[] | null
+  recovered_order_id?: string | null
+  last_checkout_started_at: string
+  abandoned_cart_30m_sent_at?: string | null
+  abandoned_cart_6h_sent_at?: string | null
+  abandoned_cart_24h_sent_at?: string | null
 }
 
 function service() {
@@ -387,4 +399,91 @@ export async function dispatchPendingOrderEmails(): Promise<{ paymentEmails: num
   }
 
   return { paymentEmails, trackingEmails }
+}
+
+function getAbandonedCartStage(lead: CheckoutLeadRow, now = new Date()): AbandonedCartStage | null {
+  const checkoutStartedAt = new Date(lead.last_checkout_started_at).getTime()
+  if (Number.isNaN(checkoutStartedAt)) return null
+
+  const ageMs = now.getTime() - checkoutStartedAt
+  const minutes = ageMs / 60000
+  const hours = ageMs / 3600000
+
+  if (!lead.abandoned_cart_30m_sent_at && minutes >= 30) return '30m'
+  if (lead.abandoned_cart_30m_sent_at && !lead.abandoned_cart_6h_sent_at && hours >= 6) return '6h'
+  if (lead.abandoned_cart_6h_sent_at && !lead.abandoned_cart_24h_sent_at && hours >= 24) return '24h'
+
+  return null
+}
+
+function getAbandonedCartSentColumn(stage: AbandonedCartStage) {
+  switch (stage) {
+    case '30m':
+      return 'abandoned_cart_30m_sent_at'
+    case '6h':
+      return 'abandoned_cart_6h_sent_at'
+    case '24h':
+      return 'abandoned_cart_24h_sent_at'
+  }
+}
+
+export async function dispatchAbandonedCartEmails(): Promise<{ abandonedCartEmails: number }> {
+  let abandonedCartEmails = 0
+  const now = new Date()
+  const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString()
+
+  const { data: leads, error } = await service()
+    .from('checkout_leads')
+    .select('id, email, cart_snapshot, recovered_order_id, last_checkout_started_at, abandoned_cart_30m_sent_at, abandoned_cart_6h_sent_at, abandoned_cart_24h_sent_at')
+    .is('recovered_order_id', null)
+    .not('email', 'is', null)
+    .lte('last_checkout_started_at', thirtyMinutesAgo)
+    .limit(100)
+
+  if (error) {
+    console.error('Failed to load abandoned checkout leads:', error)
+    return { abandonedCartEmails }
+  }
+
+  for (const lead of (leads as CheckoutLeadRow[] | null) ?? []) {
+    const stage = getAbandonedCartStage(lead, now)
+    if (!stage) continue
+
+    const sent = await sendAbandonedCartEmail({
+      to: lead.email,
+      stage,
+      items: lead.cart_snapshot,
+    })
+
+    if (!sent) continue
+
+    abandonedCartEmails += 1
+    const sentColumn = getAbandonedCartSentColumn(stage)
+
+    await service()
+      .from('checkout_leads')
+      .update({
+        [sentColumn]: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', lead.id)
+      .is('recovered_order_id', null)
+      .is(sentColumn, null)
+  }
+
+  return { abandonedCartEmails }
+}
+
+export async function dispatchPendingLifecycleEmails(): Promise<{
+  paymentEmails: number
+  trackingEmails: number
+  abandonedCartEmails: number
+}> {
+  const orderEmails = await dispatchPendingOrderEmails()
+  const abandonedCartEmails = await dispatchAbandonedCartEmails()
+
+  return {
+    ...orderEmails,
+    ...abandonedCartEmails,
+  }
 }

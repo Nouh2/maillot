@@ -1,18 +1,29 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
 import { CartItem } from '@/components/cart/CartItem'
 import { formatEuro, FREE_SHIPPING_THRESHOLD, FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE } from '@/lib/cartPricing'
+import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { useCartStore } from '@/store/cart'
 import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
 
 export default function CartPage() {
-  const { items, subtotal, shippingTotal, total, itemCount, freeShippingUnlocked } = useCartStore()
+  const { items, subtotal, discountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
   const quantity = itemCount()
+  const discount = discountTotal()
   const shipping = shippingTotal()
   const shippingUnlocked = freeShippingUnlocked()
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    const code = normalizePromoCode(searchParams.get('promo'))
+    if (isSupportedPromoCode(code)) {
+      setPromoCode(code)
+    }
+  }, [setPromoCode])
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -54,6 +65,12 @@ export default function CartPage() {
                 <span>Sous-total</span>
                 <span>{formatEuro(subtotal())}</span>
               </div>
+              {discount > 0 ? (
+                <div className="flex items-center justify-between text-sm text-[var(--terra)]">
+                  <span>Code {promoCode}</span>
+                  <span>-{formatEuro(discount)}</span>
+                </div>
+              ) : null}
               <div className="flex items-center justify-between text-sm text-[var(--grey)]">
                 <span>Livraison</span>
                 <span>{shippingUnlocked ? 'Offerte' : formatEuro(shipping)}</span>
@@ -67,6 +84,9 @@ export default function CartPage() {
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
               <p className="mt-2">Livraison offerte des {FREE_SHIPPING_MIN_ITEMS} maillots commandes ou des {formatEuro(FREE_SHIPPING_THRESHOLD)} d achats{shippingUnlocked ? ' — debloquee' : ''}.</p>
+              {discount > 0 ? (
+                <p className="mt-1 text-[var(--terra)]">Code {promoCode} applique: -10% sur les maillots du panier.</p>
+              ) : null}
               <p className="mt-1">En dessous du seuil, les frais de port sont de {formatEuro(STANDARD_SHIPPING_PRICE)}.</p>
             </div>
 

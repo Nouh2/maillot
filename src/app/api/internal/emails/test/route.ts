@@ -12,7 +12,9 @@ const TEMPLATE_IDS: EmailTemplateId[] = [
   'support_ack',
   'account_welcome',
   'delivered',
-  'abandoned_cart',
+  'abandoned_cart_30m',
+  'abandoned_cart_6h',
+  'abandoned_cart_24h',
   'post_purchase',
   'win_back',
 ]

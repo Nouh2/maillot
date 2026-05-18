@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
+import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { getStripe } from '@/lib/stripe'
 import { toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabaseServiceClient } from '@/lib/supabase/server'
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
   let email = ''
   let marketingOptIn = false
   let attribution: AttributionPayload = {}
+  let promoCode: string | null = null
 
   try {
     const body = await request.json()
@@ -77,6 +79,7 @@ export async function POST(request: NextRequest) {
     email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
     marketingOptIn = body.marketingOptIn === true
     attribution = normalizeAttributionPayload(body.attribution)
+    promoCode = normalizePromoCode(body.promoCode)
   } catch {
     return NextResponse.json({ error: 'Body invalide' }, { status: 400 })
   }
@@ -108,7 +111,9 @@ export async function POST(request: NextRequest) {
   }
 
   const normalizedItems = normalizeCartItems(items, productMap)
-  const pricing = calculateCartPricing(normalizedItems)
+  const pricing = calculateCartPricing(normalizedItems, {
+    promoCode: isSupportedPromoCode(promoCode) ? promoCode : null,
+  })
   const itemCount = pricing.itemCount
   const shippingAmount = pricing.shipping
   const orderTotal = pricing.total
@@ -136,6 +141,10 @@ export async function POST(request: NextRequest) {
       utm_medium: attribution.utm_medium ?? null,
       utm_campaign: attribution.utm_campaign ?? null,
       utm_content: attribution.utm_content ?? null,
+      utm_term: attribution.utm_term ?? null,
+      gclid: attribution.gclid ?? null,
+      fbclid: attribution.fbclid ?? null,
+      ttclid: attribution.ttclid ?? null,
       source_channel: sourceChannel,
     })
     .select('id, order_number, public_tracking_token')
@@ -157,7 +166,15 @@ export async function POST(request: NextRequest) {
         utm_medium: attribution.utm_medium ?? null,
         utm_campaign: attribution.utm_campaign ?? null,
         utm_content: attribution.utm_content ?? null,
+        utm_term: attribution.utm_term ?? null,
+        gclid: attribution.gclid ?? null,
+        fbclid: attribution.fbclid ?? null,
+        ttclid: attribution.ttclid ?? null,
         cart_snapshot: normalizedItems,
+        recovered_order_id: null,
+        abandoned_cart_30m_sent_at: null,
+        abandoned_cart_6h_sent_at: null,
+        abandoned_cart_24h_sent_at: null,
         updated_at: now,
         last_checkout_started_at: now,
       }, { onConflict: 'email' })
@@ -228,6 +245,13 @@ export async function POST(request: NextRequest) {
         shipping_amount: String(shippingAmount),
         marketing_opt_in: marketingOptIn ? 'true' : 'false',
         source_channel: sourceChannel,
+        ...(pricing.promoCode
+          ? {
+              promo_code: pricing.promoCode,
+              promo_discount_rate: String(pricing.promoDiscountRate),
+              promo_discount_amount: String(pricing.discount),
+            }
+          : {}),
       },
     })
 

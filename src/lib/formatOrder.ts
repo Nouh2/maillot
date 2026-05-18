@@ -85,6 +85,8 @@ export function formatOrderMessage(order: Order): string {
     '',
     `<b>TOTAL : ${order.total_amount != null ? order.total_amount.toFixed(2) : 'N/A'} EUR</b>`,
     `Canal : ${formatField(order.source_channel)}`,
+    `Campagne : ${formatField(order.utm_campaign)}`,
+    `Mot cle / ciblage : ${formatField(order.utm_term)}`,
     `Commande le ${escapeHtml(date)}`,
   ].join('\n')
 }
