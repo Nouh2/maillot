@@ -22,22 +22,22 @@ const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard']
 const BUNDLE_OPTIONS = [
   {
     qty: 1,
-    title: '1 Maillot',
-    label: 'Achat simple',
+    title: '1er maillot',
+    label: 'Ajoute celui-ci',
     badge: null,
     icon: BadgePercent,
   },
   {
     qty: 3,
-    title: '3 Maillots',
-    label: 'Livraison offerte',
+    title: '3 maillots',
+    label: 'Peuvent etre differents',
     badge: null,
     icon: Truck,
   },
   {
     qty: 4,
-    title: 'Pack 4',
-    label: '3 payes + 1 offert',
+    title: '4e offert',
+    label: 'Le moins cher passe a 0',
     badge: 'Meilleur deal',
     icon: Gift,
   },
@@ -65,8 +65,10 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const [flocageName, setFlocageName] = useState('')
   const [flocageNumber, setFlocageNumber] = useState('')
   const [error, setError] = useState('')
+  const [selectedBundleTarget, setSelectedBundleTarget] = useState(BUNDLE_CYCLE_ITEM_COUNT)
 
   const addItem = useCartStore((state) => state.addItem)
+  const getCartItemCount = useCartStore((state) => state.itemCount)
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -85,6 +87,10 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     hasFlocage,
   })
   const bundlePreview = getBundlePreview(unitPrice, qty)
+  const projectedBundleCount = getCartItemCount() + qty
+  const projectedFreeCount = calculateBundleFreeItemCount(projectedBundleCount)
+  const bundleProgressTarget = Math.max(1, selectedBundleTarget)
+  const missingForSelectedBundle = Math.max(0, selectedBundleTarget - projectedBundleCount)
 
   useEffect(() => {
     trackEvent('product_view', {
@@ -203,17 +209,16 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         <div className="grid grid-cols-3 gap-1.5">
           {BUNDLE_OPTIONS.map((option) => {
             const Icon = option.icon
-            const preview = getBundlePreview(unitPrice, option.qty)
-            const selected = qty === option.qty
+            const selected = selectedBundleTarget === option.qty
 
             return (
               <button
                 key={option.qty}
                 type="button"
                 aria-pressed={selected}
-                onClick={() => setQty(option.qty)}
+                onClick={() => setSelectedBundleTarget(option.qty)}
                 className={cn(
-                  'relative min-h-[92px] overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all',
+                  'relative min-h-[88px] overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all',
                   selected
                     ? 'border-[var(--terra)] bg-[var(--terra-lt)] text-[var(--black)] shadow-[0_0_0_2px_rgba(193,68,14,0.14)]'
                     : 'border-[var(--cream-3)] bg-[var(--cream)] text-[var(--black)] hover:border-[var(--terra)]/35 hover:bg-[var(--terra-lt)]',
@@ -229,21 +234,9 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 <p className="font-bebas text-[19px] leading-none tracking-wide">{option.title}</p>
                 <p className="mt-0.5 truncate text-[10px] leading-tight text-[var(--grey)]">{option.label}</p>
 
-                <div className="mt-2 flex items-end justify-between gap-1">
-                  <div>
-                    <p className="font-condensed text-sm font-bold leading-none">{formatEuro(preview.total)}</p>
-                    {preview.saving > 0 ? (
-                      <p className="mt-0.5 text-[10px] leading-none text-[var(--grey-lt)] line-through">
-                        {formatEuro(preview.subtotal)}
-                      </p>
-                    ) : null}
-                  </div>
-                  {preview.freeCount > 0 ? (
-                    <span className="rounded-full bg-[var(--black)] px-1.5 py-0.5 font-condensed text-[8px] uppercase tracking-[0.1em] text-white">
-                      +{preview.freeCount}
-                    </span>
-                  ) : null}
-                </div>
+                <p className="mt-2 font-condensed text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--terra)]">
+                  Objectif {option.qty}
+                </p>
               </button>
             )
           })}
@@ -253,19 +246,21 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           <div className="mb-1.5 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
             <span>Pack</span>
             <span>
-              {Math.min(qty, BUNDLE_CYCLE_ITEM_COUNT)}/{BUNDLE_CYCLE_ITEM_COUNT}
+              {Math.min(projectedBundleCount, bundleProgressTarget)}/{bundleProgressTarget}
             </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--cream-3)]">
             <div
               className="h-full rounded-full bg-[var(--terra)] transition-all"
-              style={{ width: `${Math.min(100, (qty / BUNDLE_CYCLE_ITEM_COUNT) * 100)}%` }}
+              style={{ width: `${Math.min(100, (projectedBundleCount / bundleProgressTarget) * 100)}%` }}
             />
           </div>
           <p className="mt-1.5 truncate text-[10px] text-[var(--grey)]">
-            {bundlePreview.freeCount > 0
-              ? `${formatEuro(bundlePreview.saving)} economises sur ce pack.`
-              : `Ajoute ${BUNDLE_CYCLE_ITEM_COUNT - qty} maillot${BUNDLE_CYCLE_ITEM_COUNT - qty > 1 ? 's' : ''} pour le 4e offert.`}
+            {projectedFreeCount > 0
+              ? `Le 4e offert sera applique au panier.`
+              : selectedBundleTarget === 1
+                ? 'Ajoute ce maillot au panier.'
+                : `Encore ${missingForSelectedBundle} maillot${missingForSelectedBundle > 1 ? 's' : ''} au choix pour completer le pack.`}
           </p>
         </div>
       </div>
