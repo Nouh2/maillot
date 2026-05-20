@@ -190,17 +190,17 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       </div>
 
       <div className="rounded-[1.5rem] border border-[var(--cream-3)] bg-white p-2 text-[var(--black)] shadow-[0_18px_40px_rgba(28,23,18,0.1)]">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
-          <div>
-            <p className="font-condensed text-[11px] uppercase tracking-[0.22em] text-[var(--terra)]">Offre coupe du monde</p>
-            <h3 className="mt-1 font-bebas text-3xl tracking-wide">3 achetes = 4e offert</h3>
+        <div className="flex items-center justify-between gap-3 px-3 py-2">
+          <div className="min-w-0">
+            <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Offre coupe du monde</p>
+            <h3 className="mt-0.5 truncate font-bebas text-2xl tracking-wide">3 achetes = 4e offert</h3>
           </div>
-          <div className="rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-3 py-1 font-condensed text-[11px] uppercase tracking-[0.18em] text-[var(--terra)]">
-            Livraison offerte des 3
+          <div className="shrink-0 rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-2.5 py-1 font-condensed text-[10px] uppercase tracking-[0.12em] text-[var(--terra)]">
+            Livraison des 3
           </div>
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-1.5">
           {BUNDLE_OPTIONS.map((option) => {
             const Icon = option.icon
             const preview = getBundlePreview(unitPrice, option.qty)
@@ -213,34 +213,34 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 aria-pressed={selected}
                 onClick={() => setQty(option.qty)}
                 className={cn(
-                  'relative min-h-[136px] overflow-hidden rounded-2xl border p-4 text-left transition-all',
+                  'relative min-h-[92px] overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all',
                   selected
                     ? 'border-[var(--terra)] bg-[var(--terra-lt)] text-[var(--black)] shadow-[0_0_0_2px_rgba(193,68,14,0.14)]'
                     : 'border-[var(--cream-3)] bg-[var(--cream)] text-[var(--black)] hover:border-[var(--terra)]/35 hover:bg-[var(--terra-lt)]',
                 )}
               >
                 {option.badge ? (
-                  <span className="absolute right-3 top-3 rounded-full bg-[var(--terra)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-white">
-                    {option.badge}
+                  <span className="absolute right-1.5 top-1.5 rounded-full bg-[var(--terra)] px-1.5 py-0.5 font-condensed text-[8px] uppercase tracking-[0.1em] text-white">
+                    Top
                   </span>
                 ) : null}
 
-                <Icon className="mb-4 h-6 w-6 text-[var(--terra)]" />
-                <p className="font-bebas text-2xl tracking-wide">{option.title}</p>
-                <p className="mt-1 text-xs text-[var(--grey)]">{option.label}</p>
+                <Icon className="mb-1.5 h-4 w-4 text-[var(--terra)]" />
+                <p className="font-bebas text-[19px] leading-none tracking-wide">{option.title}</p>
+                <p className="mt-0.5 truncate text-[10px] leading-tight text-[var(--grey)]">{option.label}</p>
 
-                <div className="mt-4 flex items-end justify-between gap-3">
+                <div className="mt-2 flex items-end justify-between gap-1">
                   <div>
-                    <p className="font-condensed text-xl font-bold">{formatEuro(preview.total)}</p>
+                    <p className="font-condensed text-sm font-bold leading-none">{formatEuro(preview.total)}</p>
                     {preview.saving > 0 ? (
-                      <p className="text-[11px] text-[var(--grey-lt)] line-through">
+                      <p className="mt-0.5 text-[10px] leading-none text-[var(--grey-lt)] line-through">
                         {formatEuro(preview.subtotal)}
                       </p>
                     ) : null}
                   </div>
                   {preview.freeCount > 0 ? (
-                    <span className="rounded-full bg-[var(--black)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-white">
-                      +{preview.freeCount} offert
+                    <span className="rounded-full bg-[var(--black)] px-1.5 py-0.5 font-condensed text-[8px] uppercase tracking-[0.1em] text-white">
+                      +{preview.freeCount}
                     </span>
                   ) : null}
                 </div>
@@ -249,23 +249,23 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           })}
         </div>
 
-        <div className="mt-2 rounded-2xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
-          <div className="mb-2 flex items-center justify-between font-condensed text-xs uppercase tracking-[0.16em] text-[var(--grey)]">
-            <span>Progression pack</span>
+        <div className="mt-1.5 rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] px-3 py-2">
+          <div className="mb-1.5 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
+            <span>Pack</span>
             <span>
               {Math.min(qty, BUNDLE_CYCLE_ITEM_COUNT)}/{BUNDLE_CYCLE_ITEM_COUNT}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[var(--cream-3)]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--cream-3)]">
             <div
               className="h-full rounded-full bg-[var(--terra)] transition-all"
               style={{ width: `${Math.min(100, (qty / BUNDLE_CYCLE_ITEM_COUNT) * 100)}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-[var(--grey)]">
+          <p className="mt-1.5 truncate text-[10px] text-[var(--grey)]">
             {bundlePreview.freeCount > 0
-              ? `Bundle applique: ${formatEuro(bundlePreview.saving)} economises sur ce pack.`
-              : `Ajoute ${BUNDLE_CYCLE_ITEM_COUNT - qty} maillot${BUNDLE_CYCLE_ITEM_COUNT - qty > 1 ? 's' : ''} pour obtenir le 4e offert.`}
+              ? `${formatEuro(bundlePreview.saving)} economises sur ce pack.`
+              : `Ajoute ${BUNDLE_CYCLE_ITEM_COUNT - qty} maillot${BUNDLE_CYCLE_ITEM_COUNT - qty > 1 ? 's' : ''} pour le 4e offert.`}
           </p>
         </div>
       </div>
