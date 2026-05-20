@@ -189,13 +189,13 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         ) : null}
       </div>
 
-      <div className="rounded-[1.5rem] border border-[var(--black)] bg-[var(--black)] p-2 text-white shadow-[0_18px_40px_rgba(28,23,18,0.18)]">
+      <div className="rounded-[1.5rem] border border-[var(--cream-3)] bg-white p-2 text-[var(--black)] shadow-[0_18px_40px_rgba(28,23,18,0.1)]">
         <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
           <div>
-            <p className="font-condensed text-[11px] uppercase tracking-[0.22em] text-[#b7ff1a]">Bundles exclusifs</p>
+            <p className="font-condensed text-[11px] uppercase tracking-[0.22em] text-[var(--terra)]">Offre coupe du monde</p>
             <h3 className="mt-1 font-bebas text-3xl tracking-wide">3 achetes = 4e offert</h3>
           </div>
-          <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 font-condensed text-[11px] uppercase tracking-[0.18em]">
+          <div className="rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-3 py-1 font-condensed text-[11px] uppercase tracking-[0.18em] text-[var(--terra)]">
             Livraison offerte des 3
           </div>
         </div>
@@ -215,31 +215,31 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 className={cn(
                   'relative min-h-[136px] overflow-hidden rounded-2xl border p-4 text-left transition-all',
                   selected
-                    ? 'border-[#b7ff1a] bg-[#efffd1] text-[var(--black)] shadow-[0_0_0_2px_rgba(183,255,26,0.3)]'
-                    : 'border-white/10 bg-white/[0.06] text-white hover:border-white/30 hover:bg-white/[0.09]',
+                    ? 'border-[var(--terra)] bg-[var(--terra-lt)] text-[var(--black)] shadow-[0_0_0_2px_rgba(193,68,14,0.14)]'
+                    : 'border-[var(--cream-3)] bg-[var(--cream)] text-[var(--black)] hover:border-[var(--terra)]/35 hover:bg-[var(--terra-lt)]',
                 )}
               >
                 {option.badge ? (
-                  <span className="absolute right-3 top-3 rounded-full bg-[#b7ff1a] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-[var(--black)]">
+                  <span className="absolute right-3 top-3 rounded-full bg-[var(--terra)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-white">
                     {option.badge}
                   </span>
                 ) : null}
 
-                <Icon className={cn('mb-4 h-6 w-6', selected ? 'text-[var(--black)]' : 'text-[#b7ff1a]')} />
+                <Icon className="mb-4 h-6 w-6 text-[var(--terra)]" />
                 <p className="font-bebas text-2xl tracking-wide">{option.title}</p>
-                <p className={cn('mt-1 text-xs', selected ? 'text-[var(--black)]/70' : 'text-white/65')}>{option.label}</p>
+                <p className="mt-1 text-xs text-[var(--grey)]">{option.label}</p>
 
                 <div className="mt-4 flex items-end justify-between gap-3">
                   <div>
                     <p className="font-condensed text-xl font-bold">{formatEuro(preview.total)}</p>
                     {preview.saving > 0 ? (
-                      <p className={cn('text-[11px] line-through', selected ? 'text-[var(--black)]/45' : 'text-white/40')}>
+                      <p className="text-[11px] text-[var(--grey-lt)] line-through">
                         {formatEuro(preview.subtotal)}
                       </p>
                     ) : null}
                   </div>
                   {preview.freeCount > 0 ? (
-                    <span className="rounded-full bg-[var(--black)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-[#b7ff1a]">
+                    <span className="rounded-full bg-[var(--black)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-white">
                       +{preview.freeCount} offert
                     </span>
                   ) : null}
@@ -249,20 +249,20 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           })}
         </div>
 
-        <div className="mt-2 rounded-2xl border border-white/10 bg-white/[0.07] p-3">
-          <div className="mb-2 flex items-center justify-between font-condensed text-xs uppercase tracking-[0.16em] text-white/75">
+        <div className="mt-2 rounded-2xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
+          <div className="mb-2 flex items-center justify-between font-condensed text-xs uppercase tracking-[0.16em] text-[var(--grey)]">
             <span>Progression pack</span>
             <span>
               {Math.min(qty, BUNDLE_CYCLE_ITEM_COUNT)}/{BUNDLE_CYCLE_ITEM_COUNT}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--cream-3)]">
             <div
-              className="h-full rounded-full bg-[#b7ff1a] transition-all"
+              className="h-full rounded-full bg-[var(--terra)] transition-all"
               style={{ width: `${Math.min(100, (qty / BUNDLE_CYCLE_ITEM_COUNT) * 100)}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-white/65">
+          <p className="mt-2 text-xs text-[var(--grey)]">
             {bundlePreview.freeCount > 0
               ? `Bundle applique: ${formatEuro(bundlePreview.saving)} economises sur ce pack.`
               : `Ajoute ${BUNDLE_CYCLE_ITEM_COUNT - qty} maillot${BUNDLE_CYCLE_ITEM_COUNT - qty > 1 ? 's' : ''} pour obtenir le 4e offert.`}

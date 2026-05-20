@@ -29,18 +29,18 @@ export function CartBundleOffer({ compact = false }: { compact?: boolean }) {
   const nextFreeItems = calculateBundleFreeItemCount(quantity + neededForBundle)
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-[var(--black)] bg-[var(--black)] text-white shadow-[0_18px_40px_rgba(28,23,18,0.16)]">
+    <section className="overflow-hidden rounded-2xl border border-[var(--cream-3)] bg-white text-[var(--black)] shadow-[0_18px_40px_rgba(28,23,18,0.1)]">
       <div className="relative p-4">
-        <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-[#b7ff1a]/15" />
+        <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-[var(--terra-lt)]" />
         <div className="relative flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#b7ff1a] text-[var(--black)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--terra)] text-white">
             <Gift className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="font-condensed text-[11px] uppercase tracking-[0.2em] text-[#b7ff1a]">Offre bundle</p>
+              <p className="font-condensed text-[11px] uppercase tracking-[0.2em] text-[var(--terra)]">Offre coupe du monde</p>
               {freeItems > 0 ? (
-                <span className="rounded-full border border-[#b7ff1a]/30 bg-[#b7ff1a]/15 px-2 py-0.5 font-condensed text-[10px] uppercase tracking-[0.14em] text-[#b7ff1a]">
+                <span className="rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-2 py-0.5 font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--terra)]">
                   Debloquee
                 </span>
               ) : null}
@@ -52,7 +52,7 @@ export function CartBundleOffer({ compact = false }: { compact?: boolean }) {
                 : '3 achetes = 4e offert'}
             </h3>
 
-            <p className="mt-2 text-sm leading-snug text-white/70">
+            <p className="mt-2 text-sm leading-snug text-[var(--grey)]">
               {freeItems > 0
                 ? `${formatEuro(bundleDiscount)} economises automatiquement sur ce panier.`
                 : shippingUnlocked
@@ -63,32 +63,32 @@ export function CartBundleOffer({ compact = false }: { compact?: boolean }) {
         </div>
 
         <div className="relative mt-4">
-          <div className="mb-2 flex items-center justify-between font-condensed text-[11px] uppercase tracking-[0.16em] text-white/55">
+          <div className="mb-2 flex items-center justify-between font-condensed text-[11px] uppercase tracking-[0.16em] text-[var(--grey)]">
             <span>{shippingUnlocked ? 'Livraison offerte active' : `Livraison offerte des ${FREE_SHIPPING_MIN_ITEMS}`}</span>
             <span>{Math.min(quantity, freeItems > 0 ? BUNDLE_CYCLE_ITEM_COUNT : progressTarget)}/{freeItems > 0 ? BUNDLE_CYCLE_ITEM_COUNT : progressTarget}</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-[#b7ff1a] transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--cream-3)]">
+            <div className="h-full rounded-full bg-[var(--terra)] transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
         <div className="relative mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3">
-            <Truck className="mb-2 h-4 w-4 text-[#b7ff1a]" />
+          <div className="rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
+            <Truck className="mb-2 h-4 w-4 text-[var(--terra)]" />
             <p className="font-condensed text-xs uppercase tracking-[0.16em]">Livraison</p>
-            <p className="mt-1 text-xs text-white/60">{shippingUnlocked ? 'Offerte' : `Des ${FREE_SHIPPING_MIN_ITEMS} maillots`}</p>
+            <p className="mt-1 text-xs text-[var(--grey)]">{shippingUnlocked ? 'Offerte' : `Des ${FREE_SHIPPING_MIN_ITEMS} maillots`}</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3">
-            <BadgePercent className="mb-2 h-4 w-4 text-[#b7ff1a]" />
+          <div className="rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
+            <BadgePercent className="mb-2 h-4 w-4 text-[var(--terra)]" />
             <p className="font-condensed text-xs uppercase tracking-[0.16em]">Remise</p>
-            <p className="mt-1 text-xs text-white/60">{discount > 0 ? `-${formatEuro(discount)}` : 'Auto au panier'}</p>
+            <p className="mt-1 text-xs text-[var(--grey)]">{discount > 0 ? `-${formatEuro(discount)}` : 'Auto au panier'}</p>
           </div>
         </div>
 
         {!compact && freeItems === 0 ? (
           <Link
             href="/shop"
-            className="relative mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#b7ff1a] px-4 py-3 font-condensed text-xs font-bold uppercase tracking-[0.18em] text-[var(--black)] transition-transform active:scale-[0.98]"
+            className="relative mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[var(--terra)] px-4 py-3 font-condensed text-xs font-bold uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98]"
           >
             Completer mon pack
           </Link>
