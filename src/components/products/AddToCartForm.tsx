@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { BadgePercent, Check, Gift, Minus, Plus, ShieldCheck, Truck } from 'lucide-react'
+import { BadgePercent, Check, Gift, Minus, Plus, Truck } from 'lucide-react'
 import {
   BUNDLE_CYCLE_ITEM_COUNT,
   calculateBundleFreeItemCount,
@@ -18,7 +19,15 @@ import { cn } from '@/lib/utils'
 import { PatchSelector } from './PatchSelector'
 import { SizeSelector } from './SizeSelector'
 
-const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard']
+const PAYMENT_METHODS = [
+  { name: 'American Express', src: '/payment/amex.svg' },
+  { name: 'Apple Pay', src: '/payment/apple-pay.svg' },
+  { name: 'Google Pay', src: '/payment/google-pay.svg' },
+  { name: 'Mastercard', src: '/payment/mastercard.svg' },
+  { name: 'PayPal', src: '/payment/paypal.svg' },
+  { name: 'Shop Pay', src: '/payment/shop-pay.svg' },
+  { name: 'Visa', src: '/payment/visa.svg' },
+] as const
 const BUNDLE_OPTIONS = [
   {
     qty: 1,
@@ -294,42 +303,16 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
             </button>
           </div>
 
-          <div className="space-y-4">
-
-            <div className="flex flex-wrap items-center justify-center gap-2 py-2">
+          <div>
+            <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
               {PAYMENT_METHODS.map((method) => (
                 <span
-                  key={method}
-                  className="rounded-full border border-[var(--cream-3)] bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--grey)]"
+                  key={method.name}
+                  className="flex h-6 w-[38px] items-center justify-center rounded border border-[var(--cream-3)] bg-white px-1.5 shadow-xs"
                 >
-                  {method}
+                  <Image src={method.src} alt={method.name} width={34} height={16} className="max-h-4 w-auto object-contain" />
                 </span>
               ))}
-            </div>
-
-            <div className="group relative overflow-hidden rounded-2xl border border-blue-50 bg-[#F0F4FF] p-6">
-              <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-blue-100/30 transition-transform duration-700 group-hover:scale-110" />
-
-              <h3 className="relative mb-4 inline-block text-[18px] font-bold italic text-[var(--black)]">
-                Paiement & Securite
-                <div className="absolute left-0 -bottom-1 -z-10 h-2 w-full rounded-full bg-[#4BFF00] opacity-60" />
-              </h3>
-
-              <div className="mb-4 flex flex-wrap gap-2">
-                <div className="flex items-center justify-center rounded border border-blue-100 bg-white px-2 py-1 shadow-xs">
-                  <ShieldCheck className="mr-1 h-3 w-3 text-blue-500" />
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-blue-900">SSL Securing</span>
-                </div>
-                {pricing.promoDescription ? (
-                  <div className="rounded border border-[var(--terra)]/10 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--terra)]">
-                    {pricing.promoDescription}
-                  </div>
-                ) : null}
-              </div>
-
-              <p className="relative z-10 text-[14px] leading-relaxed text-[#555555]">
-                Vos informations de paiement sont traitees de maniere securisee. Nous ne stockons pas les informations de carte bancaire et n&apos;y avons pas acces.
-              </p>
             </div>
           </div>
         </div>
