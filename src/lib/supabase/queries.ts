@@ -103,7 +103,7 @@ const getCachedProducts = unstable_cache(
 
     return (rawProducts as CatalogListRow[]).map((row) => toCatalogProduct(row, { photoLimit: 2 }))
   },
-  ['catalog-products'],
+  ['catalog-products-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
 
@@ -131,7 +131,7 @@ const getCachedProductBySlug = unstable_cache(
 
     return toCatalogProduct(data as Product & { manual_override?: unknown })
   },
-  ['catalog-product-by-slug'],
+  ['catalog-product-by-slug-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
 
@@ -170,7 +170,7 @@ const getCachedSearchSuggestions = unstable_cache(
     const products = await getCachedProducts()
     return getClubFilterOptions(dedupeCatalogProducts(filterStandardCatalogProducts(products)))
   },
-  ['catalog-search-suggestions'],
+  ['catalog-search-suggestions-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
 

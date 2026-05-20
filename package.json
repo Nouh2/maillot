@@ -10,6 +10,7 @@
     "catalog:clean": "node scripts/catalog/clean_catalog.mjs",
     "catalog:normalize": "node scripts/catalog/normalize_catalog.mjs",
     "images:migrate:bunny": "node scripts/catalog/migrate_images_to_bunny.mjs",
+    "images:repair:yupoo-bunny": "node scripts/catalog/repair_yupoo_bunny_photos.mjs",
     "images:status:bunny": "node scripts/catalog/bunny_migration_status.mjs",
     "images:optimize:bunny": "python scripts/catalog/optimize_bunny_images.py"
   },

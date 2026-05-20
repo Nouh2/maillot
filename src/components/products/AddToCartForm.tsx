@@ -1,16 +1,61 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Check, Minus, Plus, ShieldCheck } from 'lucide-react'
-import { FLOCAGE_PRICE, calculateCartItemUnitPrice, formatEuro, getProductPricing } from '@/lib/cartPricing'
+import { BadgePercent, Check, Gift, Minus, Plus, ShieldCheck, Truck } from 'lucide-react'
+import {
+  BUNDLE_CYCLE_ITEM_COUNT,
+  calculateBundleFreeItemCount,
+  FLOCAGE_PRICE,
+  calculateCartItemUnitPrice,
+  formatEuro,
+  getProductPricing,
+} from '@/lib/cartPricing'
 import { normalizeProductTextSeasons } from '@/lib/season'
 import { trackAddToCart, trackEvent } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import type { Patch, Product } from '@/types/product'
+import { cn } from '@/lib/utils'
 import { PatchSelector } from './PatchSelector'
 import { SizeSelector } from './SizeSelector'
 
 const PAYMENT_METHODS = ['CB', 'Visa', 'Mastercard']
+const BUNDLE_OPTIONS = [
+  {
+    qty: 1,
+    title: '1 Maillot',
+    label: 'Achat simple',
+    badge: null,
+    icon: BadgePercent,
+  },
+  {
+    qty: 3,
+    title: '3 Maillots',
+    label: 'Livraison offerte',
+    badge: null,
+    icon: Truck,
+  },
+  {
+    qty: 4,
+    title: 'Pack 4',
+    label: '3 payes + 1 offert',
+    badge: 'Meilleur deal',
+    icon: Gift,
+  },
+] as const
+
+function getBundlePreview(unitPrice: number, qty: number) {
+  const freeCount = calculateBundleFreeItemCount(qty)
+  const paidCount = Math.max(0, qty - freeCount)
+  const subtotal = unitPrice * qty
+  const total = unitPrice * paidCount
+
+  return {
+    freeCount,
+    subtotal,
+    total,
+    saving: Math.max(0, subtotal - total),
+  }
+}
 
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
@@ -39,7 +84,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     patchCount: selectedPatches.length,
     hasFlocage,
   })
-  const totalPrice = unitPrice * qty
+  const bundlePreview = getBundlePreview(unitPrice, qty)
 
   useEffect(() => {
     trackEvent('product_view', {
@@ -85,7 +130,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       patchCount: selectedPatches.length,
       hasFlocage,
       unitPrice,
-      value: totalPrice,
+      value: bundlePreview.total,
     })
   }
 
@@ -144,6 +189,87 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         ) : null}
       </div>
 
+      <div className="rounded-[1.5rem] border border-[var(--black)] bg-[var(--black)] p-2 text-white shadow-[0_18px_40px_rgba(28,23,18,0.18)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
+          <div>
+            <p className="font-condensed text-[11px] uppercase tracking-[0.22em] text-[#b7ff1a]">Bundles exclusifs</p>
+            <h3 className="mt-1 font-bebas text-3xl tracking-wide">3 achetes = 4e offert</h3>
+          </div>
+          <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 font-condensed text-[11px] uppercase tracking-[0.18em]">
+            Livraison offerte des 3
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          {BUNDLE_OPTIONS.map((option) => {
+            const Icon = option.icon
+            const preview = getBundlePreview(unitPrice, option.qty)
+            const selected = qty === option.qty
+
+            return (
+              <button
+                key={option.qty}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setQty(option.qty)}
+                className={cn(
+                  'relative min-h-[136px] overflow-hidden rounded-2xl border p-4 text-left transition-all',
+                  selected
+                    ? 'border-[#b7ff1a] bg-[#efffd1] text-[var(--black)] shadow-[0_0_0_2px_rgba(183,255,26,0.3)]'
+                    : 'border-white/10 bg-white/[0.06] text-white hover:border-white/30 hover:bg-white/[0.09]',
+                )}
+              >
+                {option.badge ? (
+                  <span className="absolute right-3 top-3 rounded-full bg-[#b7ff1a] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-[var(--black)]">
+                    {option.badge}
+                  </span>
+                ) : null}
+
+                <Icon className={cn('mb-4 h-6 w-6', selected ? 'text-[var(--black)]' : 'text-[#b7ff1a]')} />
+                <p className="font-bebas text-2xl tracking-wide">{option.title}</p>
+                <p className={cn('mt-1 text-xs', selected ? 'text-[var(--black)]/70' : 'text-white/65')}>{option.label}</p>
+
+                <div className="mt-4 flex items-end justify-between gap-3">
+                  <div>
+                    <p className="font-condensed text-xl font-bold">{formatEuro(preview.total)}</p>
+                    {preview.saving > 0 ? (
+                      <p className={cn('text-[11px] line-through', selected ? 'text-[var(--black)]/45' : 'text-white/40')}>
+                        {formatEuro(preview.subtotal)}
+                      </p>
+                    ) : null}
+                  </div>
+                  {preview.freeCount > 0 ? (
+                    <span className="rounded-full bg-[var(--black)] px-2 py-1 font-condensed text-[10px] uppercase tracking-[0.16em] text-[#b7ff1a]">
+                      +{preview.freeCount} offert
+                    </span>
+                  ) : null}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="mt-2 rounded-2xl border border-white/10 bg-white/[0.07] p-3">
+          <div className="mb-2 flex items-center justify-between font-condensed text-xs uppercase tracking-[0.16em] text-white/75">
+            <span>Progression pack</span>
+            <span>
+              {Math.min(qty, BUNDLE_CYCLE_ITEM_COUNT)}/{BUNDLE_CYCLE_ITEM_COUNT}
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-[#b7ff1a] transition-all"
+              style={{ width: `${Math.min(100, (qty / BUNDLE_CYCLE_ITEM_COUNT) * 100)}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-white/65">
+            {bundlePreview.freeCount > 0
+              ? `Bundle applique: ${formatEuro(bundlePreview.saving)} economises sur ce pack.`
+              : `Ajoute ${BUNDLE_CYCLE_ITEM_COUNT - qty} maillot${BUNDLE_CYCLE_ITEM_COUNT - qty > 1 ? 's' : ''} pour obtenir le 4e offert.`}
+          </p>
+        </div>
+      </div>
+
       <div className="border-t border-[var(--cream-3)] pt-4">
         {error ? <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p> : null}
 
@@ -169,7 +295,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               onClick={handleAdd}
               className="ml-4 flex h-[56px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] text-[16px] font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98]"
             >
-              Ajouter au panier - {formatEuro(totalPrice)}
+              Ajouter au panier - {formatEuro(bundlePreview.total)}
             </button>
           </div>
 

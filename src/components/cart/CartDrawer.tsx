@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { formatEuro } from '@/lib/cartPricing'
+import { CartBundleOffer } from './CartBundleOffer'
 import { CartItem } from './CartItem'
 import { CheckoutButton } from './CheckoutButton'
 import { CheckoutContactFields } from './CheckoutContactFields'
@@ -14,10 +15,12 @@ export function CartDrawer() {
     isOpen,
     closeCart,
     subtotal,
+    discountTotal,
     shippingTotal,
     total,
     freeShippingUnlocked,
   } = useCartStore()
+  const discount = discountTotal()
 
   useEffect(() => {
     if (!isOpen) return
@@ -71,15 +74,23 @@ export function CartDrawer() {
             <div className="space-y-4 pb-[calc(env(safe-area-inset-bottom,0px)+20px)]">
               <div className="px-1">
                 {items.map((item) => (
-                  <CartItem key={`${item.product_id}-${item.size}`} item={item} />
+                  <CartItem key={`${item.product_id}-${item.size}-${item.flocage_name ?? ''}-${item.flocage_number ?? ''}`} item={item} />
                 ))}
               </div>
+
+              <CartBundleOffer compact />
 
               <div className="space-y-2 rounded-2xl bg-[var(--cream)] p-4">
                 <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
                   <span>Sous-total</span>
                   <span>{formatEuro(subtotal())}</span>
                 </div>
+                {discount > 0 ? (
+                  <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--terra)]">
+                    <span>Remises</span>
+                    <span>-{formatEuro(discount)}</span>
+                  </div>
+                ) : null}
                 <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
                   <span>Livraison</span>
                   <span>{freeShippingUnlocked() ? 'Offerte' : formatEuro(shippingTotal())}</span>

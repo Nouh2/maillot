@@ -4,6 +4,16 @@ import { normalizeCatalogProduct } from '@/lib/catalogEntityRegistry'
 
 export const CATALOG_CACHE_TAG = 'catalog-products'
 
+function isUnavailablePlaceholderPhoto(url: string): boolean {
+  return url.includes('photo.yupoo.com/12345-67890/')
+}
+
+function normalizeProductPhotos(photos: string[]): string[] {
+  return photos
+    .map((photo) => photo.trim())
+    .filter((photo) => photo && !isUnavailablePlaceholderPhoto(photo))
+}
+
 export function toCatalogProduct(
   row: Partial<Product> & { manual_override?: unknown },
   options?: { photoLimit?: number; includeManualOverride?: boolean },
@@ -44,13 +54,17 @@ export function toCatalogProduct(
     options?.includeManualOverride === false
       ? normalizedProduct
       : applyProductManualOverride(normalizedProduct, row.manual_override)
+  const productWithAvailablePhotos = {
+    ...mergedProduct,
+    photos: normalizeProductPhotos(mergedProduct.photos),
+  }
 
   if (!options?.photoLimit) {
-    return mergedProduct
+    return productWithAvailablePhotos
   }
 
   return {
-    ...mergedProduct,
-    photos: mergedProduct.photos.slice(0, options.photoLimit),
+    ...productWithAvailablePhotos,
+    photos: productWithAvailablePhotos.photos.slice(0, options.photoLimit),
   }
 }

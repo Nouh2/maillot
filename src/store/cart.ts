@@ -20,6 +20,8 @@ interface CartState {
   setPromoCode: (promoCode: string | null) => void
   subtotal: () => number
   discountTotal: () => number
+  bundleDiscountTotal: () => number
+  bundleFreeItemCount: () => number
   shippingTotal: () => number
   total: () => number
   itemCount: () => number
@@ -85,6 +87,8 @@ export const useCartStore = create<CartState>()(
 
       subtotal: () => getPricing().subtotal,
       discountTotal: () => getPricing().discount,
+      bundleDiscountTotal: () => getPricing().bundleDiscount,
+      bundleFreeItemCount: () => getPricing().bundleFreeItemCount,
       shippingTotal: () => getPricing().shipping,
       total: () => getPricing().total,
       itemCount: () => getPricing().itemCount,

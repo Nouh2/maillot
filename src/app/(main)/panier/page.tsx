@@ -9,11 +9,13 @@ import { formatEuro, FREE_SHIPPING_THRESHOLD, FREE_SHIPPING_MIN_ITEMS, STANDARD_
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { useCartStore } from '@/store/cart'
 import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
+import { CartBundleOffer } from '@/components/cart/CartBundleOffer'
 
 export default function CartPage() {
-  const { items, subtotal, discountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
+  const { items, subtotal, discountTotal, bundleDiscountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
   const quantity = itemCount()
   const discount = discountTotal()
+  const bundleDiscount = bundleDiscountTotal()
   const shipping = shippingTotal()
   const shippingUnlocked = freeShippingUnlocked()
 
@@ -56,6 +58,8 @@ export default function CartPage() {
         </section>
 
         <aside className="order-1 space-y-5 pb-24 lg:order-2 lg:pb-0">
+          {items.length > 0 ? <CartBundleOffer /> : null}
+
           <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Resume</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Ta commande</h2>
@@ -65,10 +69,16 @@ export default function CartPage() {
                 <span>Sous-total</span>
                 <span>{formatEuro(subtotal())}</span>
               </div>
-              {discount > 0 ? (
+              {bundleDiscount > 0 ? (
                 <div className="flex items-center justify-between text-sm text-[var(--terra)]">
-                  <span>Code {promoCode}</span>
-                  <span>-{formatEuro(discount)}</span>
+                  <span>Bundle 3 achetes = 4e offert</span>
+                  <span>-{formatEuro(bundleDiscount)}</span>
+                </div>
+              ) : null}
+              {discount > bundleDiscount ? (
+                <div className="flex items-center justify-between text-sm text-[var(--terra)]">
+                  <span>{promoCode ? `Code ${promoCode}` : 'Remise'}</span>
+                  <span>-{formatEuro(discount - bundleDiscount)}</span>
                 </div>
               ) : null}
               <div className="flex items-center justify-between text-sm text-[var(--grey)]">
@@ -83,8 +93,9 @@ export default function CartPage() {
 
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
-              <p className="mt-2">Livraison offerte des {FREE_SHIPPING_MIN_ITEMS} maillots commandes ou des {formatEuro(FREE_SHIPPING_THRESHOLD)} d achats{shippingUnlocked ? ' — debloquee' : ''}.</p>
-              {discount > 0 ? (
+              <p className="mt-2">Livraison offerte des {FREE_SHIPPING_MIN_ITEMS} maillots commandes ou des {formatEuro(FREE_SHIPPING_THRESHOLD)} d achats{shippingUnlocked ? ' - debloquee' : ''}.</p>
+              <p className="mt-1">Bundle automatique: 3 maillots achetes, le 4e est offert.</p>
+              {discount > bundleDiscount ? (
                 <p className="mt-1 text-[var(--terra)]">Code {promoCode} applique: -10% sur les maillots du panier.</p>
               ) : null}
               <p className="mt-1">En dessous du seuil, les frais de port sont de {formatEuro(STANDARD_SHIPPING_PRICE)}.</p>

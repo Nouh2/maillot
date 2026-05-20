@@ -47,7 +47,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
 
   return (
     <section className="relative w-full bg-[var(--black)]">
-      <div className="aspect-[3/4] md:aspect-[16/9] relative overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden md:aspect-auto md:h-[360px] lg:h-[390px] xl:h-[410px] 2xl:h-[430px]">
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 4000, disableOnInteraction: false }}
@@ -94,23 +94,23 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                 />
 
                 {/* Texte overlay bas */}
-                <div className="absolute bottom-0 left-0 right-0 px-5 pb-16 md:px-12 md:pb-12 lg:px-20 lg:pb-16 lg:max-w-2xl">
+                <div className="absolute bottom-0 left-0 right-0 px-5 pb-16 md:bottom-auto md:top-1/2 md:max-w-[420px] md:-translate-y-1/2 md:px-12 md:pb-0 lg:left-20 lg:max-w-[460px] lg:px-0 xl:max-w-[500px]">
                   <p
-                    className="font-condensed uppercase mb-2 md:text-xs"
+                    className="font-condensed uppercase mb-2 md:mb-3 md:text-xs"
                     style={{ fontSize: 11, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.65)' }}
                   >
                     {slide.smallText}
                   </p>
                   <h2
-                    className="font-condensed font-bold uppercase text-white leading-tight mb-5 text-[30px] md:text-5xl lg:text-6xl"
+                    className="font-condensed font-bold uppercase text-white leading-tight mb-5 text-[30px] md:mb-6 md:text-[46px] lg:text-[52px] xl:text-[58px]"
                     style={{ whiteSpace: 'pre-line' }}
                   >
                     {slide.bigText}
                   </h2>
                   <Link
                     href={slide.href}
-                    className="inline-flex items-center justify-center font-condensed font-bold uppercase bg-white text-[var(--black)] hover:bg-[var(--cream)] transition-colors w-full md:w-auto md:px-10"
-                    style={{ fontSize: 13, height: 44, borderRadius: 2, letterSpacing: '0.08em' }}
+                    className="inline-flex items-center justify-center font-condensed font-bold uppercase bg-white text-[var(--black)] hover:bg-[var(--cream)] transition-colors w-full md:w-auto md:px-9"
+                    style={{ fontSize: 13, height: 42, borderRadius: 2, letterSpacing: '0.08em' }}
                   >
                     {slide.cta}
                   </Link>
@@ -125,7 +125,7 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
       {/* Pagination dots */}
       <div
         ref={paginationRef}
-        className="hero-pagination absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10 md:justify-start md:left-12 md:right-auto lg:left-20"
+        className="hero-pagination absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-1.5 md:bottom-8 md:left-12 md:right-auto md:justify-start lg:left-20"
       />
 
       <style>{`
