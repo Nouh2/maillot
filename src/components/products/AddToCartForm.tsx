@@ -31,22 +31,22 @@ const PAYMENT_METHODS = [
 const BUNDLE_OPTIONS = [
   {
     qty: 1,
-    title: '1er maillot',
-    label: 'Ajoute celui-ci',
+    title: 'Solo',
+    benefit: 'Prix standard',
     badge: null,
     icon: BadgePercent,
   },
   {
     qty: 3,
-    title: '3 maillots',
-    label: 'Peuvent etre differents',
+    title: 'Pack 3',
+    benefit: 'Livraison offerte',
     badge: null,
     icon: Truck,
   },
   {
     qty: 4,
-    title: '4e offert',
-    label: 'Le moins cher passe a 0',
+    title: 'Pack 4',
+    benefit: '1 maillot offert',
     badge: 'Meilleur deal',
     icon: Gift,
   },
@@ -239,12 +239,11 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                   </span>
                 ) : null}
 
-                <Icon className="mb-1.5 h-4 w-4 text-[var(--terra)]" />
-                <p className="font-bebas text-[19px] leading-none tracking-wide">{option.title}</p>
-                <p className="mt-0.5 truncate text-[10px] leading-tight text-[var(--grey)]">{option.label}</p>
+                <Icon className="mb-2 h-4 w-4 text-[var(--terra)]" />
+                <p className="font-bebas text-[21px] leading-none tracking-wide">{option.title}</p>
 
-                <p className="mt-2 font-condensed text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--terra)]">
-                  Objectif {option.qty}
+                <p className="mt-2 font-condensed text-[12px] font-bold uppercase leading-tight tracking-[0.08em] text-[var(--terra)]">
+                  {option.benefit}
                 </p>
               </button>
             )
@@ -253,7 +252,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
 
         <div className="mt-1.5 rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] px-3 py-2">
           <div className="mb-1.5 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
-            <span>Pack</span>
+            <span>Offre panier</span>
             <span>
               {Math.min(projectedBundleCount, bundleProgressTarget)}/{bundleProgressTarget}
             </span>
@@ -266,10 +265,10 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           </div>
           <p className="mt-1.5 truncate text-[10px] text-[var(--grey)]">
             {projectedFreeCount > 0
-              ? `Le 4e offert sera applique au panier.`
+              ? `1 maillot offert applique au panier.`
               : selectedBundleTarget === 1
                 ? 'Ajoute ce maillot au panier.'
-                : `Encore ${missingForSelectedBundle} maillot${missingForSelectedBundle > 1 ? 's' : ''} au choix pour completer le pack.`}
+                : `Mix possible: encore ${missingForSelectedBundle} maillot${missingForSelectedBundle > 1 ? 's' : ''} pour activer l'offre.`}
           </p>
         </div>
       </div>
