@@ -1,25 +1,25 @@
 'use client'
 
 import { useEffect, useState, type ReactNode } from 'react'
-import { LAUNCH_PROMO_ENABLED, SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
+import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
 
 const MESSAGES: ReactNode[] = [
   ...(LAUNCH_PROMO_ENABLED
     ? [
         <span key="launch" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-          OFFRE DE LANCEMENT - PRIX PROMO PENDANT 7 JOURS
+          OFFRE COUPE DU MONDE - 4E MAILLOT OFFERT AUTOMATIQUEMENT
         </span>,
       ]
     : [
         <span key="catalog" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-          CATALOGUE PREMIUM - MAILLOTS CLUBS ET SELECTIONS
+          COMPOSE TON PACK - CLUBS, SELECTIONS ET RETRO AU CHOIX
         </span>,
       ]),
   <span key="shipping" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-    {SHIPPING_DELAY_LABEL.toUpperCase()} - SUIVI PAR LIEN UNIQUE
+    DES 3 MAILLOTS - LIVRAISON OFFERTE ET SUIVI INCLUS
   </span>,
   <span key="support" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-    PAIEMENT CARTE VIA STRIPE - SUPPORT CLIENT PAR EMAIL ET TELEGRAM
+    FLOCAGE, PATCHS ET PAIEMENT SECURISE POUR UNE COMMANDE SANS PRISE DE TETE
   </span>,
 ]
 
