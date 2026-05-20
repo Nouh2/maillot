@@ -22,7 +22,7 @@ const WHY_ITEMS = [
 
 const STATS = [
   { value: '+ de 1000', label: 'clients satisfaits' },
-  { value: '4.5 / 5', label: 'note moyenne' },
+  { value: '4.8 / 5', label: 'note moyenne' },
   { value: '+ de 1000', label: 'maillots livrés' },
 ] as const
 

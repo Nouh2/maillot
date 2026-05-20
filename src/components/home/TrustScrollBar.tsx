@@ -2,7 +2,7 @@ import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const ITEMS = [
   '+ de 1000 clients satisfaits',
-  '★ Note 4.5/5 — Excellent',
+  '★ Note 4.8/5 — Excellent',
   'Paiement 100% sécurisé',
   `${SHIPPING_DELAY_LABEL}`,
   '+ de 1000 maillots livrés',
