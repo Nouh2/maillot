@@ -208,7 +208,9 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         <div className="flex items-center justify-between gap-3 px-3 py-2">
           <div className="min-w-0">
             <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Offre coupe du monde</p>
-            <h3 className="mt-0.5 truncate font-bebas text-2xl tracking-wide">3 achetes = 4e offert</h3>
+            <h3 className="mt-0.5 whitespace-nowrap font-bebas text-[22px] leading-none tracking-wide sm:text-2xl">
+              4e maillot offert
+            </h3>
           </div>
           <div className="shrink-0 rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-2.5 py-1 font-condensed text-[10px] uppercase tracking-[0.12em] text-[var(--terra)]">
             Livraison des 3
