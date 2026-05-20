@@ -65,7 +65,7 @@ export function PatchSelector({
 
         <button
           onClick={() => setOpen(true)}
-          className="group flex w-full items-center justify-between border border-[#E0E0E0] bg-white px-4 py-3.5 transition-all hover:border-[var(--black)]"
+          className="group flex w-full items-center justify-between border border-[#E0E0E0] bg-white px-4 py-3 transition-all hover:border-[var(--black)]"
           style={{ borderRadius: 2 }}
         >
           <div className="flex items-center gap-3">

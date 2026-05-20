@@ -150,15 +150,15 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-10">
+    <div className="space-y-4">
+      <div className="space-y-4">
         <SizeSelector available={product.sizes} selected={size} onSelect={setSize} />
         <PatchSelector patches={availablePatches} selected={selectedPatches} onSelect={setSelectedPatches} />
       </div>
 
-      <div className="space-y-6 pt-2">
-        <label className="group flex cursor-pointer items-center gap-3">
-          <div className="relative flex h-6 w-6 items-center justify-center rounded-sm border-2 border-[var(--black)] bg-white transition-colors">
+      <div className="space-y-3">
+        <label className="group flex cursor-pointer items-center gap-2.5">
+          <div className="relative flex h-5 w-5 items-center justify-center rounded-sm border-2 border-[var(--black)] bg-white transition-colors">
             <input
               type="checkbox"
               className="peer sr-only"
@@ -166,13 +166,13 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               onChange={(event) => setHasFlocage(event.target.checked)}
             />
             <div className="absolute inset-0 flex scale-0 items-center justify-center bg-[var(--black)] transition-transform peer-checked:scale-100">
-              <Check className="h-4 w-4 text-white" strokeWidth={3} />
+              <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
             </div>
           </div>
 
           <div>
-            <span className="text-[17px] font-bold text-[var(--black)]">Personnaliser ce maillot</span>
-            <span className="ml-2 text-[15px] text-[var(--grey)]">(+{formatEuro(FLOCAGE_PRICE)})</span>
+            <span className="text-[15px] font-bold text-[var(--black)]">Personnaliser ce maillot</span>
+            <span className="ml-2 text-[13px] text-[var(--grey)]">(+{formatEuro(FLOCAGE_PRICE)})</span>
           </div>
         </label>
 
@@ -204,8 +204,8 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         ) : null}
       </div>
 
-      <div className="rounded-[1.5rem] border border-[var(--cream-3)] bg-white p-2 text-[var(--black)] shadow-[0_18px_40px_rgba(28,23,18,0.1)]">
-        <div className="flex items-center justify-between gap-3 px-3 py-2">
+      <div className="rounded-[1.25rem] border border-[var(--cream-3)] bg-white p-1.5 text-[var(--black)] shadow-[0_14px_32px_rgba(28,23,18,0.1)]">
+        <div className="flex items-center justify-between gap-3 px-2.5 py-1.5">
           <div className="min-w-0">
             <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Offre coupe du monde</p>
             <h3 className="mt-0.5 whitespace-nowrap font-bebas text-[22px] leading-none tracking-wide sm:text-2xl">
@@ -229,7 +229,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                 aria-pressed={selected}
                 onClick={() => setSelectedBundleTarget(option.qty)}
                 className={cn(
-                  'relative min-h-[88px] overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all',
+                  'relative min-h-[78px] overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all',
                   selected
                     ? 'border-[var(--terra)] bg-[var(--terra-lt)] text-[var(--black)] shadow-[0_0_0_2px_rgba(193,68,14,0.14)]'
                     : 'border-[var(--cream-3)] bg-[var(--cream)] text-[var(--black)] hover:border-[var(--terra)]/35 hover:bg-[var(--terra-lt)]',
@@ -241,10 +241,10 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
                   </span>
                 ) : null}
 
-                <Icon className="mb-2 h-4 w-4 text-[var(--terra)]" />
-                <p className="font-bebas text-[21px] leading-none tracking-wide">{option.title}</p>
+                <Icon className="mb-1.5 h-4 w-4 text-[var(--terra)]" />
+                <p className="font-bebas text-[20px] leading-none tracking-wide">{option.title}</p>
 
-                <p className="mt-2 font-condensed text-[12px] font-bold uppercase leading-tight tracking-[0.08em] text-[var(--terra)]">
+                <p className="mt-1.5 font-condensed text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-[var(--terra)]">
                   {option.benefit}
                 </p>
               </button>
@@ -252,8 +252,8 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           })}
         </div>
 
-        <div className="mt-1.5 rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] px-3 py-2">
-          <div className="mb-1.5 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
+        <div className="mt-1 rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] px-3 py-1.5">
+          <div className="mb-1 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
             <span>Offre panier</span>
             <span>
               {Math.min(projectedBundleCount, bundleProgressTarget)}/{bundleProgressTarget}
@@ -265,7 +265,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               style={{ width: `${Math.min(100, (projectedBundleCount / bundleProgressTarget) * 100)}%` }}
             />
           </div>
-          <p className="mt-1.5 truncate text-[10px] text-[var(--grey)]">
+          <p className="mt-1 truncate text-[10px] text-[var(--grey)]">
             {projectedFreeCount > 0
               ? `1 maillot offert applique au panier.`
               : selectedBundleTarget === 1
@@ -275,22 +275,22 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         </div>
       </div>
 
-      <div className="border-t border-[var(--cream-3)] pt-4">
+      <div className="border-t border-[var(--cream-3)] pt-3">
         {error ? <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p> : null}
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center">
-            <div className="flex h-[56px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
+            <div className="flex h-[52px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
-                className="flex h-10 w-10 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
+                className="flex h-9 w-9 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
               >
                 <Minus size={18} />
               </button>
               <span className="w-8 text-center font-bebas text-xl text-[var(--black)]">{qty}</span>
               <button
                 onClick={() => setQty(qty + 1)}
-                className="flex h-10 w-10 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
+                className="flex h-9 w-9 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
               >
                 <Plus size={18} />
               </button>
@@ -298,7 +298,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
 
             <button
               onClick={handleAdd}
-              className="ml-4 flex h-[56px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] text-[16px] font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98]"
+              className="ml-3 flex h-[52px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] text-[15px] font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98]"
             >
               Ajouter au panier - {formatEuro(bundlePreview.total)}
             </button>

@@ -22,13 +22,13 @@ export function ProductTrustBadges() {
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
       {badges.map((badge, index) => (
         <div
           key={index}
-          className="flex aspect-square flex-col items-center justify-center rounded-xl border border-[#E5E5E5] bg-white p-3 text-center transition-colors hover:border-[var(--black)] sm:h-28 sm:aspect-auto sm:p-4"
+          className="flex h-20 flex-col items-center justify-center rounded-xl border border-[#E5E5E5] bg-white p-2 text-center transition-colors hover:border-[var(--black)] sm:h-24 sm:p-3"
         >
-          <div className="mb-2 text-[var(--black)] sm:mb-3">{badge.icon}</div>
+          <div className="mb-1.5 text-[var(--black)] sm:mb-2">{badge.icon}</div>
           <div className="flex flex-col leading-tight">
             <span className="font-bebas text-[14px] uppercase tracking-wide text-[var(--black)] sm:text-[15px]">
               {badge.text}

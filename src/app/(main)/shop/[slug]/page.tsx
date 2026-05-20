@@ -97,10 +97,10 @@ export default async function ProductPage({ params }: Props) {
         promoLabel={pricing.promoLabel}
       />
 
-      <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 md:pt-16">
-        <div className="grid gap-2 md:grid-cols-2 md:gap-16">
+      <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 md:pt-12">
+        <div className="grid gap-1 md:grid-cols-2 md:gap-12">
           <div className="min-w-0">
-            <nav className="mb-4 flex items-center gap-2 font-condensed text-[10px] uppercase tracking-wider text-[var(--grey)] sm:text-xs">
+            <nav className="mb-2 flex items-center gap-2 font-condensed text-[10px] uppercase tracking-wider text-[var(--grey)] sm:text-xs">
               <Link href="/" className="transition-colors hover:text-[var(--black)]">
                 Maison
               </Link>
@@ -112,19 +112,19 @@ export default async function ProductPage({ params }: Props) {
 
             <PhotoGallery photos={product.photos} name={normalizeProductTextSeasons(product.name)} />
 
-            <div className="mt-6 flex justify-center md:justify-start">
+            <div className="mt-3 flex justify-center md:justify-start">
               <TrustBadge />
             </div>
           </div>
 
           <div className="min-w-0">
-            <div className="mb-3">
+            <div className="mb-2">
               <ProductFamilyBadge product={product} />
             </div>
-            <h1 className="mb-2 font-bebas text-4xl leading-tight text-[var(--black)] md:text-5xl">
+            <h1 className="mb-1 font-bebas text-[34px] leading-[0.95] text-[var(--black)] md:text-5xl">
               {normalizeProductTextSeasons(product.name)}
             </h1>
-            <p className="mb-4 font-condensed text-sm uppercase tracking-widest text-[var(--grey)]">
+            <p className="mb-2 font-condensed text-xs uppercase tracking-widest text-[var(--grey)] md:text-sm">
               {product.club} · {getProductMetaLine(product)}
             </p>
 
@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: Props) {
               originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined}
               promoLabel={pricing.promoLabel ?? undefined}
               size="lg"
-              className="mb-8"
+              className="mb-4"
             />
 
             {product.description
@@ -150,13 +150,13 @@ export default async function ProductPage({ params }: Props) {
 
                   if (!cleanDescription) return null
 
-                  return <p className="mb-8 text-base leading-relaxed text-[var(--grey)]">{cleanDescription}</p>
+                  return <p className="mb-4 text-sm leading-relaxed text-[var(--grey)] md:text-base">{cleanDescription}</p>
                 })()
               : null}
 
             <div id="product-cta-sentinel" />
 
-            <div className="mb-8">
+            <div className="mb-4">
               <ProductTrustBadges />
             </div>
 

@@ -14,8 +14,8 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
   const goToNext = () => setActive((current) => (current === photos.length - 1 ? 0 : current + 1))
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-[var(--cream-3)] bg-[var(--cream-2)] shadow-xs sm:aspect-[4/5]">
+    <div className="flex flex-col gap-3 sm:gap-5">
+      <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-[var(--cream-3)] bg-[var(--cream-2)] shadow-xs sm:aspect-[4/5] sm:rounded-3xl">
         <button
           type="button"
           onClick={goToNext}
@@ -64,14 +64,14 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
         ) : null}
       </div>
 
-      <div className="scrollbar-hide flex max-w-full gap-3 overflow-x-auto px-1 pb-2">
+      <div className="scrollbar-hide flex max-w-full gap-2.5 overflow-x-auto px-1 pb-1">
         {photos.map((photo, index) => (
           <button
             key={`${photo}-${index}`}
             type="button"
             onClick={() => setActive(index)}
             aria-label={`Photo ${index + 1} de ${name}`}
-            className={`group relative aspect-[4/5] w-16 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all sm:w-20 ${
+            className={`group relative aspect-[4/5] w-14 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all sm:w-20 ${
               active === index 
                 ? 'border-[var(--black)] ring-1 ring-[var(--black)]' 
                 : 'border-transparent opacity-80 hover:opacity-100'

@@ -35,7 +35,7 @@ export function SizeSelector({
 
   return (
     <>
-      <div className="space-y-4" ref={containerRef}>
+      <div className="space-y-2.5" ref={containerRef}>
         <div className="flex items-center justify-between px-1">
           <p className="text-[17px] font-bold text-[var(--black)]">
             Taille: <span className="text-[var(--grey)] font-normal">{selected || 'Sélectionner'}</span>
@@ -54,7 +54,7 @@ export function SizeSelector({
             type="button"
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
-              "w-full flex items-center justify-between bg-white border-2 border-[var(--cream-3)] rounded-2xl px-6 py-4.5 text-[16px] font-bold text-[var(--black)] cursor-pointer transition-all hover:border-[var(--black)] shadow-sm text-left",
+              "w-full flex items-center justify-between bg-white border-2 border-[var(--cream-3)] rounded-2xl px-5 py-3.5 text-[16px] font-bold text-[var(--black)] cursor-pointer transition-all hover:border-[var(--black)] shadow-sm text-left",
               isOpen && "border-[var(--black)] ring-4 ring-[var(--black)]/5"
             )}
           >
