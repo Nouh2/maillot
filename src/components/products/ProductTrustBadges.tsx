@@ -1,23 +1,23 @@
 'use client'
 
-import { CircleDollarSign, Package, Truck } from 'lucide-react'
+import { BadgeCheck, Gift, Type } from 'lucide-react'
 
 export function ProductTrustBadges() {
   const badges = [
     {
-      icon: <Package className="h-4 w-4 sm:h-5 sm:w-5" />,
-      text: 'Référence',
-      subtext: 'commande',
+      icon: <Gift className="h-4 w-4 sm:h-5 sm:w-5" />,
+      text: '4e maillot',
+      subtext: 'offert',
     },
     {
-      icon: <CircleDollarSign className="h-4 w-4 sm:h-5 sm:w-5" />,
-      text: 'Paiement',
-      subtext: 'sécurisé',
+      icon: <Type className="h-4 w-4 sm:h-5 sm:w-5" />,
+      text: 'Flocage',
+      subtext: 'nom + numéro',
     },
     {
-      icon: <Truck className="h-4 w-4 sm:h-5 sm:w-5" />,
-      text: 'Suivi',
-      subtext: 'expédition',
+      icon: <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5" />,
+      text: 'Patchs',
+      subtext: 'officiels',
     },
   ]
 
@@ -30,10 +30,10 @@ export function ProductTrustBadges() {
         >
           <div className="mb-1 shrink-0 text-[var(--black)] sm:mb-2">{badge.icon}</div>
           <div className="flex max-w-full min-w-0 flex-col leading-[0.95]">
-            <span className="max-w-full whitespace-normal break-words font-bebas text-[13px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
+            <span className="max-w-full whitespace-normal break-words font-bebas text-[12px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
               {badge.text}
             </span>
-            <span className="max-w-full whitespace-normal break-words font-bebas text-[13px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
+            <span className="max-w-full whitespace-normal break-words font-bebas text-[12px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
               {badge.subtext}
             </span>
           </div>
