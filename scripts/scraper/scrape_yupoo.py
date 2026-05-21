@@ -273,7 +273,7 @@ def parse_product(title: str, category: dict) -> dict | None:
         description += " retro"
     if season != "A definir":
         description += f" saison {season}"
-    description += ". Produit importe automatiquement depuis le catalogue fournisseur et heberge sur KITLAB."
+    description += f". Sélectionné pour son style et ses détails soignés, parfait pour porter les couleurs de {club} les jours de match, au quotidien ou dans une collection de passionné."
     return {
         "name": " ".join(part for part in name_parts if part).strip(),
         "club": club,

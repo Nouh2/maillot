@@ -44,6 +44,34 @@ function getRelatedProducts(product: Product, catalog: Product[]): Product[] {
     .slice(0, 4)
 }
 
+const IMPORTED_PRODUCT_DESCRIPTION_PATTERN =
+  /\s*Produit import[eé] automatiquement depuis le catalogue fournisseur et h[eé]berg[eé] sur (?:KITLAB|MAILLOT ADDICT)\.?/i
+
+function getProductSalesSentence(product: Product): string {
+  const club = product.club?.trim()
+  const colors = club ? `les couleurs de ${club}` : 'tes couleurs'
+  return `Sélectionné pour son style et ses détails soignés, parfait pour porter ${colors} les jours de match, au quotidien ou dans une collection de passionné.`
+}
+
+function getProductDisplayDescription(product: Product): string | null {
+  if (!product.description) return null
+
+  const cleanDescription = product.description
+    .split('|')
+    .map((part) => part.trim())
+    .filter((part) => {
+      const lowered = part.toLowerCase()
+      return !lowered.includes('yupoo') && !lowered.startsWith('ref catalogue:')
+    })
+    .join(' | ')
+    .replace(IMPORTED_PRODUCT_DESCRIPTION_PATTERN, ` ${getProductSalesSentence(product)}`)
+    .replace(/kitlab/gi, 'MAILLOT ADDICT')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return cleanDescription || null
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug)
@@ -87,6 +115,7 @@ export default async function ProductPage({ params }: Props) {
     jerseyVersion: product.jersey_version,
   })
   const relatedProducts = getRelatedProducts(product, catalog)
+  const productDescription = getProductDisplayDescription(product)
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--cream)] md:pb-0">
@@ -136,23 +165,9 @@ export default async function ProductPage({ params }: Props) {
               className="mb-4"
             />
 
-            {product.description
-              ? (() => {
-                  const cleanDescription = product.description
-                    .split('|')
-                    .map((part) => part.trim())
-                    .filter((part) => {
-                      const lowered = part.toLowerCase()
-                      return !lowered.includes('yupoo') && !lowered.startsWith('ref catalogue:')
-                    })
-                    .join(' | ')
-                    .replace(/kitlab/gi, 'MAILLOT ADDICT')
-
-                  if (!cleanDescription) return null
-
-                  return <p className="mb-4 text-sm leading-relaxed text-[var(--grey)] md:text-base">{cleanDescription}</p>
-                })()
-              : null}
+            {productDescription ? (
+              <p className="mb-4 text-sm leading-relaxed text-[var(--grey)] md:text-base">{productDescription}</p>
+            ) : null}
 
             <div id="product-cta-sentinel" />
 
