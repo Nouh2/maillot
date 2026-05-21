@@ -5,35 +5,35 @@ import { CircleDollarSign, Package, Truck } from 'lucide-react'
 export function ProductTrustBadges() {
   const badges = [
     {
-      icon: <Package className="h-5 w-5" />,
-      text: 'Reference',
-      subtext: 'de commande',
+      icon: <Package className="h-4 w-4 sm:h-5 sm:w-5" />,
+      text: 'Référence',
+      subtext: 'commande',
     },
     {
-      icon: <CircleDollarSign className="h-5 w-5" />,
+      icon: <CircleDollarSign className="h-4 w-4 sm:h-5 sm:w-5" />,
       text: 'Paiement',
-      subtext: 'securise',
+      subtext: 'sécurisé',
     },
     {
-      icon: <Truck className="h-5 w-5" />,
+      icon: <Truck className="h-4 w-4 sm:h-5 sm:w-5" />,
       text: 'Suivi',
-      subtext: 'expedition',
+      subtext: 'expédition',
     },
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+    <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2">
       {badges.map((badge, index) => (
         <div
           key={index}
-          className="flex h-20 flex-col items-center justify-center rounded-xl border border-[#E5E5E5] bg-white p-2 text-center transition-colors hover:border-[var(--black)] sm:h-24 sm:p-3"
+          className="flex min-h-[78px] min-w-0 flex-col items-center justify-center overflow-hidden rounded-lg border border-[#E5E5E5] bg-white px-1.5 py-2 text-center transition-colors hover:border-[var(--black)] sm:min-h-[92px] sm:px-3 sm:py-3"
         >
-          <div className="mb-1.5 text-[var(--black)] sm:mb-2">{badge.icon}</div>
-          <div className="flex flex-col leading-tight">
-            <span className="font-bebas text-[14px] uppercase tracking-wide text-[var(--black)] sm:text-[15px]">
+          <div className="mb-1 shrink-0 text-[var(--black)] sm:mb-2">{badge.icon}</div>
+          <div className="flex max-w-full min-w-0 flex-col leading-[0.95]">
+            <span className="max-w-full whitespace-normal break-words font-bebas text-[13px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
               {badge.text}
             </span>
-            <span className="font-bebas text-[14px] uppercase tracking-wide text-[var(--black)] sm:text-[15px]">
+            <span className="max-w-full whitespace-normal break-words font-bebas text-[13px] uppercase tracking-normal text-[var(--black)] sm:text-[15px] sm:tracking-wide">
               {badge.subtext}
             </span>
           </div>
