@@ -28,7 +28,7 @@ interface ShopCatalogClientProps {
 function EmptyCatalogState() {
   return (
     <div className="py-20 text-center">
-      <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouve</p>
+      <p className="font-bebas text-4xl text-[var(--cream-3)]">Aucun maillot trouvé</p>
     </div>
   )
 }

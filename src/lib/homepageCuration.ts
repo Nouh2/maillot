@@ -196,7 +196,7 @@ export async function replaceHomepageCurationAssignments(
   const deleteQuery = await service().from('homepage_curation_slots').delete().neq('section', '')
   if (deleteQuery.error) {
     if (isMissingHomepageCurationTable(deleteQuery.error)) {
-      throw new Error('La migration Supabase 20260411121500_homepage_curation_slots.sql doit etre appliquee avant la sauvegarde home')
+      throw new Error('La migration Supabase 20260411121500_homepage_curation_slots.sql doit être appliquée avant la sauvegarde home')
     }
     throw deleteQuery.error
   }
@@ -215,7 +215,7 @@ export async function replaceHomepageCurationAssignments(
 
   if (insertQuery.error) {
     if (isMissingHomepageCurationTable(insertQuery.error)) {
-      throw new Error('La migration Supabase 20260411121500_homepage_curation_slots.sql doit etre appliquee avant la sauvegarde home')
+      throw new Error('La migration Supabase 20260411121500_homepage_curation_slots.sql doit être appliquée avant la sauvegarde home')
     }
     throw insertQuery.error
   }
@@ -380,7 +380,7 @@ export function buildHomepageCurationEditorSections(
     ...source.homeLeagueProducts.map((group) => ({
       key: group.key,
       label: group.label,
-      description: `Selection manuelle pour l onglet ${group.label}.`,
+      description: `Sélection manuelle pour l’onglet ${group.label}.`,
       href: group.href,
       slot_labels: [...TOP_MOMENT_SLOT_LABELS],
       assignments: Array.from({ length: TOP_MOMENT_SLOT_LABELS.length }, (_, index) => assignmentsByTopMomentGroup.get(group.key)?.[index] ?? null),
@@ -402,7 +402,7 @@ export function buildHomepageCurationEditorSections(
     return {
       key,
       label: country,
-      description: `Ordre manuel des maillots affiches pour ${country}.`,
+      description: `Ordre manuel des maillots affichés pour ${country}.`,
       href: `/coupe-du-monde?club=${encodeURIComponent(country)}`,
       slot_labels: [...FAST_MOVER_SLOT_LABELS],
       assignments: Array.from({ length: FAST_MOVER_SLOT_LABELS.length }, (_, index) => assignmentsByFastMoversGroup.get(key)?.[index] ?? null),
@@ -415,13 +415,13 @@ export function buildHomepageCurationEditorSections(
     {
       id: 'top_moment',
       label: 'Top du moment',
-      description: 'Controle la grande carte et les cartes produits par onglet.',
+      description: 'Contrôle la grande carte et les cartes produits par onglet.',
       groups: topMomentGroups,
     },
     {
       id: 'fast_movers',
       label: 'Maillots qui partent vite',
-      description: 'Controle l ordre des cartes par pays pour le bloc Coupe du Monde 2026.',
+      description: 'Contrôle l’ordre des cartes par pays pour le bloc Coupe du Monde 2026.',
       groups: fastMoverGroups,
     },
   ]

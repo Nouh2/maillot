@@ -5,7 +5,7 @@ import { getLeagues, getRetroProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Maillots Retro',
-  description: 'Collection de maillots de football retro et vintage.',
+  description: 'Collection de maillots de football rétro et vintage.',
 }
 export const revalidate = 21600
 

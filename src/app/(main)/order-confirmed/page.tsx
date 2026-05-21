@@ -4,7 +4,7 @@ import { getStripe } from '@/lib/stripe'
 import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 import { OrderConfirmedClient } from './OrderConfirmedClient'
 
-export const metadata = { title: 'Commande confirmee' }
+export const metadata = { title: 'Commande confirmée' }
 
 interface OrderConfirmedPageProps {
   searchParams: Promise<{ session_id?: string }>
@@ -48,7 +48,7 @@ export default async function OrderConfirmedPage({ searchParams }: OrderConfirme
         <div className="mb-6 text-7xl">OK</div>
         <h1 className="mb-4 font-bebas text-5xl text-[var(--black)] md:text-6xl">COMMANDE CONFIRMEE</h1>
         <p className="mb-2 leading-relaxed text-[var(--grey)]">
-          Merci pour votre commande. Un email de confirmation vient d&apos;etre envoye si l&apos;adresse de paiement est valide.
+          Merci pour votre commande. Un email de confirmation vient d’être envoyé si l’adresse de paiement est valide.
         </p>
         <p className="mb-8 text-sm text-[var(--grey)]">
           {SHIPPING_DELAY_LABEL} · Suivi par lien unique et espace compte
@@ -70,7 +70,7 @@ export default async function OrderConfirmedPage({ searchParams }: OrderConfirme
                 href="/compte"
                 className="inline-flex items-center justify-center rounded-full border border-[var(--cream-3)] px-5 py-3 text-center font-condensed text-sm uppercase tracking-[0.18em] text-[var(--black)] transition-colors hover:border-[var(--black)]"
               >
-                Creer ou ouvrir mon compte
+                Créer ou ouvrir mon compte
               </Link>
             </div>
           </div>

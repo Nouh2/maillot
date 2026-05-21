@@ -139,7 +139,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
               Maillots concept
             </Link>
             <Link href={NATIONAL_TEAMS_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
-              Selections nationales
+              Sélections nationales
             </Link>
             <Link href={REST_OF_WORLD_HREF} className="font-condensed text-sm uppercase tracking-widest text-[var(--black)] transition-colors hover:text-[var(--terra)]">
               Reste du monde
@@ -214,7 +214,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
             <div className="mt-12">
               {normalizedSearchQuery ? (
                 <div className="rounded-[2rem] border border-[var(--cream-3)] bg-[var(--cream)]/70 p-4 md:p-6">
-                  <p className="mb-4 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions clubs et selections</p>
+                  <p className="mb-4 font-condensed text-sm font-bold uppercase tracking-widest text-[#707072]">Suggestions clubs et sélections</p>
                   {liveSuggestions.length > 0 ? (
                     <div className="grid gap-2">
                       {liveSuggestions.map((suggestion) => (
@@ -230,7 +230,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#707072]">Aucun club ou selection ne commence par cette saisie.</p>
+                    <p className="text-sm text-[#707072]">Aucun club ou sélection ne commence par cette saisie.</p>
                   )}
                 </div>
               ) : (
@@ -297,7 +297,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
               </Link>
               <Link href={NATIONAL_TEAMS_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
-                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Selections</span>
+                <span className="text-[28px] font-black uppercase tracking-tight text-[var(--black)]">Sélections</span>
                 <ChevronRight className="h-6 w-6 text-[var(--black)]" />
               </Link>
               <Link href={REST_OF_WORLD_HREF} onClick={closeMobileMenu} className="flex items-center justify-between py-2">
@@ -316,7 +316,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
 
             <div className="mb-10 flex flex-col gap-8 border-t border-[var(--cream-3)] pt-10">
               <p className="text-[16px] leading-relaxed text-[#707072]">
-                Deviens membre <span className="font-bold text-[var(--black)]">MAILLOT ADDICT</span> pour acceder au meilleur des produits et profiter d&apos;offres exclusives. <span className="cursor-pointer font-bold text-[var(--black)] underline">En savoir plus</span>
+                Deviens membre <span className="font-bold text-[var(--black)]">MAILLOT ADDICT</span> pour accéder au meilleur des produits et profiter d’offres exclusives. <span className="cursor-pointer font-bold text-[var(--black)] underline">En savoir plus</span>
               </p>
               <div className="flex gap-3">
                 <Link
@@ -331,7 +331,7 @@ export function NavbarClient({ leagues, searchSuggestions }: NavbarClientProps) 
                   onClick={closeMobileMenu}
                   className="min-w-[120px] rounded-full border border-[#E5E5E5] bg-white px-6 py-2 text-center text-[15px] font-bold text-[var(--black)] transition-colors hover:border-[var(--black)]"
                 >
-                  S&apos;identifier
+                  S’identifier
                 </Link>
               </div>
             </div>

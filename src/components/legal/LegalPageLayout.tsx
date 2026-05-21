@@ -22,7 +22,7 @@ export function LegalPageLayout({ title, intro, currentPath, children }: LegalPa
       <div className="bg-[var(--black-2)]">
         <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6 md:py-16">
           <p className="mb-3 font-condensed text-xs uppercase tracking-[0.32em] text-[var(--terra-mid)]">
-            Informations legales
+            Informations légales
           </p>
           <h1 className="font-bebas text-5xl text-white md:text-6xl">{title}</h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--grey-lt)] md:text-base">

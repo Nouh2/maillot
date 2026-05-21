@@ -236,11 +236,11 @@ export function OpsHomepageCurationClient({
         <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Landing page admin</p>
         <h1 className="mt-2 font-bebas text-4xl text-[var(--black)]">Curation home</h1>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--grey)]">
-          Choisis manuellement les maillots affiches dans <span className="font-semibold text-[var(--black)]">Le top du moment</span> et <span className="font-semibold text-[var(--black)]">Les maillots qui partent vite</span>. Tant que tu ne sauvegardes pas, rien ne change sur le site.
+          Choisis manuellement les maillots affichés dans <span className="font-semibold text-[var(--black)]">Le top du moment</span> et <span className="font-semibold text-[var(--black)]">Les maillots qui partent vite</span>. Tant que tu ne sauvegardes pas, rien ne change sur le site.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <StatusPill active label={`${productOptions.length} produits disponibles`} />
-          <StatusPill active={isDirty} label={isDirty ? 'Brouillon en cours' : 'Brouillon a jour'} />
+          <StatusPill active={isDirty} label={isDirty ? 'Brouillon en cours' : 'Brouillon à jour'} />
         </div>
         {message ? <p className="mt-4 text-sm text-[var(--terra)]">{message}</p> : null}
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
@@ -330,7 +330,7 @@ export function OpsHomepageCurationClient({
                         <div>
                           <p className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">{label}</p>
                           <p className="mt-1 text-sm text-[var(--black)]">
-                            {slotProduct ? slotProduct.name : 'Aucun maillot affiche'}
+                            {slotProduct ? slotProduct.name : 'Aucun maillot affiché'}
                           </p>
                         </div>
                         <span className="rounded-full bg-white px-3 py-1 text-[11px] font-condensed uppercase tracking-[0.16em] text-[var(--black)]">
@@ -373,7 +373,7 @@ export function OpsHomepageCurationClient({
                             </>
                           ) : (
                             <p className="text-sm text-[var(--grey)]">
-                              Aucun maillot n est actuellement affiche pour ce slot.
+                              Aucun maillot n’est actuellement affiché pour ce slot.
                             </p>
                           )}
                         </div>
@@ -387,7 +387,7 @@ export function OpsHomepageCurationClient({
                             isActiveSlot ? 'bg-[var(--black)] text-white' : 'border border-[var(--cream-3)] text-[var(--black)]'
                           }`}
                         >
-                          {isActiveSlot ? 'Slot cible' : 'Selectionner ce slot'}
+                          {isActiveSlot ? 'Slot cible' : 'Sélectionner ce slot'}
                         </button>
                         {isManualSlot ? (
                           <button
@@ -418,7 +418,7 @@ export function OpsHomepageCurationClient({
               <div>
                 <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Librairie produits</p>
                 <p className="mt-1 text-sm text-[var(--grey)]">
-                  {activeGroup ? `Selection pour ${activeGroup.label}` : 'Choisis un onglet'}
+                  {activeGroup ? `Sélection pour ${activeGroup.label}` : 'Choisis un onglet'}
                 </p>
               </div>
               <button
@@ -426,7 +426,7 @@ export function OpsHomepageCurationClient({
                 onClick={() => setShowAllProducts((current) => !current)}
                 className="rounded-full border border-[var(--cream-3)] px-4 py-2 text-xs font-condensed uppercase tracking-[0.16em] text-[var(--black)]"
               >
-                {showAllProducts ? 'Vue ciblee' : 'Tout le catalogue'}
+                {showAllProducts ? 'Vue ciblée' : 'Tout le catalogue'}
               </button>
             </div>
 
@@ -486,7 +486,7 @@ export function OpsHomepageCurationClient({
 
               {filteredProducts.length === 0 ? (
                 <div className="rounded-[1.5rem] border border-[var(--cream-3)] bg-[var(--cream)] p-5 text-sm text-[var(--grey)]">
-                  Aucun produit ne correspond a cette recherche.
+                  Aucun produit ne correspond à cette recherche.
                 </div>
               ) : null}
             </div>

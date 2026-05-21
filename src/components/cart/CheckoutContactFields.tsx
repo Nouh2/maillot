@@ -26,7 +26,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
         className={`mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 ${compact ? 'py-2.5' : 'py-3'} text-sm text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]`}
       />
       <p className="mt-2 text-xs leading-relaxed text-[var(--grey)]">
-        Cet email sert a confirmer la commande, envoyer le lien de suivi et rattacher la commande a ton compte.
+        Cet email sert à confirmer la commande, envoyer le lien de suivi et rattacher la commande à ton compte.
       </p>
 
       <label className={`${compact ? 'mt-3' : 'mt-4'} flex items-start gap-3 text-xs leading-relaxed text-[var(--grey)]`}>
@@ -36,7 +36,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
           onChange={(event) => setMarketingOptIn(event.target.checked)}
           className="mt-0.5 h-4 w-4 rounded border-[var(--cream-3)] text-[var(--terra)] focus:ring-[var(--terra)]"
         />
-        <span>J&apos;accepte de recevoir les emails de lancement, de relance panier et les offres Maillot Addict.</span>
+        <span>J’accepte de recevoir les emails de lancement, de relance panier et les offres Maillot Addict.</span>
       </label>
     </div>
   )

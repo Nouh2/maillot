@@ -31,7 +31,7 @@ export default async function TrackingTokenPage({ params }: { params: Promise<{ 
       <div className="bg-[var(--black-2)] py-12 text-center">
         <p className="mb-2 font-condensed text-xs tracking-[4px] uppercase text-[var(--terra)]">Suivi public</p>
         <h1 className="font-bebas text-6xl text-white md:text-7xl">{getOrderDisplayReference(order)}</h1>
-        <p className="mt-2 text-[var(--grey-lt)]">Derniere mise a jour de votre commande</p>
+        <p className="mt-2 text-[var(--grey-lt)]">Dernière mise à jour de votre commande</p>
       </div>
 
       <div className="mx-auto max-w-4xl space-y-6 px-4 py-10 sm:px-6">
@@ -96,9 +96,9 @@ export default async function TrackingTokenPage({ params }: { params: Promise<{ 
         </section>
 
         <section className="rounded-[2rem] border border-[var(--cream-3)] bg-white p-6 md:p-8">
-          <h2 className="font-bebas text-4xl text-[var(--black)]">Besoin d&apos;aide ?</h2>
+          <h2 className="font-bebas text-4xl text-[var(--black)]">Besoin d’aide ?</h2>
           <p className="mt-4 text-sm leading-relaxed text-[var(--grey)]">
-            Si tu as une question sur cette commande, utilise la page contact et indique la reference {getOrderDisplayReference(order)}.
+            Si tu as une question sur cette commande, utilise la page contact et indique la référence {getOrderDisplayReference(order)}.
           </p>
           <div className="mt-6">
             <Link

@@ -12,13 +12,13 @@ export const PRODUCT_FAMILY_LABELS: Record<ProductFamily, string> = {
   fan: 'Maillot fan',
   player: 'Maillot player',
   concept: 'Maillot concept',
-  retro: 'Maillot retro',
+  retro: 'Maillot rétro',
   other: 'Produit',
 }
 
 export const PRODUCT_TYPE_LABELS: Record<Product['type'], string> = {
   domicile: 'Domicile',
-  exterieur: 'Exterieur',
+  exterieur: 'Extérieur',
   third: 'Third',
 }
 
@@ -32,7 +32,7 @@ export const PRODUCT_KIND_LABELS: Record<Product['product_kind'], string> = {
   pants: 'Pantalon',
   shorts: 'Short',
   set: 'Ensemble',
-  vest: 'Debardeur',
+  vest: 'Débardeur',
 }
 
 export function getProductTypeLabel(type: Product['type']): string {

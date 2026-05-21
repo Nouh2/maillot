@@ -9,7 +9,7 @@ export const CONCEPT_HREF = '/concept'
 export const NATIONAL_TEAMS_OPTION: League = {
   id: 'national-teams',
   slug: NATIONAL_TEAMS_SLUG,
-  name: 'Selections nationales',
+  name: 'Sélections nationales',
   country: 'International',
   flag_emoji: 'INT',
   display_order: 0,

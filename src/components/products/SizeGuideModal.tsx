@@ -41,7 +41,7 @@ export function SizeGuideModal({
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar">
           <p className="font-condensed text-sm md:text-base leading-relaxed text-[var(--grey)]">
-            Les mesures sont en centimetres (cm) et representent le maillot pose a plat. Nous vous conseillons de prendre votre taille habituelle pour une coupe standard.
+            Les mesures sont en centimètres (cm) et représentent le maillot posé à plat. Nous vous conseillons de prendre votre taille habituelle pour une coupe standard.
           </p>
 
           <div className="overflow-x-auto border border-[var(--cream-3)] rounded-sm">
@@ -75,7 +75,7 @@ export function SizeGuideModal({
           <div className="border border-[var(--cream-3)] bg-[var(--cream-2)] p-4">
             <h3 className="mb-2 font-condensed text-xs md:text-sm font-bold uppercase text-[var(--black)]">Conseil coupe :</h3>
             <p className="font-condensed text-xs md:text-sm text-[var(--grey)]">
-              La version &quot;Classique / Supporter&quot; taille normalement. La version &quot;Pro / Joueur&quot; a une coupe tres cintree pres du corps. Si vous optez pour la version Pro, prevoyez une taille au-dessus pour etre a l&apos;aise.
+              La version &quot;Classique / Supporter&quot; taille normalement. La version &quot;Pro / Joueur&quot; a une coupe très cintrée près du corps. Si vous optez pour la version Pro, prévoyez une taille au-dessus pour être à l’aise.
             </p>
           </div>
         </div>

@@ -12,18 +12,18 @@ export default function LivraisonPage() {
     <LegalPageLayout
       currentPath="/legal/livraison"
       title="Livraison"
-      intro="Cette page resume les conditions de livraison actuellement appliquees sur Maillot Addict: delais indicatifs, frais de port et suivi des commandes."
+      intro="Cette page résume les conditions de livraison actuellement appliquées sur Maillot Addict: délais indicatifs, frais de port et suivi des commandes."
     >
       <LegalSection title="Delais indicatifs">
-        <p>Les commandes sont generalement livrees dans un delai estime de 7 a 12 jours ouvres apres traitement.</p>
-        <p>Ces delais restent indicatifs et peuvent varier selon la periode, la destination ou le transporteur.</p>
+        <p>Les commandes sont généralement livrées dans un délai estimé de 7 à 12 jours ouvrés après traitement.</p>
+        <p>Ces délais restent indicatifs et peuvent varier selon la période, la destination ou le transporteur.</p>
       </LegalSection>
 
       <LegalSection title="Frais de livraison">
-        <p>Les frais de livraison sont calcules sur le montant du panier apres application des offres automatiques:</p>
+        <p>Les frais de livraison sont calcules sur le montant du panier après application des offres automatiques:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>Livraison standard: {STANDARD_SHIPPING_LABEL}</li>
-          <li>Livraison offerte des {FREE_SHIPPING_MIN_ITEMS} maillots commandes ou des {FREE_SHIPPING_LABEL} d&apos;achats</li>
+          <li>Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés ou dès {FREE_SHIPPING_LABEL} d’achats</li>
         </ul>
       </LegalSection>
 
@@ -39,14 +39,14 @@ export default function LivraisonPage() {
 
       <LegalSection title="Adresse de livraison">
         <p>
-          Le client doit verifier l&apos;exactitude des informations de livraison avant validation de la commande. Toute erreur d&apos;adresse peut
+          Le client doit vérifier l’exactitude des informations de livraison avant validation de la commande. Toute erreur d’adresse peut
           entrainer un retard ou empecher la bonne reception du colis.
         </p>
       </LegalSection>
 
       <LegalSection title="Incident de livraison">
         <p>
-          En cas de retard important, de colis non recu ou de produit arrive endommage, le client est invite a contacter rapidement le
+          En cas de retard important, de colis non reçu ou de produit arrivé endommagé, le client est invité à contacter rapidement le
           service client via la{' '}
           <Link href="/contact" className="font-semibold text-[var(--terra)] underline underline-offset-4">
             page contact

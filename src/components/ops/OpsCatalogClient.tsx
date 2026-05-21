@@ -292,12 +292,12 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
         <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Catalogue admin</p>
         <h1 className="mt-2 font-bebas text-4xl text-[var(--black)]">Produits</h1>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--grey)]">
-          Modifie les titres, la saison, la ligue, les tags retro ou concept, l activation et l ordre des images.
+          Modifie les titres, la saison, la ligue, les tags rétro ou concept, l’activation et l’ordre des images.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <StatPill active label={`${products.length} produits`} />
           <StatPill active={products.some((product) => product.has_manual_override)} label="Overrides actifs" />
-          <StatPill active={draftIsDirty} label={draftIsDirty ? 'Brouillon en cours' : 'Brouillon a jour'} />
+          <StatPill active={draftIsDirty} label={draftIsDirty ? 'Brouillon en cours' : 'Brouillon à jour'} />
         </div>
         {message ? <p className="mt-4 text-sm text-[var(--terra)]">{message}</p> : null}
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
@@ -482,7 +482,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                     <p className="text-xs font-condensed uppercase tracking-[0.16em] text-[var(--grey)]">Etat du produit</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <ToggleButton active={draft.is_active} label={draft.is_active ? 'Visible sur le site' : 'Masque du site'} onClick={() => updateDraft({ is_active: !draft.is_active })} />
-                      <ToggleButton active={draft.is_retro} label="Tag retro" onClick={() => updateDraft({ is_retro: !draft.is_retro })} />
+                      <ToggleButton active={draft.is_retro} label="Tag rétro" onClick={() => updateDraft({ is_retro: !draft.is_retro })} />
                       <ToggleButton active={draft.is_concept} label="Tag concept" onClick={() => updateDraft({ is_concept: !draft.is_concept })} />
                     </div>
                   </section>
@@ -531,7 +531,7 @@ export function OpsCatalogClient({ initialProducts, initialProduct, leagues }: O
                       <p><span className="text-[var(--grey)]">Pays:</span> {draft.country}</p>
                       <p><span className="text-[var(--grey)]">Source:</span> {loadedProduct.source_provider ?? 'Manuelle'}</p>
                       <p><span className="text-[var(--grey)]">Titre source:</span> {loadedProduct.source_title ?? 'Absent'}</p>
-                      <p><span className="text-[var(--grey)]">Derniere synchro:</span> {formatTimestamp(loadedProduct.last_synced_at)}</p>
+                      <p><span className="text-[var(--grey)]">Dernière synchro:</span> {formatTimestamp(loadedProduct.last_synced_at)}</p>
                       <p><span className="text-[var(--grey)]">Override manuel:</span> {formatTimestamp(loadedProduct.manual_override_updated_at)}</p>
                     </div>
                   </section>

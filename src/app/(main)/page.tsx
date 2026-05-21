@@ -22,7 +22,7 @@ import { getLeagues, getProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Accueil | MAILLOT ADDICT - Maillots de Football Premium',
-  description: 'Catalogue premium de maillots de football - grands clubs, selections nationales et retro. Flocage et patchs disponibles.',
+  description: 'Catalogue premium de maillots de football - grands clubs, sélections nationales et rétro. Flocage et patchs disponibles.',
 }
 export const revalidate = 21600
 

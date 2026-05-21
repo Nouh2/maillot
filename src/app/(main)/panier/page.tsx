@@ -71,7 +71,7 @@ export default function CartPage() {
               </div>
               {bundleDiscount > 0 ? (
                 <div className="flex items-center justify-between text-sm text-[var(--terra)]">
-                  <span>Bundle 3 achetes = 4e offert</span>
+                  <span>Bundle 3 achetés = 4e offert</span>
                   <span>-{formatEuro(bundleDiscount)}</span>
                 </div>
               ) : null}
@@ -93,10 +93,10 @@ export default function CartPage() {
 
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
-              <p className="mt-2">Livraison offerte des {FREE_SHIPPING_MIN_ITEMS} maillots commandes ou des {formatEuro(FREE_SHIPPING_THRESHOLD)} d achats{shippingUnlocked ? ' - debloquee' : ''}.</p>
-              <p className="mt-1">Bundle automatique: 3 maillots achetes, le 4e est offert.</p>
+              <p className="mt-2">Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés ou dès {formatEuro(FREE_SHIPPING_THRESHOLD)} d’achats{shippingUnlocked ? ' - débloquée' : ''}.</p>
+              <p className="mt-1">Bundle automatique: 3 maillots achetés, le 4e est offert.</p>
               {discount > bundleDiscount ? (
-                <p className="mt-1 text-[var(--terra)]">Code {promoCode} applique: -10% sur les maillots du panier.</p>
+                <p className="mt-1 text-[var(--terra)]">Code {promoCode} appliqué: -10% sur les maillots du panier.</p>
               ) : null}
               <p className="mt-1">En dessous du seuil, les frais de port sont de {formatEuro(STANDARD_SHIPPING_PRICE)}.</p>
             </div>
@@ -112,7 +112,7 @@ export default function CartPage() {
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Rappel</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Personnalisation</h2>
             <p className="mt-4 text-sm leading-relaxed text-[var(--grey)]">
-              Le flocage est facture {formatEuro(5)} par maillot. Les patchs selectionnes restent ajoutes article par article.
+              Le flocage est facturé {formatEuro(5)} par maillot. Les patchs sélectionnés restent ajoutés article par article.
             </p>
           </section>
         </aside>

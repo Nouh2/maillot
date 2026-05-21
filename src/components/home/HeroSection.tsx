@@ -24,7 +24,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
             DES <span className="relative inline-block text-[var(--terra)]">PROS</span>
           </h1>
           <p className="mb-8 max-w-lg text-lg font-normal leading-relaxed text-[var(--black-3)] md:text-xl">
-            Une selection premium de maillots de football des plus grands clubs. Qualite premium, flocages et patchs disponibles.
+            Une sélection premium de maillots de football des plus grands clubs. Qualité premium, flocages et patchs disponibles.
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -38,7 +38,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
 
           <div className="mt-12 grid grid-cols-3 gap-8 border-t border-[var(--black)]/10 pt-8">
             {[
-              ['Catalogue', 'Selection premium'],
+              ['Catalogue', 'Sélection premium'],
               ['Suivi', 'Lien unique'],
               ['Paiement', 'Carte via Stripe'],
             ].map(([value, label]) => (
@@ -83,7 +83,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <span className="border border-white/30 bg-black/20 px-2 py-1 font-condensed text-xs uppercase tracking-wider text-white backdrop-blur-sm">
-                        Apercu rapide
+                        Aperçu rapide
                       </span>
                     </div>
                   </div>

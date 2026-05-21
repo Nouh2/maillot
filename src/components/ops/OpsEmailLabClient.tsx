@@ -42,7 +42,7 @@ export function OpsEmailLabClient({ templates }: OpsEmailLabClientProps) {
         return
       }
 
-      setMessage(`Mail de test envoye pour ${templateId}.`)
+      setMessage(`Mail de test envoyé pour ${templateId}.`)
     } catch {
       setMessage('Envoi impossible')
     } finally {
@@ -56,7 +56,7 @@ export function OpsEmailLabClient({ templates }: OpsEmailLabClientProps) {
         <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Email lab</p>
         <h1 className="mt-2 font-bebas text-4xl text-[var(--black)]">Emails</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--grey)]">
-          Ici tu peux previsualiser tous les mails utiles au lancement et envoyer un test vers une adresse de ton choix.
+          Ici tu peux prévisualiser tous les mails utiles au lancement et envoyer un test vers une adresse de ton choix.
         </p>
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">

@@ -29,7 +29,7 @@ export function toCatalogProduct(
     product_kind: row.product_kind ?? 'jersey',
     jersey_version: row.jersey_version ?? 'fan',
     type: row.type ?? 'domicile',
-    season: row.season ?? 'A definir',
+    season: row.season ?? 'À définir',
     price: typeof row.price === 'number' ? row.price : 0,
     description: row.description ?? null,
     sizes: Array.isArray(row.sizes) ? row.sizes : [],

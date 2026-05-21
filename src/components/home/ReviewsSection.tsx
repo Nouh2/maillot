@@ -16,7 +16,7 @@ const REVIEWS = [
     initials: 'EM',
     color: '#C1440E',
     stars: 5,
-    text: 'Deja 3 commandes, jamais decu. Toujours au rendez-vous sur la qualite et les delais.',
+    text: 'Déjà 3 commandes, jamais déçu. Toujours au rendez-vous sur la qualité et les délais.',
     product: 'Maillot Mexique 2026',
   },
   {
@@ -24,23 +24,23 @@ const REVIEWS = [
     initials: 'KB',
     color: '#3f3830',
     stars: 5,
-    text: 'Qualite incroyable, exactement comme sur les photos. Le flocage est impeccable. Boutique de confiance.',
-    product: 'Maillot Bresil Retro',
+    text: 'Qualité incroyable, exactement comme sur les photos. Le flocage est impeccable. Boutique de confiance.',
+    product: 'Maillot Brésil Rétro',
   },
   {
     name: 'Theo D.',
     initials: 'TD',
     color: '#A83A0C',
     stars: 5,
-    text: 'J ai commande le maillot Algerie avec le patch. Rendu parfait. Livraison en 9 jours chrono.',
-    product: 'Maillot Algerie 2026',
+    text: 'J’ai commandé le maillot Algérie avec le patch. Rendu parfait. Livraison en 9 jours chrono.',
+    product: 'Maillot Algérie 2026',
   },
   {
     name: 'Adam S.',
     initials: 'AS',
     color: '#7a6f62',
     stars: 5,
-    text: 'Maillot recu bien emballe, qualite au top. Pas decu du tout, je reviendrai surement pour la CAN.',
+    text: 'Maillot reçu bien emballé, qualité au top. Pas déçu du tout, je reviendrai surement pour la CAN.',
     product: 'Maillot PSG 2024',
   },
   {
@@ -48,7 +48,7 @@ const REVIEWS = [
     initials: 'NH',
     color: '#D4581F',
     stars: 5,
-    text: 'Le SAV a repondu en quelques heures a ma question. Serieux, fiable, je recommande a tous mes potes.',
+    text: 'Le SAV a répondu en quelques heures à ma question. Sérieux, fiable, je recommande à tous mes potes.',
     product: 'Maillot Real Madrid',
   },
   {
@@ -56,7 +56,7 @@ const REVIEWS = [
     initials: 'RC',
     color: '#1C1712',
     stars: 5,
-    text: 'Commande vendredi, recu le mercredi suivant. La qualite est la, c est du solide. Top boutique.',
+    text: 'Commande vendredi, reçu le mercredi suivant. La qualité est là, c’est du solide. Top boutique.',
     product: 'Maillot Barcelone 2024',
   },
   {
@@ -64,7 +64,7 @@ const REVIEWS = [
     initials: 'YT',
     color: '#C1440E',
     stars: 5,
-    text: 'Suivi de commande nickel, maillot conforme a la description. Je recommande les yeux fermes.',
+    text: 'Suivi de commande nickel, maillot conforme à la description. Je recommande les yeux fermés.',
     product: 'Maillot Maroc 2026',
   },
 ]
@@ -99,11 +99,11 @@ export function ReviewsSection() {
                 color: 'transparent',
               }}
             >
-              LIVRES
+              LIVRÉS
             </span>
           </h2>
           <p className="mt-2 font-condensed text-sm text-[var(--grey)]">
-            Merci pour vos retours - ils nous poussent a faire encore mieux.
+            Merci pour vos retours - ils nous poussent à faire encore mieux.
           </p>
         </div>
       </div>
@@ -130,7 +130,7 @@ export function ReviewsSection() {
                     {review.name}
                   </p>
                   <p className="font-condensed text-[10px] font-semibold uppercase tracking-wide text-[#00b67a]">
-                    Verifie
+                    Vérifié
                   </p>
                 </div>
               </div>

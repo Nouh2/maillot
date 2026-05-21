@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest) {
   })
 
   if (error || !data) {
-    return NextResponse.json({ error: 'Impossible de mettre a jour la commande' }, { status: 500 })
+    return NextResponse.json({ error: 'Impossible de mettre à jour la commande' }, { status: 500 })
   }
 
   return NextResponse.json({ order: data })

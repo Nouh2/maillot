@@ -12,18 +12,18 @@ const FILTER_KEYS: FilterKey[] = ['league', 'club', 'type', 'date', 'alpha']
 
 const TYPE_OPTIONS = [
   { value: 'domicile', label: 'Domicile' },
-  { value: 'exterieur', label: 'Exterieur' },
+  { value: 'exterieur', label: 'Extérieur' },
   { value: 'third', label: 'Third' },
 ]
 
 const DATE_OPTIONS = [
-  { value: 'recent', label: 'Plus recents' },
+  { value: 'recent', label: 'Plus récents' },
   { value: 'oldest', label: 'Plus anciens' },
 ]
 
 const ALPHA_OPTIONS = [
-  { value: 'az', label: 'A a Z' },
-  { value: 'za', label: 'Z a A' },
+  { value: 'az', label: 'A à Z' },
+  { value: 'za', label: 'Z à A' },
 ]
 
 interface FilterSidebarProps {
@@ -188,9 +188,9 @@ export function FilterSidebar({
         {showClub
           ? renderDropdown({
               filterKey: 'club',
-              buttonLabel: 'Equipe',
-              panelTitle: 'Equipe',
-              defaultLabel: 'Toutes les equipes',
+              buttonLabel: 'Équipe',
+              panelTitle: 'Équipe',
+              defaultLabel: 'Toutes les équipes',
               options: clubs.map((club) => ({ value: club, label: club })),
             })
           : null}
@@ -210,7 +210,7 @@ export function FilterSidebar({
               filterKey: 'date',
               buttonLabel: 'Date',
               panelTitle: "Date d'ajout",
-              defaultLabel: 'Ordre par defaut',
+              defaultLabel: 'Ordre par défaut',
               options: DATE_OPTIONS,
             })
           : null}
@@ -218,9 +218,9 @@ export function FilterSidebar({
         {showAlpha
           ? renderDropdown({
               filterKey: 'alpha',
-              buttonLabel: 'Alphabetique',
-              panelTitle: 'Ordre alphabetique',
-              defaultLabel: 'Ordre par defaut',
+              buttonLabel: 'Alphabétique',
+              panelTitle: 'Ordre alphabétique',
+              defaultLabel: 'Ordre par défaut',
               options: ALPHA_OPTIONS,
               align: 'right',
             })

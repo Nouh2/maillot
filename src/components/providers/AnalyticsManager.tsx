@@ -81,7 +81,7 @@ export function AnalyticsManager() {
         <div className="fixed bottom-4 left-4 right-4 z-[70] mx-auto max-w-3xl rounded-[2rem] border border-[var(--cream-3)] bg-white p-5 shadow-xl">
           <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Cookies et mesure</p>
           <p className="mt-3 text-sm leading-relaxed text-[var(--black)]">
-            Nous utilisons des cookies de mesure pour suivre les campagnes et ameliorer la boutique. Rien n&apos;est active sans ton accord.
+            Nous utilisons des cookies de mesure pour suivre les campagnes et améliorer la boutique. Rien n’est activé sans ton accord.
           </p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <button

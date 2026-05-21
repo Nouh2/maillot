@@ -97,7 +97,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
             key={index}
             type="button"
             onClick={() => setActive(index)}
-            aria-label={`Selectionner la photo ${index + 1}`}
+            aria-label={`Sélectionner la photo ${index + 1}`}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               active === index ? 'w-6 bg-[var(--black)]' : 'w-1.5 bg-[var(--cream-3)]'
             }`}

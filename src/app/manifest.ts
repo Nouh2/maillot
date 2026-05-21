@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'MAILLOT ADDICT',
     short_name: 'Maillot Addict',
-    description: 'Maillots de football premium pour clubs, selections et retro.',
+    description: 'Maillots de football premium pour clubs, sélections et rétro.',
     start_url: '/',
     scope: '/',
     display: 'standalone',

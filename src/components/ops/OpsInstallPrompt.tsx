@@ -54,7 +54,7 @@ export function OpsInstallPrompt() {
       </div>
 
       <p className="mt-3 text-sm leading-relaxed text-[var(--grey)]">
-        Ca ajoute une icone sur l&apos;ecran d&apos;accueil pour ouvrir directement le back-office sans retaper l&apos;URL.
+        Ça ajoute une icône sur l’écran d’accueil pour ouvrir directement le back-office sans retaper l’URL.
       </p>
 
       {installEvent ? (
@@ -68,10 +68,10 @@ export function OpsInstallPrompt() {
       ) : null}
 
       <div className="mt-4 space-y-2 text-sm text-[var(--black)]">
-        <p>iPhone: ouvre cette page dans Safari, touche Partager, puis Sur l&apos;ecran d&apos;accueil.</p>
-        <p>Android: ouvre le menu du navigateur puis Ajouter a l&apos;ecran d&apos;accueil ou Installer l&apos;application.</p>
+        <p>iPhone: ouvre cette page dans Safari, touche Partager, puis Sur l’écran d’accueil.</p>
+        <p>Android: ouvre le menu du navigateur puis Ajouter à l’écran d’accueil ou Installer l’application.</p>
         <p>
-          Acces direct: ouvre simplement <strong>/ops/login</strong> depuis ton telephone si tu ne veux pas l&apos;installer.
+          Accès direct: ouvre simplement <strong>/ops/login</strong> depuis ton téléphone si tu ne veux pas l’installer.
         </p>
       </div>
     </section>

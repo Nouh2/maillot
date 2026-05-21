@@ -313,7 +313,7 @@ export async function saveOpsProductDraft(productId: string, draftInput: unknown
 
   if (updateError) {
     if (isMissingOptionalCatalogColumn(updateError)) {
-      throw new Error('Les migrations Supabase catalogue doivent etre appliquees avant la sauvegarde produit')
+      throw new Error('Les migrations Supabase catalogue doivent être appliquées avant la sauvegarde produit')
     }
     throw updateError
   }

@@ -19,7 +19,7 @@ export function TikTokWall() {
           Communaute MAILLOT ADDICT
         </p>
         <h2 className="font-bebas text-4xl text-white sm:text-5xl md:text-6xl">
-          ILS L&apos;ONT RECU.{' '}
+          ILS L’ONT REÇU.{' '}
           <span
             style={{
               WebkitTextStroke: '1px rgba(255,255,255,0.3)',
@@ -27,11 +27,11 @@ export function TikTokWall() {
             }}
             className="md:WebkitTextStroke-[2px]"
           >
-            ILS L&apos;ONT PORTE.
+            ILS L’ONT PORTÉ.
           </span>
         </h2>
         <p className="mt-4 font-condensed text-sm text-white/50 md:text-base">
-          Taguez-nous sur TikTok pour rejoindre le mur de la communaute.
+          Taguez-nous sur TikTok pour rejoindre le mur de la communauté.
         </p>
       </div>
 

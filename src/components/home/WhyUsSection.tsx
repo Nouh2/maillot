@@ -5,18 +5,18 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal'
 const WHY_ITEMS = [
   {
     icon: Zap,
-    title: 'Selection qui convertit',
-    desc: 'On garde uniquement les maillots les plus demandes - pas de catalogue infini. Tu trouves vite, tu commandes vite.',
+    title: 'Sélection qui convertit',
+    desc: 'On garde uniquement les maillots les plus demandés - pas de catalogue infini. Tu trouves vite, tu commandes vite.',
   },
   {
     icon: ShieldCheck,
-    title: 'Qualite verifiee',
-    desc: 'Chaque reference est triee sur le volet : flocage propre, tissu solide, coutures nettes. Aucun compromis sur la finition.',
+    title: 'Qualité vérifiée',
+    desc: 'Chaque référence est triée sur le volet : flocage propre, tissu solide, coutures nettes. Aucun compromis sur la finition.',
   },
   {
     icon: Truck,
     title: 'Livraison sans friction',
-    desc: 'Suivi partage des expedition. 1 maillot -> 6 EUR · 2 -> 5 EUR · gratuite des 3. Simple, transparent, fiable.',
+    desc: 'Suivi partagé dès l’expédition. 1 maillot -> 6 EUR · 2 -> 5 EUR · gratuite dès 3. Simple, transparent, fiable.',
   },
 ] as const
 
@@ -46,8 +46,8 @@ export function WhyUsSection() {
           </div>
           <div className="flex flex-col gap-2 md:items-end">
             <p className="max-w-sm text-sm leading-relaxed text-[var(--grey-lt)]">
-              On n&apos;est pas un gros catalogue generaliste. On est une boutique specialisee, taillee pour ceux qui savent
-              ce qu&apos;ils veulent.
+              On n’est pas un gros catalogue généraliste. On est une boutique spécialisée, taillée pour ceux qui savent
+              ce qu’ils veulent.
             </p>
             <Link
               href="/shop"
@@ -97,9 +97,9 @@ export function WhyUsSection() {
 
         <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-8">
           {[
-            'Paiement 100% securise via Stripe',
+            'Paiement 100% sécurisé via Stripe',
             'Retour sous 14 jours',
-            'Suivi partage des expedition',
+            'Suivi partagé dès l’expédition',
             'Flocage et patchs disponibles',
           ].map((item) => (
             <span key={item} className="flex items-center gap-2 font-condensed text-[11px] uppercase tracking-wider text-white/40">

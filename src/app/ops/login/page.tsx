@@ -20,7 +20,7 @@ export default async function OpsLoginPage() {
           <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Webapp interne</p>
           <h1 className="mt-3 font-bebas text-5xl text-[var(--black)]">OPS LOGIN</h1>
           <p className="mt-4 text-sm leading-relaxed text-[var(--grey)]">
-            Connexion rapide pour gerer les commandes depuis un telephone ou n importe quel navigateur.
+            Connexion rapide pour gérer les commandes depuis un téléphone ou n’importe quel navigateur.
           </p>
           <div className="mt-6">
             <OpsLoginForm defaultUsername={getOpsExpectedUsername()} />

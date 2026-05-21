@@ -41,17 +41,17 @@ export function ContactForm() {
       const data = await response.json().catch(() => null)
 
       if (!response.ok) {
-        setError(data?.error ?? 'Impossible d envoyer votre message pour le moment.')
+        setError(data?.error ?? 'Impossible d’envoyer votre message pour le moment.')
         return
       }
 
       trackEvent('contact_form_submitted', {
         has_order_number: Boolean(values.orderNumber.trim()),
       })
-      setSuccess('Votre message a bien ete envoye au service client.')
+      setSuccess('Votre message a bien été envoyé au service client.')
       setValues(INITIAL_VALUES)
     } catch {
-      setError('Impossible d envoyer votre message pour le moment.')
+      setError('Impossible d’envoyer votre message pour le moment.')
     } finally {
       setLoading(false)
     }

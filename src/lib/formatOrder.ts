@@ -10,12 +10,12 @@ function escapeHtml(value: string): string {
 
 function formatField(value?: string | null): string {
   const cleaned = value?.trim()
-  return cleaned ? escapeHtml(cleaned) : 'Non renseigne'
+  return cleaned ? escapeHtml(cleaned) : 'Non renseigné'
 }
 
 function formatCountry(countryCode?: string | null): string {
   const cleaned = countryCode?.trim()
-  if (!cleaned) return 'Non renseigne'
+  if (!cleaned) return 'Non renseigné'
 
   try {
     const displayNames = new Intl.DisplayNames(['fr-FR'], { type: 'region' })
@@ -67,7 +67,7 @@ export function formatOrderMessage(order: Order): string {
         order.shipping_address.state ? formatField(order.shipping_address.state) : null,
         formatCountry(order.shipping_address.country),
       ].filter(Boolean)
-    : ['Non renseigne']
+    : ['Non renseigné']
 
   return [
     `<b>NOUVELLE COMMANDE ${escapeHtml(order.order_number)}</b>`,

@@ -50,7 +50,7 @@ export function CountdownBanner() {
           PRIX PROMO SUR{' '}
           <span className="text-[var(--terra)]">TOUS LES MAILLOTS</span>
         </h2>
-        <p className="mb-6 font-condensed text-xs uppercase tracking-widest text-[var(--grey-lt)]">L&apos;offre se termine dans</p>
+        <p className="mb-6 font-condensed text-xs uppercase tracking-widest text-[var(--grey-lt)]">L’offre se termine dans</p>
 
         <div className="mb-6 flex items-center justify-center gap-3">
           {[
@@ -76,7 +76,7 @@ export function CountdownBanner() {
           className="inline-block w-full bg-white py-4 text-center font-condensed text-sm font-bold uppercase tracking-[0.15em] text-[var(--black)] transition-colors hover:bg-[var(--cream)]"
           style={{ borderRadius: 0 }}
         >
-          Profiter de l&apos;offre →
+          Profiter de l’offre →
         </Link>
       </div>
     </section>

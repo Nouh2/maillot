@@ -50,7 +50,7 @@ export function BestsellersTabs({
           moment
         </span>
       </h2>
-      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">Une selection courte des bestsellers qui partent le plus.</p>
+      <p className="mt-1 font-condensed text-[13px] text-[var(--grey)]">Une sélection courte des bestsellers qui partent le plus.</p>
 
       <div className="mt-4 flex gap-5 border-b border-[var(--cream-3)]" style={{ overflowX: 'auto', scrollbarWidth: 'none' }}>
         {tabs.map((tab) => (
@@ -71,10 +71,10 @@ export function BestsellersTabs({
           {/* Mobile : featured card + 2 petites */}
           <div className="mt-3 grid grid-cols-2 gap-2 md:hidden">
             <Link href={collectionHref} className="relative row-span-2 block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2, minHeight: 200 }}>
-              <Image src={featuredTabImage} alt={`Les plus demandes ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="45vw" />
+              <Image src={featuredTabImage} alt={`Les plus demandés ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="45vw" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-3">
-                <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Selection</p>
+                <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Sélection</p>
                 <p className="font-condensed text-[15px] font-bold uppercase leading-tight text-white">Les Plus<br />Demandes</p>
                 <p className="mt-2 font-condensed text-[11px] font-semibold uppercase tracking-wide text-[var(--terra)]">Voir tout →</p>
               </div>
@@ -106,10 +106,10 @@ export function BestsellersTabs({
           {/* Desktop : grille 4 colonnes */}
           <div className="mt-3 hidden md:grid md:grid-cols-4 lg:grid-cols-4 gap-4">
             <Link href={collectionHref} className="relative block overflow-hidden bg-[var(--cream-2)]" style={{ borderRadius: 2 }}>
-              <Image src={featuredTabImage} alt={`Les plus demandes ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="25vw" />
+              <Image src={featuredTabImage} alt={`Les plus demandés ${activeGroup?.label ?? ''}`.trim()} fill className="object-cover object-center" sizes="25vw" />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-4">
-                <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Selection</p>
+                <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Sélection</p>
                 <p className="font-condensed text-base font-bold uppercase leading-tight text-white">Les Plus<br />Demandes</p>
                 <p className="mt-2 font-condensed text-[11px] font-semibold uppercase tracking-wide text-[var(--terra)]">Voir tout →</p>
               </div>
@@ -141,7 +141,7 @@ export function BestsellersTabs({
           </div>
         </>
       ) : (
-        <p className="mt-6 py-8 text-center font-condensed text-sm text-[var(--grey)]">Aucun maillot dans cette categorie</p>
+        <p className="mt-6 py-8 text-center font-condensed text-sm text-[var(--grey)]">Aucun maillot dans cette catégorie</p>
       )}
 
       <Link

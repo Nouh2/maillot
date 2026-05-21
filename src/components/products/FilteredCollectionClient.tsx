@@ -35,7 +35,7 @@ function CollectionLayout({
   products,
   leagues = [],
   clubs = [],
-  emptyTitle = 'Aucun maillot trouve',
+  emptyTitle = 'Aucun maillot trouvé',
   emptyDescription,
   showFilters = true,
   showLeague = true,

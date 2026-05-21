@@ -5,7 +5,7 @@ import { getConceptProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Maillots Concept',
-  description: 'Selection manuelle de maillots concept et editions creatives.',
+  description: 'Sélection manuelle de maillots concept et éditions créatives.',
 }
 export const revalidate = 21600
 
@@ -15,8 +15,8 @@ export default async function ConceptPage() {
     title: 'MAILLOTS CONCEPT',
     breadcrumbLabel: 'Concept',
     products,
-    emptyTitle: 'Selection concept en cours',
-    emptyDescription: 'Les maillots concept sont desormais separes du retro et seront ajoutes manuellement.',
+    emptyTitle: 'Sélection concept en cours',
+    emptyDescription: 'Les maillots concept sont désormais séparés du rétro et seront ajoutés manuellement.',
     showLeague: false,
     showType: false,
     showDate: false,

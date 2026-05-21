@@ -90,7 +90,7 @@ export async function sendTelegramContactNotification(params: {
     '',
     `<b>Nom :</b> ${escapeTelegramHtml(params.name)}`,
     `<b>Email :</b> ${escapeTelegramHtml(params.email)}`,
-    `<b>Commande :</b> ${orderNumber ? escapeTelegramHtml(orderNumber) : 'Non renseignee'}`,
+    `<b>Commande :</b> ${orderNumber ? escapeTelegramHtml(orderNumber) : 'Non renseignée'}`,
     '',
     `<b>Sujet :</b> ${escapeTelegramHtml(params.subject)}`,
     '',

@@ -73,14 +73,14 @@ export default async function OpsMarketingPage() {
           <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Marketing</p>
           <h1 className="mt-2 font-bebas text-4xl text-[var(--black)]">Tracking campagne</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--grey)]">
-            Vue interne des events envoyes vers GA4 et TikTok Pixel, plus les commandes et relances panier. Periode: 7 derniers jours.
+            Vue interne des events envoyés vers GA4 et TikTok Pixel, plus les commandes et relances panier. Période: 7 derniers jours.
           </p>
         </section>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="CA commandes" value={formatEuro(summary.totals.revenue)} detail={`${summary.totals.orders} commande(s)`} />
           <StatCard label="Sessions trackees" value={metricLabel(summary.totals.sessions)} detail={`${summary.totals.events} event(s)`} />
-          <StatCard label="Leads checkout" value={metricLabel(summary.totals.checkoutLeads)} detail={`${summary.totals.recoveredLeads} recupere(s)`} />
+          <StatCard label="Leads checkout" value={metricLabel(summary.totals.checkoutLeads)} detail={`${summary.totals.recoveredLeads} récupéré(s)`} />
           <StatCard label="Clic IDs" value={metricLabel(summary.totals.tiktokClicks)} detail={`TikTok. Google ${summary.totals.googleClicks}, Meta ${summary.totals.metaClicks}`} />
         </div>
 
@@ -100,10 +100,10 @@ export default async function OpsMarketingPage() {
           <StatCard
             label="Relances panier"
             value={`${summary.totals.abandoned30mSent}/${summary.totals.abandoned6hSent}/${summary.totals.abandoned24hSent}`}
-            detail="Emails envoyes a 30 min, 6h et 24h."
+            detail="Emails envoyés à 30 min, 6h et 24h."
           />
           <StatCard
-            label="Derniere mise a jour"
+            label="Dernière mise à jour"
             value={new Date(summary.generatedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
             detail={new Date(summary.generatedAt).toLocaleDateString('fr-FR')}
           />
@@ -136,7 +136,7 @@ export default async function OpsMarketingPage() {
                   </tr>
                 )) : (
                   <tr>
-                    <td className="py-4 text-[var(--grey)]" colSpan={5}>Les nouveaux events apparaitront apres les prochaines visites avec consentement cookies.</td>
+                    <td className="py-4 text-[var(--grey)]" colSpan={5}>Les nouveaux events apparaîtront après les prochaines visites avec consentement aux cookies.</td>
                   </tr>
                 )}
               </tbody>

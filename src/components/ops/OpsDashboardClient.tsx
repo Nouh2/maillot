@@ -116,15 +116,15 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
 
       const data = await response.json().catch(() => null)
       if (!response.ok) {
-        setMessage(data?.error ?? 'Mise a jour impossible')
+        setMessage(data?.error ?? 'Mise à jour impossible')
         return null
       }
 
       syncOrderIntoState(data.order)
-      setMessage('Commande mise a jour')
+      setMessage('Commande mise à jour')
       return data.order as Order
     } catch {
-      setMessage('Mise a jour impossible')
+      setMessage('Mise à jour impossible')
       return null
     } finally {
       setBusyOrderId(null)
@@ -159,7 +159,7 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
           savedOrder.status === 'paid' && !savedOrder.shipped_at ? new Date().toISOString() : savedOrder.shipped_at,
         tracking_email_sent_at: new Date().toISOString(),
       })
-      setMessage('Email de suivi envoye')
+      setMessage('Email de suivi envoyé')
     } catch {
       setMessage('Envoi impossible')
     } finally {
@@ -193,7 +193,7 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
                     : 'border border-[var(--cream-3)] text-[var(--black)]'
                 }`}
               >
-                {filter === 'all' ? 'Toutes' : filter === 'paid' ? 'A payer fournisseur' : 'Expediees'}
+                {filter === 'all' ? 'Toutes' : filter === 'paid' ? 'À payer fournisseur' : 'Expédiées'}
               </button>
             ))}
             <button
@@ -230,7 +230,7 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
               </div>
 
               <div className="mt-4 grid gap-3 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
-                <p>{order.customer_name || 'Nom non renseigne'} · {order.customer_email || 'Email absent'}</p>
+                <p>{order.customer_name || 'Nom non renseigné'} · {order.customer_email || 'Email absent'}</p>
                 <p>{itemCount} article(s) · {order.total_amount?.toFixed(2)} EUR</p>
                 <p>{order.customer_phone || 'Telephone absent'}</p>
                 <p className="text-xs text-[var(--grey)]">
@@ -258,7 +258,7 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
                   <input
                     value={form.trackingNumber}
                     onChange={(event) => updateForm(order.id, { trackingNumber: event.target.value })}
-                    placeholder="Numero de suivi"
+                    placeholder="Numéro de suivi"
                     className="rounded-2xl border border-[var(--cream-3)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--terra)]"
                   />
                   <select
@@ -311,8 +311,8 @@ export function OpsDashboardClient({ initialOrders }: OpsDashboardClientProps) {
 
               <div className="mt-4 text-xs text-[var(--grey)]">
                 {order.tracking_email_sent_at
-                  ? `Dernier email de suivi envoye le ${new Date(order.tracking_email_sent_at).toLocaleString('fr-FR')}`
-                  : 'Aucun email de suivi envoye pour cette commande'}
+                  ? `Dernier email de suivi envoyé le ${new Date(order.tracking_email_sent_at).toLocaleString('fr-FR')}`
+                  : 'Aucun email de suivi envoyé pour cette commande'}
               </div>
             </article>
           )

@@ -31,7 +31,7 @@ export function AccountAuthForm() {
 
     trackEvent('account_magic_link_requested', { email_domain: email.split('@')[1] ?? null })
     setStatus('sent')
-    setMessage('Lien magique envoye. Verifie ta boite mail puis reviens sur ton compte.')
+    setMessage('Lien magique envoyé. Vérifie ta boîte mail puis reviens sur ton compte.')
   }
 
   return (

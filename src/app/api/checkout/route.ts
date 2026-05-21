@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     .in('id', productIds)
 
   if (dbError || !products) {
-    return NextResponse.json({ error: 'Erreur base de donnees' }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur base de données' }, { status: 500 })
   }
 
   const productMap: Record<string, Product> = {}
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
                   currency: 'eur',
                   product_data: {
                     name: 'Livraison',
-                    description: `Offerte des ${FREE_SHIPPING_MIN_ITEMS} maillots ou ${FREE_SHIPPING_THRESHOLD} EUR d achats`,
+                    description: `Offerte dès ${FREE_SHIPPING_MIN_ITEMS} maillots ou ${FREE_SHIPPING_THRESHOLD} EUR d’achats`,
                   },
                   unit_amount: Math.round(shippingAmount * 100),
                 },

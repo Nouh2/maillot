@@ -60,7 +60,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         <p className="mb-2 font-condensed text-xs tracking-[4px] uppercase text-[var(--terra)]">Espace client</p>
         <h1 className="font-bebas text-6xl text-white md:text-7xl">MON COMPTE</h1>
         <p className="mt-2 text-[var(--grey-lt)]">
-          {user ? `Connecte en tant que ${user.email}` : 'Connexion securisee par Supabase'}
+          {user ? `Connecté en tant que ${user.email}` : 'Connexion sécurisée par Supabase'}
         </p>
       </div>
 
@@ -72,18 +72,18 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               {user ? 'Etat de session' : 'Connexion'}
             </p>
             <h2 className="mt-3 font-bebas text-5xl leading-none text-[var(--black)]">
-              {user ? 'Mon espace' : 'Acceder a mon compte'}
+              {user ? 'Mon espace' : 'Accéder à mon compte'}
             </h2>
 
             {authError ? (
               <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                Le lien de connexion n&apos;a pas pu etre valide. Reessaye avec un nouveau lien.
+                Le lien de connexion n’a pas pu être validé. Réessaye avec un nouveau lien.
               </p>
             ) : null}
 
             {authSuccess ? (
               <p className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                Connexion reussie. Tes commandes ont ete rattachees a ton compte.
+                Connexion réussie. Tes commandes ont été rattachées à ton compte.
               </p>
             ) : null}
 
@@ -105,7 +105,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                       type="submit"
                       className="inline-flex w-full items-center justify-center rounded-full border border-[var(--cream-3)] px-5 py-3 font-condensed text-sm tracking-[0.22em] uppercase text-[var(--black)] transition-colors hover:border-[var(--black)] sm:w-auto"
                     >
-                      Se deconnecter
+                      Se déconnecter
                     </button>
                   </form>
                 </div>
@@ -118,12 +118,12 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           </section>
 
           <aside className="rounded-[2rem] border border-[var(--cream-3)] bg-[var(--terra-lt)] p-6 md:p-8">
-            <p className="font-condensed text-xs tracking-[0.28em] uppercase text-[var(--terra)]">Comment ca marche</p>
+            <p className="font-condensed text-xs tracking-[0.28em] uppercase text-[var(--terra)]">Comment ça marche</p>
             <h2 className="mt-3 font-bebas text-5xl leading-none text-[var(--black)]">Lien magique</h2>
             <div className="mt-5 space-y-4 text-sm text-[var(--black-2)]">
-              <p>Entre ton email, recois un lien de connexion instantane sans mot de passe.</p>
-              <p>Une fois connecte, retrouve tout l&apos;historique de tes commandes et les liens de suivi.</p>
-              <p>Si tu n&apos;as pas encore de compte, tes commandes sont rattachees automatiquement au premier login avec le meme email.</p>
+              <p>Entre ton email, reçois un lien de connexion instantané sans mot de passe.</p>
+              <p>Une fois connecté, retrouve tout l’historique de tes commandes et les liens de suivi.</p>
+              <p>Si tu n’as pas encore de compte, tes commandes sont rattachées automatiquement au premier login avec le même email.</p>
             </div>
           </aside>
         </div>
@@ -139,7 +139,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                   href="/shop"
                   className="mt-4 inline-block rounded-full bg-[var(--terra)] px-6 py-3 font-condensed text-sm tracking-widest uppercase text-white transition-colors hover:bg-[var(--black)]"
                 >
-                  Decouvrir les maillots
+                  Découvrir les maillots
                 </Link>
               </div>
             ) : (

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
   const sent = await sendEmailTemplateTest({ to, templateId })
   if (!sent) {
-    return NextResponse.json({ error: 'Impossible d envoyer le mail de test' }, { status: 500 })
+    return NextResponse.json({ error: 'Impossible d’envoyer le mail de test' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

@@ -24,7 +24,7 @@ export const LEGAL_CONTACT_PHONE = process.env.NEXT_PUBLIC_CONTACT_PHONE?.trim()
 
 export const LEGAL_INFRASTRUCTURE_ITEMS = [
   ['Hebergement du front', 'Vercel'],
-  ['Base de donnees', 'Supabase - infrastructure en Suisse'],
+  ['Base de données', 'Supabase - infrastructure en Suisse'],
   ['Paiement', 'Stripe'],
   ['Nom de domaine', 'LWS'],
 ] as const

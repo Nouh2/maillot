@@ -127,7 +127,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
 
   const handleAdd = () => {
     if (!size) {
-      setError('Veuillez selectionner une taille')
+      setError('Veuillez sélectionner une taille')
       return
     }
 
@@ -205,7 +205,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               />
             </div>
             <div className="col-span-2 space-y-2">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Numero</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--grey)]">Numéro</label>
               <input
                 type="text"
                 maxLength={2}

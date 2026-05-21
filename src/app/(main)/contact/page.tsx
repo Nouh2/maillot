@@ -7,17 +7,17 @@ import { LEGAL_CONTACT_EMAIL, LEGAL_CONTACT_PHONE } from '@/lib/legal'
 const HELP_ITEMS = [
   {
     title: 'FAQ',
-    description: 'Consultez les reponses aux questions les plus frequentes avant de contacter le support.',
+    description: 'Consultez les réponses aux questions les plus fréquentes avant de contacter le support.',
     href: '/faq',
   },
   {
     title: 'Suivi de commande',
-    description: 'Retrouvez vos commandes depuis votre compte ou via le lien unique envoye apres paiement.',
+    description: 'Retrouvez vos commandes depuis votre compte ou via le lien unique envoyé après paiement.',
     href: '/suivi',
   },
   {
     title: 'CGV',
-    description: 'Consultez les conditions de vente, la livraison et les regles de personnalisation.',
+    description: 'Consultez les conditions de vente, la livraison et les règles de personnalisation.',
     href: '/legal/cgv',
   },
 ] as const
@@ -32,7 +32,7 @@ export default function ContactPage() {
           <p className="mb-3 font-condensed text-xs uppercase tracking-[0.32em] text-[var(--terra-mid)]">Service client</p>
           <h1 className="font-bebas text-5xl text-white md:text-6xl">Contact</h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--grey-lt)] md:text-base">
-            Une question sur une commande, un delai, un flocage ou un produit ? Utilisez le formulaire ci-dessous pour joindre le service client.
+            Une question sur une commande, un délai, un flocage ou un produit ? Utilisez le formulaire ci-dessous pour joindre le service client.
           </p>
         </div>
       </div>
@@ -53,30 +53,30 @@ export default function ContactPage() {
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
           <LegalSection title="Envoyer un message">
-            <p>Pour accelerer le traitement, indiquez votre numero de commande si votre demande concerne une commande deja passee.</p>
+            <p>Pour accélérer le traitement, indiquez votre numéro de commande si votre demande concerne une commande déjà passée.</p>
             <ContactForm />
           </LegalSection>
 
           <div className="space-y-6">
-            <LegalSection title="Avant de nous ecrire">
+            <LegalSection title="Avant de nous écrire">
               <div className="space-y-4">
                 <div className="flex gap-3">
                   <PackageSearch className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
-                  <p>Pour une commande en cours, preparez votre email de commande, votre reference et votre lien de suivi si vous l avez deja recu.</p>
+                  <p>Pour une commande en cours, préparez votre email de commande, votre référence et votre lien de suivi si vous l’avez déjà reçu.</p>
                 </div>
                 <div className="flex gap-3">
                   <ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
-                  <p>Les articles personnalises ne peuvent pas etre retournes sauf defaut produit ou erreur du vendeur.</p>
+                  <p>Les articles personnalisés ne peuvent pas être retournés sauf défaut produit ou erreur du vendeur.</p>
                 </div>
                 <div className="flex gap-3">
                   <Mail className="mt-0.5 h-5 w-5 text-[var(--terra)]" />
-                  <p>Decrivez precisement votre demande pour obtenir une reponse plus rapide.</p>
+                  <p>Décrivez précisément votre demande pour obtenir une réponse plus rapide.</p>
                 </div>
               </div>
             </LegalSection>
 
             {LEGAL_CONTACT_EMAIL || LEGAL_CONTACT_PHONE ? (
-              <LegalSection title="Coordonnees directes">
+              <LegalSection title="Coordonnées directes">
                 {LEGAL_CONTACT_EMAIL ? (
                   <p>
                     Email:{' '}
@@ -85,7 +85,7 @@ export default function ContactPage() {
                     </a>
                   </p>
                 ) : null}
-                {LEGAL_CONTACT_PHONE ? <p>Telephone: {LEGAL_CONTACT_PHONE}</p> : null}
+                {LEGAL_CONTACT_PHONE ? <p>Téléphone: {LEGAL_CONTACT_PHONE}</p> : null}
               </LegalSection>
             ) : null}
           </div>

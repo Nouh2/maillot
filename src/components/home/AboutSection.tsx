@@ -3,9 +3,9 @@ import { ArrowRight, ShieldCheck, Ticket, Truck } from 'lucide-react'
 import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
 
 const LIST_ITEMS = [
-  { icon: ShieldCheck, text: 'Paiement 100% securise via Stripe' },
-  { icon: Ticket, text: 'Suivi partage des l expedition' },
-  { icon: Truck, text: 'Livraison offerte des 3 maillots ou 60 EUR d achats' },
+  { icon: ShieldCheck, text: 'Paiement 100% sécurisé via Stripe' },
+  { icon: Ticket, text: 'Suivi partagé dès l’expédition' },
+  { icon: Truck, text: 'Livraison offerte dès 3 maillots ou 60 EUR d’achats' },
 ]
 
 export function AboutSection() {
@@ -16,7 +16,7 @@ export function AboutSection() {
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--terra)]/25 bg-[var(--terra-lt)] px-4 py-1.5">
             <span className="text-base">FR</span>
             <span className="font-condensed text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--terra)]">
-              Boutique francaise · Confiance depuis 2024
+              Boutique française · Confiance depuis 2024
             </span>
           </div>
 
@@ -30,13 +30,13 @@ export function AboutSection() {
                 textUnderlineOffset: 5,
               }}
             >
-              vraiment la difference.
+              vraiment la différence.
             </span>
           </h2>
 
           <p className="mt-4 text-[14px] leading-relaxed text-[var(--grey)]">
-            On a construit MAILLOT ADDICT pour les vrais passionnes : une selection resserree des maillots les plus
-            recherches, un parcours d&apos;achat clair, et un suivi transmis sans friction.{' '}
+            On a construit MAILLOT ADDICT pour les vrais passionnés : une sélection resserrée des maillots les plus
+            recherchés, un parcours d’achat clair, et un suivi transmis sans friction.{' '}
             {LAUNCH_PROMO_ENABLED ? 'Prix promo en cours, ' : ''}
             pas de mauvaises surprises.
           </p>

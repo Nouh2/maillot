@@ -13,7 +13,7 @@ const PATCH_GROUPS: { label: string; codes: string[] }[] = [
   { label: 'Premier League', codes: ['pl_winner', 'fa_cup', 'efl_cup'] },
   { label: 'La Liga', codes: ['laliga_winner', 'copa_del_rey', 'supercopa'] },
   { label: 'Bundesliga', codes: ['bundesliga_winner', 'dfb_pokal'] },
-  { label: 'Serie A', codes: ['serie_a_winner', 'coppa_italia', 'supercoppa'] },
+  { label: 'Série A', codes: ['serie_a_winner', 'coppa_italia', 'supercoppa'] },
   { label: 'Ligue 1', codes: ['ligue1_winner', 'coupe_de_france', 'trophee_champions'] },
   { label: 'Distinctions', codes: ['captain', 'ballon_dor', 'best_fifa'] },
 ]
@@ -76,7 +76,7 @@ export function PatchSelector({
                   ? 'Sans patch'
                   : selected.length === 1
                     ? patches.find((patch) => patch.code === selected[0])?.name ?? '1 patch'
-                    : `${selected.length} patchs selectionnes`}
+                    : `${selected.length} patchs sélectionnés`}
               </p>
               <p className="mt-0.5 text-[11px] text-[#999]">
                 {selected.length > 0 ? `+${formatEuro(selected.length * PATCH_PRICE)}` : 'Inclus'}
