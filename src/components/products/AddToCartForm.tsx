@@ -212,9 +212,6 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               3 maillots = livraison offerte
             </h3>
           </div>
-          <div className="shrink-0 rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-2.5 py-1 font-condensed text-[10px] uppercase tracking-[0.12em] text-[var(--terra)]">
-            Livraison offerte dès le 3e
-          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-1.5">
