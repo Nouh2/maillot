@@ -2,10 +2,8 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { BadgePercent, Check, Gift, Minus, Plus, Truck } from 'lucide-react'
+import { BadgePercent, Check, Minus, Plus, Truck } from 'lucide-react'
 import {
-  BUNDLE_CYCLE_ITEM_COUNT,
-  calculateBundleFreeItemCount,
   FLOCAGE_PRICE,
   FREE_SHIPPING_MIN_ITEMS,
   calculateCartItemUnitPrice,
@@ -44,13 +42,6 @@ const BUNDLE_OPTIONS = [
     badge: null,
     icon: Truck,
   },
-  {
-    qty: 4,
-    title: 'Pack de 4',
-    benefit: '1 maillot offert',
-    badge: 'Meilleur deal',
-    icon: Gift,
-  },
 ] as const
 
 function pluralizeMaillot(count: number) {
@@ -58,16 +49,11 @@ function pluralizeMaillot(count: number) {
 }
 
 function getBundlePreview(unitPrice: number, qty: number) {
-  const freeCount = calculateBundleFreeItemCount(qty)
-  const paidCount = Math.max(0, qty - freeCount)
   const subtotal = unitPrice * qty
-  const total = unitPrice * paidCount
 
   return {
-    freeCount,
     subtotal,
-    total,
-    saving: Math.max(0, subtotal - total),
+    total: subtotal,
   }
 }
 
@@ -103,13 +89,12 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const bundlePreview = getBundlePreview(unitPrice, qty)
   const currentCartCount = getCartItemCount()
   const projectedBundleCount = currentCartCount + qty
-  const projectedFreeCount = calculateBundleFreeItemCount(projectedBundleCount)
-  const bundleProgressTarget = selectedBundleTarget === 1 ? BUNDLE_CYCLE_ITEM_COUNT : Math.max(1, selectedBundleTarget)
+  const bundleProgressTarget = selectedBundleTarget === 1 ? FREE_SHIPPING_MIN_ITEMS : Math.max(1, selectedBundleTarget)
   const missingForSelectedBundle = Math.max(0, selectedBundleTarget - projectedBundleCount)
   const selectedBundleOption = BUNDLE_OPTIONS.find((option) => option.qty === selectedBundleTarget) ?? BUNDLE_OPTIONS[0]
   const progressCount = Math.min(projectedBundleCount, bundleProgressTarget)
   const progressWidth = Math.min(100, (progressCount / bundleProgressTarget) * 100)
-  const progressLabel = selectedBundleTarget === 1 ? `Offre pack de ${BUNDLE_CYCLE_ITEM_COUNT}` : selectedBundleOption.title
+  const progressLabel = selectedBundleTarget === 1 ? 'Livraison offerte' : selectedBundleOption.title
 
   const selectBundleOption = (targetQty: number) => {
     setSelectedBundleTarget(targetQty)
@@ -222,9 +207,9 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       <div className="rounded-[1.25rem] border border-[var(--cream-3)] bg-white p-1.5 text-[var(--black)] shadow-[0_14px_32px_rgba(28,23,18,0.1)]">
         <div className="flex items-center justify-between gap-3 px-2.5 py-1.5">
           <div className="min-w-0">
-            <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Offre coupe du monde</p>
+            <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Bundle 3 maillots</p>
             <h3 className="mt-0.5 whitespace-nowrap font-bebas text-[22px] leading-none tracking-wide sm:text-2xl">
-              4e maillot offert
+              3 maillots = livraison offerte
             </h3>
           </div>
           <div className="shrink-0 rounded-full border border-[var(--terra)]/15 bg-[var(--terra-lt)] px-2.5 py-1 font-condensed text-[10px] uppercase tracking-[0.12em] text-[var(--terra)]">
@@ -232,7 +217,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
           {BUNDLE_OPTIONS.map((option) => {
             const Icon = option.icon
             const selected = selectedBundleTarget === option.qty
@@ -284,9 +269,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
             {selectedBundleTarget === 1
               ? 'Ajoute ce maillot seul, ou complète un pack pour activer les avantages.'
               : missingForSelectedBundle === 0
-                ? selectedBundleTarget >= BUNDLE_CYCLE_ITEM_COUNT && projectedFreeCount > 0
-                  ? 'Pack complet: le moins cher des 4 maillots passe offert au panier.'
-                  : `Pack complet: livraison offerte dès le ${FREE_SHIPPING_MIN_ITEMS}e maillot.`
+                ? `Pack complet: livraison offerte dès le ${FREE_SHIPPING_MIN_ITEMS}e maillot.`
                 : `Encore ${missingForSelectedBundle} ${pluralizeMaillot(missingForSelectedBundle)} pour compléter ce pack.`}
           </p>
         </div>

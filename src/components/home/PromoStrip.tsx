@@ -7,7 +7,7 @@ const MESSAGES: ReactNode[] = [
   ...(LAUNCH_PROMO_ENABLED
     ? [
         <span key="launch" className="block py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.05em] text-white">
-          OFFRE COUPE DU MONDE - 4E MAILLOT OFFERT AUTOMATIQUEMENT
+          BUNDLE 3 MAILLOTS - LIVRAISON OFFERTE AUTOMATIQUEMENT
         </span>,
       ]
     : [

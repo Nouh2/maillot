@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { LegalPageLayout, LegalSection } from '@/components/legal/LegalPageLayout'
-import { FREE_SHIPPING_THRESHOLD, FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE, formatEuro } from '@/lib/cartPricing'
+import { FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE, formatEuro } from '@/lib/cartPricing'
 
 const STANDARD_SHIPPING_LABEL = formatEuro(STANDARD_SHIPPING_PRICE)
-const FREE_SHIPPING_LABEL = formatEuro(FREE_SHIPPING_THRESHOLD)
 
 export const metadata = { title: 'Livraison' }
 
@@ -23,7 +22,7 @@ export default function LivraisonPage() {
         <p>Les frais de livraison sont calcules sur le montant du panier après application des offres automatiques:</p>
         <ul className="list-disc space-y-2 pl-5">
           <li>Livraison standard: {STANDARD_SHIPPING_LABEL}</li>
-          <li>Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés ou dès {FREE_SHIPPING_LABEL} d’achats</li>
+          <li>Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés</li>
         </ul>
       </LegalSection>
 

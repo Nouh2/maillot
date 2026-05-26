@@ -16,10 +16,6 @@ export const STANDARD_PROMO_PRICE = 19.99
 export const RETRO_PRICE = 34.99
 export const RETRO_PROMO_PRICE = 27.99
 export const STANDARD_SHIPPING_PRICE = 6
-export const FREE_SHIPPING_THRESHOLD = 60
-export const BUNDLE_PAID_ITEM_COUNT = 3
-export const BUNDLE_FREE_ITEM_COUNT = 1
-export const BUNDLE_CYCLE_ITEM_COUNT = BUNDLE_PAID_ITEM_COUNT + BUNDLE_FREE_ITEM_COUNT
 
 type PriceableCartItem = {
   price: number
@@ -48,8 +44,6 @@ export type CartPricingBreakdown = {
   discount: number
   shipping: number
   total: number
-  bundleDiscount: number
-  bundleFreeItemCount: number
   promoCode: string | null
   promoDiscountRate: number
   freeShippingUnlocked: boolean
@@ -128,15 +122,9 @@ export function getProductPricing(params: {
 
 export const FREE_SHIPPING_MIN_ITEMS = 3
 
-export function calculateBundleFreeItemCount(itemCount: number): number {
-  if (itemCount <= 0) return 0
-  return Math.floor(itemCount / BUNDLE_CYCLE_ITEM_COUNT) * BUNDLE_FREE_ITEM_COUNT
-}
-
-export function calculateShippingAmount(itemCount: number, discountedSubtotal = 0): number {
+export function calculateShippingAmount(itemCount: number): number {
   if (itemCount <= 0) return 0
   if (itemCount >= FREE_SHIPPING_MIN_ITEMS) return 0
-  if (discountedSubtotal >= FREE_SHIPPING_THRESHOLD) return 0
   return STANDARD_SHIPPING_PRICE
 }
 
@@ -149,7 +137,6 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
   const subtotalCents = items.reduce((sum, item) => sum + (toCents(item.price) * item.qty), 0)
   const promoCode = normalizePromoCode(options.promoCode)
   const promoDiscountRate = getPromoDiscountRate(promoCode)
-  const bundleFreeItemCount = calculateBundleFreeItemCount(itemCount)
   const units: DiscountableUnit[] = []
   let promoDiscountCents = 0
 
@@ -164,30 +151,11 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     }
   }
 
-  const freeUnitIndexes = new Set<number>()
-  if (bundleFreeItemCount > 0) {
-    units
-      .map((unit, unitIndex) => ({ ...unit, unitIndex }))
-      .sort((left, right) => {
-        if (left.amountAfterPromoCents !== right.amountAfterPromoCents) {
-          return left.amountAfterPromoCents - right.amountAfterPromoCents
-        }
-        return left.unitIndex - right.unitIndex
-      })
-      .slice(0, bundleFreeItemCount)
-      .forEach((unit) => freeUnitIndexes.add(unit.unitIndex))
-  }
-
-  const bundleDiscountCents = units.reduce((sum, unit, unitIndex) => (
-    freeUnitIndexes.has(unitIndex) ? sum + unit.amountAfterPromoCents : sum
-  ), 0)
-  const discountCents = promoDiscountCents + bundleDiscountCents
+  const discountCents = promoDiscountCents
   const discountedSubtotalCents = Math.max(0, subtotalCents - discountCents)
 
   const groupedUnits = new Map<string, DiscountedUnitGroup>()
-  units.forEach((unit, unitIndex) => {
-    if (freeUnitIndexes.has(unitIndex)) return
-
+  units.forEach((unit) => {
     const groupKey = `${unit.sourceIndex}:${unit.amountAfterPromoCents}`
     const existingGroup = groupedUnits.get(groupKey)
     if (existingGroup) {
@@ -202,7 +170,7 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     })
   })
 
-  const shippingCents = toCents(calculateShippingAmount(itemCount, fromCents(discountedSubtotalCents)))
+  const shippingCents = toCents(calculateShippingAmount(itemCount))
 
   return {
     itemCount,
@@ -210,8 +178,6 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     discount: fromCents(discountCents),
     shipping: fromCents(shippingCents),
     total: fromCents(discountedSubtotalCents + shippingCents),
-    bundleDiscount: fromCents(bundleDiscountCents),
-    bundleFreeItemCount,
     promoCode: promoDiscountRate > 0 ? promoCode : null,
     promoDiscountRate,
     freeShippingUnlocked: shippingCents === 0 && itemCount > 0,

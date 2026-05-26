@@ -1,13 +1,13 @@
 'use client'
 
-import { BadgeCheck, Gift, Type } from 'lucide-react'
+import { BadgeCheck, Truck, Type } from 'lucide-react'
 
 export function ProductTrustBadges() {
   const badges = [
     {
-      icon: <Gift className="h-4 w-4 sm:h-5 sm:w-5" />,
-      text: '4e maillot',
-      subtext: 'offert',
+      icon: <Truck className="h-4 w-4 sm:h-5 sm:w-5" />,
+      text: 'Livraison',
+      subtext: 'offerte',
     },
     {
       icon: <Type className="h-4 w-4 sm:h-5 sm:w-5" />,

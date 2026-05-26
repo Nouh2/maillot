@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_MIN_ITEMS, FREE_SHIPPING_THRESHOLD } from '@/lib/cartPricing'
+import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_MIN_ITEMS } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
                   currency: 'eur',
                   product_data: {
                     name: 'Livraison',
-                    description: `Offerte dès ${FREE_SHIPPING_MIN_ITEMS} maillots ou ${FREE_SHIPPING_THRESHOLD} EUR d’achats`,
+                    description: `Offerte dès ${FREE_SHIPPING_MIN_ITEMS} maillots`,
                   },
                   unit_amount: Math.round(shippingAmount * 100),
                 },
@@ -245,8 +245,6 @@ export async function POST(request: NextRequest) {
         shipping_amount: String(shippingAmount),
         marketing_opt_in: marketingOptIn ? 'true' : 'false',
         source_channel: sourceChannel,
-        bundle_free_item_count: String(pricing.bundleFreeItemCount),
-        bundle_discount_amount: String(pricing.bundleDiscount),
         ...(pricing.promoCode
           ? {
               promo_code: pricing.promoCode,

@@ -5,17 +5,16 @@ import Link from 'next/link'
 import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
 import { CartItem } from '@/components/cart/CartItem'
-import { formatEuro, FREE_SHIPPING_THRESHOLD, FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE } from '@/lib/cartPricing'
+import { formatEuro, FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE } from '@/lib/cartPricing'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { useCartStore } from '@/store/cart'
 import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
 import { CartBundleOffer } from '@/components/cart/CartBundleOffer'
 
 export default function CartPage() {
-  const { items, subtotal, discountTotal, bundleDiscountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
+  const { items, subtotal, discountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
   const quantity = itemCount()
   const discount = discountTotal()
-  const bundleDiscount = bundleDiscountTotal()
   const shipping = shippingTotal()
   const shippingUnlocked = freeShippingUnlocked()
 
@@ -69,16 +68,10 @@ export default function CartPage() {
                 <span>Sous-total</span>
                 <span>{formatEuro(subtotal())}</span>
               </div>
-              {bundleDiscount > 0 ? (
-                <div className="flex items-center justify-between text-sm text-[var(--terra)]">
-                  <span>Bundle 3 achetés = 4e offert</span>
-                  <span>-{formatEuro(bundleDiscount)}</span>
-                </div>
-              ) : null}
-              {discount > bundleDiscount ? (
+              {discount > 0 ? (
                 <div className="flex items-center justify-between text-sm text-[var(--terra)]">
                   <span>{promoCode ? `Code ${promoCode}` : 'Remise'}</span>
-                  <span>-{formatEuro(discount - bundleDiscount)}</span>
+                  <span>-{formatEuro(discount)}</span>
                 </div>
               ) : null}
               <div className="flex items-center justify-between text-sm text-[var(--grey)]">
@@ -93,9 +86,9 @@ export default function CartPage() {
 
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
-              <p className="mt-2">Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés ou dès {formatEuro(FREE_SHIPPING_THRESHOLD)} d’achats{shippingUnlocked ? ' - débloquée' : ''}.</p>
-              <p className="mt-1">Bundle automatique: 3 maillots achetés, le 4e est offert.</p>
-              {discount > bundleDiscount ? (
+              <p className="mt-2">Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés{shippingUnlocked ? ' - débloquée' : ''}.</p>
+              <p className="mt-1">Les maillots restent facturés normalement, y compris au-delà de 3 articles.</p>
+              {discount > 0 ? (
                 <p className="mt-1 text-[var(--terra)]">Code {promoCode} appliqué: -10% sur les maillots du panier.</p>
               ) : null}
               <p className="mt-1">En dessous du seuil, les frais de port sont de {formatEuro(STANDARD_SHIPPING_PRICE)}.</p>

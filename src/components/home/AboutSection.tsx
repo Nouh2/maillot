@@ -5,7 +5,7 @@ import { LAUNCH_PROMO_ENABLED } from '@/lib/siteConfig'
 const LIST_ITEMS = [
   { icon: ShieldCheck, text: 'Paiement 100% sécurisé via Stripe' },
   { icon: Ticket, text: 'Suivi partagé dès l’expédition' },
-  { icon: Truck, text: 'Livraison offerte dès 3 maillots ou 60 EUR d’achats' },
+  { icon: Truck, text: 'Livraison offerte dès 3 maillots' },
 ]
 
 export function AboutSection() {
