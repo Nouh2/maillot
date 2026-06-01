@@ -61,6 +61,7 @@ export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }
               isConcept: product.is_concept,
               productKind: product.product_kind,
               jerseyVersion: product.jersey_version,
+              productSlug: product.slug,
             })
 
             return (

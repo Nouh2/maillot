@@ -17,6 +17,12 @@ export const RETRO_PRICE = 34.99
 export const RETRO_PROMO_PRICE = 27.99
 export const STANDARD_SHIPPING_PRICE = 6
 
+const FIXED_PRODUCT_PRICES: Record<string, number> = {
+  'maillot-domicile-stadium-psg-25-26-flocage-champions-of-europe': 30,
+  'maillot-exterieur-stadium-psg-25-26-flocage-champions-of-europe': 30,
+  'maillot-psg-jordan-night-edition-stadium-25-26-flocage-champions-of-europe': 30,
+}
+
 type PriceableCartItem = {
   price: number
   qty: number
@@ -89,9 +95,22 @@ export function getProductPricing(params: {
   isConcept?: boolean
   productKind?: 'jersey' | string
   jerseyVersion?: 'fan' | 'player' | string
+  productSlug?: string | null
   now?: Date
 }) {
-  const { isRetro, isConcept = false, productKind, jerseyVersion = 'fan', now = new Date() } = params
+  const { isRetro, isConcept = false, productKind, jerseyVersion = 'fan', productSlug, now = new Date() } = params
+  const fixedProductPrice = productSlug ? FIXED_PRODUCT_PRICES[productSlug] : undefined
+
+  if (typeof fixedProductPrice === 'number') {
+    return {
+      originalPrice: fixedProductPrice,
+      currentPrice: fixedProductPrice,
+      promoPrice: fixedProductPrice,
+      promoActive: false,
+      promoLabel: null,
+      promoDescription: null,
+    }
+  }
 
   if (!isRetro && !isConcept && productKind === 'jersey') {
     const jerseyPrice = jerseyVersion === 'player' ? PLAYER_JERSEY_PRICE : FAN_JERSEY_PRICE

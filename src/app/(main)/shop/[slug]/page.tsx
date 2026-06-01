@@ -85,6 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     isConcept: product.is_concept,
     productKind: product.product_kind,
     jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
   })
   const season = resolveProductSeasonLabel(product)
 
@@ -113,6 +114,7 @@ export default async function ProductPage({ params }: Props) {
     isConcept: product.is_concept,
     productKind: product.product_kind,
     jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
   })
   const relatedProducts = getRelatedProducts(product, catalog)
   const productDescription = getProductDisplayDescription(product)

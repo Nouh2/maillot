@@ -42,6 +42,7 @@ function normalizeCartItems(items: CartItem[], productMap: Record<string, Produc
       isConcept: product.is_concept,
       productKind: product.product_kind,
       jerseyVersion: product.jersey_version,
+      productSlug: product.slug,
     }).currentPrice
     const price = calculateCartItemUnitPrice({
       basePrice,
