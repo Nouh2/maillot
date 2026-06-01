@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache'
 import type { Club, League, Patch, Product } from '@/types/product'
-import { dedupeCatalogProducts, filterConceptProducts, filterStandardCatalogProducts, getClubFilterOptions } from '@/lib/catalogPresentation'
+import catalogEntities from '../../../data/catalog-entities.json'
+import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
 import { CATALOG_CACHE_TAG, toCatalogProduct } from '@/lib/catalogProducts'
 import { getSupabasePublicClient } from './server'
 
@@ -81,7 +82,7 @@ const getCachedProducts = unstable_cache(
             'id, slug, name, club, league, country, product_kind, jersey_version, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override',
           )
           .eq('is_active', true)
-          .order('created_at', { ascending: false })
+          .order('id', { ascending: true })
           .range(from, to),
       )
     } catch (error) {
@@ -96,7 +97,7 @@ const getCachedProducts = unstable_cache(
             'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at',
           )
           .eq('is_active', true)
-          .order('created_at', { ascending: false })
+          .order('id', { ascending: true })
           .range(from, to),
       )
     }
@@ -167,14 +168,14 @@ const getCachedClubs = unstable_cache(
 
 const getCachedSearchSuggestions = unstable_cache(
   async (): Promise<string[]> => {
-    const products = await getCachedProducts()
-    const suggestions = getClubFilterOptions(dedupeCatalogProducts(filterStandardCatalogProducts(products)))
+    const suggestions = Array.from(
+      new Set([
+        'PSG',
+        ...catalogEntities.map((entry) => entry.club),
+      ]),
+    ).sort((left, right) => left.localeCompare(right, 'fr-FR', { sensitivity: 'base' }))
 
-    if (suggestions.includes('Paris Saint-Germain') && !suggestions.includes('PSG')) {
-      return ['PSG', ...suggestions]
-    }
-
-    return suggestions
+    return ['PSG', ...suggestions.filter((suggestion) => suggestion !== 'PSG')]
   },
   ['catalog-search-suggestions-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
