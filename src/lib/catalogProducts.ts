@@ -4,6 +4,9 @@ import { normalizeCatalogProduct } from '@/lib/catalogEntityRegistry'
 
 export const CATALOG_CACHE_TAG = 'catalog-products'
 
+const PSG_2026_2027_HOME_SLUG = 'paris-saint-germain-maillot-domicile-2026-2027'
+const PSG_2026_2027_HOME_COVER = '/psg%20maillot.png'
+
 function isUnavailablePlaceholderPhoto(url: string): boolean {
   return url.includes('photo.yupoo.com/12345-67890/')
 }
@@ -12,6 +15,20 @@ function normalizeProductPhotos(photos: string[]): string[] {
   return photos
     .map((photo) => photo.trim())
     .filter((photo) => photo && !isUnavailablePlaceholderPhoto(photo))
+}
+
+function applyProductPhotoOverrides(product: Product): Product {
+  if (product.slug !== PSG_2026_2027_HOME_SLUG) {
+    return product
+  }
+
+  return {
+    ...product,
+    photos: [
+      PSG_2026_2027_HOME_COVER,
+      ...product.photos.filter((photo) => photo !== PSG_2026_2027_HOME_COVER && photo !== '/psg maillot.png'),
+    ],
+  }
 }
 
 export function toCatalogProduct(
@@ -54,9 +71,10 @@ export function toCatalogProduct(
     options?.includeManualOverride === false
       ? normalizedProduct
       : applyProductManualOverride(normalizedProduct, row.manual_override)
+  const productWithPhotoOverrides = applyProductPhotoOverrides(mergedProduct)
   const productWithAvailablePhotos = {
-    ...mergedProduct,
-    photos: normalizeProductPhotos(mergedProduct.photos),
+    ...productWithPhotoOverrides,
+    photos: normalizeProductPhotos(productWithPhotoOverrides.photos),
   }
 
   if (!options?.photoLimit) {
