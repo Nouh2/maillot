@@ -168,7 +168,13 @@ const getCachedClubs = unstable_cache(
 const getCachedSearchSuggestions = unstable_cache(
   async (): Promise<string[]> => {
     const products = await getCachedProducts()
-    return getClubFilterOptions(dedupeCatalogProducts(filterStandardCatalogProducts(products)))
+    const suggestions = getClubFilterOptions(dedupeCatalogProducts(filterStandardCatalogProducts(products)))
+
+    if (suggestions.includes('Paris Saint-Germain') && !suggestions.includes('PSG')) {
+      return ['PSG', ...suggestions]
+    }
+
+    return suggestions
   },
   ['catalog-search-suggestions-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },

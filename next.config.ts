@@ -27,6 +27,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
       },
+      {
+        protocol: 'https',
+        hostname: 'maillotaddict.fr',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.maillotaddict.fr',
+      },
       ...(bunnyCdnHostname
         ? [
             {
