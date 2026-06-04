@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE support_tickets (
   id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   customer_name           TEXT NOT NULL,
