@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendSupportAckEmail } from '@/lib/email'
+import { createSupportTicket, setSupportTicketTelegramMessage } from '@/lib/support'
 import { sendTelegramContactNotification } from '@/lib/telegram'
 
 type ContactPayload = {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Un ou plusieurs champs depassent la longueur autorisee.' }, { status: 400 })
   }
 
-  const delivered = await sendTelegramContactNotification({
+  const ticket = await createSupportTicket({
     name,
     email,
     orderNumber,
@@ -51,8 +52,29 @@ export async function POST(request: NextRequest) {
     message,
   })
 
-  if (!delivered) {
+  if (!ticket) {
     return NextResponse.json({ error: 'Service client temporairement indisponible. Merci de reessayer plus tard.' }, { status: 503 })
+  }
+
+  const telegramDelivery = await sendTelegramContactNotification({
+    ticketId: ticket.id,
+    name,
+    email,
+    orderNumber,
+    subject,
+    message,
+  })
+
+  if (!telegramDelivery.delivered) {
+    return NextResponse.json({ error: 'Service client temporairement indisponible. Merci de reessayer plus tard.' }, { status: 503 })
+  }
+
+  if (telegramDelivery.chatId && telegramDelivery.messageId) {
+    await setSupportTicketTelegramMessage({
+      ticketId: ticket.id,
+      chatId: telegramDelivery.chatId,
+      messageId: telegramDelivery.messageId,
+    })
   }
 
   await sendSupportAckEmail({

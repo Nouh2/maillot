@@ -103,6 +103,15 @@ function bulletList(items: string[]): string {
   return `<ul style="margin:0 0 18px;padding-left:20px;color:#1a1209;line-height:1.7;font-size:15px;">${listItems}</ul>`
 }
 
+function multilineParagraph(text: string): string {
+  const lines = escapeHtml(text)
+    .split(/\r?\n/)
+    .map((line) => line || '&nbsp;')
+    .join('<br />')
+
+  return paragraph(lines)
+}
+
 function renderCta(cta: EmailCta): string {
   const palette =
     cta.tone === 'terra'
@@ -824,6 +833,45 @@ export async function sendSupportAckEmail(params: {
     to: params.to,
     subject: template.subject,
     html: template.html,
+    replyTo: getSupportEmail() ?? undefined,
+  })
+}
+
+export async function sendSupportReplyEmail(params: {
+  to: string
+  customerName: string
+  originalSubject: string
+  orderNumber?: string
+  replySubject: string
+  replyBody: string
+}): Promise<boolean> {
+  const orderReference = params.orderNumber?.trim()
+
+  const html = renderEmailFrame({
+    eyebrow: 'Support',
+    title: 'Reponse du support',
+    preview: `Reponse a ta demande : ${params.originalSubject}`,
+    intro: 'Le support Maillot Addict revient vers toi avec une reponse a ta demande.',
+    sections: [
+      paragraph(`Bonjour ${escapeHtml(params.customerName)},`),
+      paragraph(`Nous revenons vers toi au sujet de <strong>${escapeHtml(params.originalSubject)}</strong>.`),
+      orderReference ? paragraph(`Reference transmise : <strong>${escapeHtml(orderReference)}</strong>.`) : '',
+      multilineParagraph(params.replyBody),
+    ],
+    primaryCta: orderReference
+      ? {
+          label: 'Voir le suivi',
+          href: `${getBaseUrl()}/suivi`,
+          tone: 'ghost',
+        }
+      : undefined,
+    note: 'Tu peux repondre directement a cet email si tu as besoin de completer ta demande.',
+  })
+
+  return sendTransactionalEmail({
+    to: params.to,
+    subject: params.replySubject,
+    html,
     replyTo: getSupportEmail() ?? undefined,
   })
 }
