@@ -1,7 +1,7 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE support_tickets (
-  id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_name           TEXT NOT NULL,
   customer_email          TEXT NOT NULL,
   order_number            TEXT,
