@@ -32,7 +32,7 @@ export function ProductsGrid({ products, title, sub, showConversionBreaks = fals
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
         {products.map((p, index) => (
           <Fragment key={p.id}>
-            <ProductCard product={p} priority={index < 6} openSizeOnClick={openSizeOnClick} />
+            <ProductCard product={p} priority={index < 4} openSizeOnClick={openSizeOnClick} />
             {showConversionBreaks && index === 7 ? (
               <div key="bundle-offer-break" className="col-span-2 -mx-4 md:col-span-3 lg:col-span-4">
                 <BundleOffer />

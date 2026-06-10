@@ -23,13 +23,18 @@ interface Props {
   searchParams?: Promise<{ taille?: string | string[] }>
 }
 
-const IMPORTED_PRODUCT_DESCRIPTION_PATTERN =
-  /\s*Produit import[eé] automatiquement depuis le catalogue fournisseur et h[eé]berg[eé] sur (?:KITLAB|MAILLOT ADDICT)\.?/i
-
-function getProductSalesSentence(product: Product): string {
-  const club = product.club?.trim()
-  const colors = club ? `les couleurs de ${club}` : 'tes couleurs'
-  return `Sélectionné pour son style et ses détails soignés, parfait pour porter ${colors} les jours de match, au quotidien ou dans une collection de passionné.`
+function isSupplierDescriptionPart(part: string): boolean {
+  const lowered = part.toLowerCase()
+  return (
+    lowered.includes('yupoo') ||
+    lowered.startsWith('ref catalogue:') ||
+    lowered.includes('catalogue fournisseur') ||
+    lowered.includes('produit ajoute') ||
+    lowered.includes('produit ajouté') ||
+    lowered.includes('heberge') ||
+    lowered.includes('héberge') ||
+    lowered.includes('hébergé')
+  )
 }
 
 function getProductDisplayDescription(product: Product): string | null {
@@ -38,12 +43,8 @@ function getProductDisplayDescription(product: Product): string | null {
   const cleanDescription = product.description
     .split('|')
     .map((part) => part.trim())
-    .filter((part) => {
-      const lowered = part.toLowerCase()
-      return !lowered.includes('yupoo') && !lowered.startsWith('ref catalogue:')
-    })
+    .filter((part) => part && !isSupplierDescriptionPart(part))
     .join(' | ')
-    .replace(IMPORTED_PRODUCT_DESCRIPTION_PATTERN, ` ${getProductSalesSentence(product)}`)
     .replace(/kitlab/gi, 'MAILLOT ADDICT')
     .replace(/\s+/g, ' ')
     .trim()
@@ -98,6 +99,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   })
   const relatedProducts = await getRelatedProducts(product)
   const productDescription = getProductDisplayDescription(product)
+  const displayProduct: Product = { ...product, description: productDescription }
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--cream)] md:pb-0">
@@ -130,7 +132,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
           <div className="min-w-0">
             <div className="mb-2">
-              <ProductFamilyBadge product={product} />
+              <ProductFamilyBadge product={displayProduct} />
             </div>
             <h1 className="mb-1 font-bebas text-[34px] leading-[0.95] text-[var(--black)] md:text-5xl">
               {normalizeProductTextSeasons(product.name)}
@@ -149,13 +151,13 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
             <div id="product-cta-sentinel" />
 
-            <AddToCartForm product={product} patches={patches} openSizeOnLoad={openSizeOnLoad} />
+            <AddToCartForm product={displayProduct} patches={patches} openSizeOnLoad={openSizeOnLoad} />
 
             <div className="mt-5">
               <ProductConversionProof />
             </div>
 
-            <ProductDetailsPanels product={product} />
+            <ProductDetailsPanels product={displayProduct} />
 
             {productDescription ? (
               <p className="mt-5 text-sm leading-relaxed text-[var(--grey)] md:text-base">{productDescription}</p>

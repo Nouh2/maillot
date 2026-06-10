@@ -119,7 +119,8 @@ function ProductTile({ product, priority = false }: { product: Product; priority
               src={product.photos[0]}
               alt={product.name}
               fill
-              priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
               unoptimized
               fallbackMode="proxy"
               bunnyTransform={priority ? 'hero' : 'card'}
@@ -206,7 +207,7 @@ export function FeaturedProductBrowser({ products }: { products: Product[] }) {
       {visibleProducts.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
           {visibleProducts.map((product, index) => (
-            <ProductTile key={product.id} product={product} priority={index < 2} />
+            <ProductTile key={product.id} product={product} priority={index < 4} />
           ))}
         </div>
       ) : (

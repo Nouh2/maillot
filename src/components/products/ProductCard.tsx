@@ -37,7 +37,8 @@ export function ProductCard({
               src={photo}
               alt={product.name}
               fill
-              priority={priority}
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
               unoptimized
               fallbackMode="proxy"
               bunnyTransform="card"

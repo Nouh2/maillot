@@ -11,26 +11,60 @@ export const metadata: Metadata = {
 }
 export const revalidate = 21600
 
-const BESTSELLER_CLUB_ORDER = [
+const BESTSELLER_PRODUCT_PRIORITY = [
+  { club: 'France', type: 'exterieur' },
+  { club: 'Maroc' },
+  { club: 'Portugal', type: 'exterieur' },
+  { club: 'Espagne' },
+  { club: 'Argentine' },
+  { club: 'Angleterre' },
+] as const
+
+const BESTSELLER_CLUB_FALLBACK_ORDER = [
   'France',
   'Maroc',
-  'Algérie',
+  'Algerie',
   'Portugal',
   'Argentine',
-  'Brésil',
+  'Bresil',
   'Espagne',
   'Angleterre',
   'Allemagne',
   'Italie',
 ]
 
+function normalizeRankValue(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+function matchesPriorityProduct(
+  product: Product,
+  priority: (typeof BESTSELLER_PRODUCT_PRIORITY)[number],
+) {
+  if (normalizeRankValue(product.club) !== normalizeRankValue(priority.club)) return false
+  return !('type' in priority) || product.type === priority.type
+}
+
+function getPriorityClubRank(product: Product) {
+  const productRank = BESTSELLER_PRODUCT_PRIORITY.findIndex((priority) => matchesPriorityProduct(product, priority))
+  if (productRank !== -1) return productRank
+
+  const clubRank = BESTSELLER_CLUB_FALLBACK_ORDER.findIndex(
+    (club) => normalizeRankValue(product.club) === normalizeRankValue(club),
+  )
+  return BESTSELLER_PRODUCT_PRIORITY.length + (clubRank === -1 ? BESTSELLER_CLUB_FALLBACK_ORDER.length : clubRank)
+}
+
 function getWorldCupSalesRank(product: Product) {
-  const clubRank = BESTSELLER_CLUB_ORDER.findIndex((club) => product.club.toLowerCase() === club.toLowerCase())
-  const normalizedClubRank = clubRank === -1 ? BESTSELLER_CLUB_ORDER.length : clubRank
+  const clubRank = getPriorityClubRank(product)
+  const productKindRank = product.product_kind === 'jersey' ? 0 : 1
   const typeRank = product.type === 'domicile' ? 0 : product.type === 'exterieur' ? 1 : 2
   const fanRank = product.jersey_version === 'fan' ? 0 : 1
 
-  return normalizedClubRank * 100 + typeRank * 10 + fanRank
+  return fanRank * 1000 + clubRank * 100 + productKindRank * 10 + typeRank
 }
 
 function sortWorldCupForAds(products: Product[]) {
@@ -38,6 +72,24 @@ function sortWorldCupForAds(products: Product[]) {
     const rankDiff = getWorldCupSalesRank(left) - getWorldCupSalesRank(right)
     if (rankDiff !== 0) return rankDiff
     return left.name.localeCompare(right.name, 'fr-FR', { sensitivity: 'base' })
+  })
+}
+
+function getWorldCupHighlightProducts(products: Product[]) {
+  return BESTSELLER_PRODUCT_PRIORITY.flatMap((priority) => {
+    const match =
+      products.find(
+        (product) =>
+          matchesPriorityProduct(product, priority) &&
+          product.product_kind === 'jersey' &&
+          product.jersey_version === 'fan',
+      ) ??
+      products.find(
+        (product) => matchesPriorityProduct(product, priority) && product.product_kind === 'jersey',
+      ) ??
+      products.find((product) => matchesPriorityProduct(product, priority))
+
+    return match ? [match] : []
   })
 }
 
@@ -54,7 +106,7 @@ export default async function CoupeDuMondePage() {
     showAlpha: false,
     compactHeader: true,
     showHeaderTrust: true,
-    highlightProducts: products.slice(0, 4),
+    highlightProducts: getWorldCupHighlightProducts(products),
     showConversionBreaks: true,
   }
 
