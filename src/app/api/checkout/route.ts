@@ -24,6 +24,25 @@ type PersistedOrderItem = {
   qty: number
 }
 
+function toStripeImageUrl(photo: string | null | undefined, baseUrl: string): string | null {
+  const value = photo?.trim()
+  if (!value) return null
+
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null
+  } catch {
+    // Local product overrides can use paths such as /psg%20maillot.png.
+  }
+
+  try {
+    const url = new URL(value.startsWith('/') ? value : `/${value}`, baseUrl)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
 function normalizeCartItems(items: CartItem[], productMap: Record<string, Product>): PersistedOrderItem[] {
   return items.map((item) => {
     const product = productMap[item.product_id]
@@ -195,7 +214,6 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card'],
       allow_promotion_codes: true,
       locale: 'fr',
       client_reference_id: pendingOrder.id,
@@ -203,6 +221,7 @@ export async function POST(request: NextRequest) {
       line_items: [
         ...pricing.discountedUnitGroups.map((group) => {
           const item = normalizedItems[group.sourceIndex]
+          const imageUrl = toStripeImageUrl(item.photo, baseUrl)
 
           return {
             price_data: {
@@ -218,7 +237,7 @@ export async function POST(request: NextRequest) {
                 ]
                   .filter(Boolean)
                   .join(' - '),
-                images: item.photo ? [item.photo] : [],
+                ...(imageUrl ? { images: [imageUrl] } : {}),
               },
               unit_amount: Math.round(group.unitAmount * 100),
             },
