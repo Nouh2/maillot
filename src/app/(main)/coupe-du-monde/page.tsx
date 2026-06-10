@@ -12,12 +12,13 @@ export const metadata: Metadata = {
 export const revalidate = 21600
 
 const BESTSELLER_PRODUCT_PRIORITY = [
-  { club: 'France', type: 'exterieur' },
-  { club: 'Maroc' },
-  { club: 'Portugal', type: 'exterieur' },
-  { club: 'Espagne' },
+  { slug: 'france-maillot-exterieur-2026' },
+  { slug: 'portugal-maillot-exterieur-version-joueur-2026' },
+  { slug: 'espagne-maillot-exterieur-2026' },
   { club: 'Argentine' },
   { club: 'Angleterre' },
+  { club: 'Maroc' },
+  { club: 'Algerie' },
 ] as const
 
 const BESTSELLER_CLUB_FALLBACK_ORDER = [
@@ -44,6 +45,7 @@ function matchesPriorityProduct(
   product: Product,
   priority: (typeof BESTSELLER_PRODUCT_PRIORITY)[number],
 ) {
+  if ('slug' in priority) return product.slug === priority.slug
   if (normalizeRankValue(product.club) !== normalizeRankValue(priority.club)) return false
   return !('type' in priority) || product.type === priority.type
 }
@@ -64,7 +66,7 @@ function getWorldCupSalesRank(product: Product) {
   const typeRank = product.type === 'domicile' ? 0 : product.type === 'exterieur' ? 1 : 2
   const fanRank = product.jersey_version === 'fan' ? 0 : 1
 
-  return fanRank * 1000 + clubRank * 100 + productKindRank * 10 + typeRank
+  return clubRank * 1000 + productKindRank * 100 + fanRank * 10 + typeRank
 }
 
 function sortWorldCupForAds(products: Product[]) {
