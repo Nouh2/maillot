@@ -71,6 +71,10 @@ export function FilterSidebar({
   const updateFilter = (key: FilterKey, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
 
+    if (key === 'club') {
+      params.delete('equipe')
+    }
+
     if (value === '' || params.get(key) === value) {
       params.delete(key)
     } else {
@@ -86,19 +90,38 @@ export function FilterSidebar({
     for (const key of FILTER_KEYS) {
       params.delete(key)
     }
+    params.delete('equipe')
     pushParams(params)
     setOpenDropdown(null)
   }
 
-  const activeValue = (key: FilterKey) => searchParams.get(key) || ''
+  const activeValue = (key: FilterKey) =>
+    key === 'club' ? searchParams.get('club') || searchParams.get('equipe') || '' : searchParams.get(key) || ''
   const totalActive = FILTER_KEYS.filter((key) => {
     if (key === 'league' && !showLeague) return false
     if (key === 'club' && !showClub) return false
     if (key === 'type' && !showType) return false
     if (key === 'date' && !showDate) return false
     if (key === 'alpha' && !showAlpha) return false
+    if (key === 'club') return searchParams.has('club') || searchParams.has('equipe')
     return searchParams.has(key)
   }).length
+  const primaryFilterKey: FilterKey | null = showLeague
+    ? 'league'
+    : showClub
+      ? 'club'
+      : showType
+        ? 'type'
+        : showDate
+          ? 'date'
+          : showAlpha
+            ? 'alpha'
+            : null
+
+  const togglePrimaryFilter = () => {
+    if (!primaryFilterKey) return
+    setOpenDropdown(openDropdown === primaryFilterKey ? null : primaryFilterKey)
+  }
 
   const renderDropdown = ({
     filterKey,
@@ -117,6 +140,7 @@ export function FilterSidebar({
   }) => (
     <div className="relative shrink-0 sm:flex-initial">
       <button
+        type="button"
         onClick={() => setOpenDropdown(openDropdown === filterKey ? null : filterKey)}
         className={`flex w-full items-center justify-between gap-4 rounded-full border-2 px-6 py-2.5 text-sm font-black font-condensed uppercase tracking-widest transition-all sm:w-auto sm:justify-start ${
           activeValue(filterKey)
@@ -139,6 +163,7 @@ export function FilterSidebar({
           </div>
           <div className="custom-scrollbar max-h-[60vh] overflow-y-auto sm:max-h-80">
             <button
+              type="button"
               onClick={() => updateFilter(filterKey, '')}
               className="group flex w-full items-center justify-between border-b border-[var(--cream-3)] px-5 py-3.5 text-left text-sm font-black font-condensed uppercase tracking-wider transition-colors hover:bg-[var(--cream)]"
             >
@@ -149,6 +174,7 @@ export function FilterSidebar({
             {options.map((option) => (
               <button
                 key={option.value}
+                type="button"
                 onClick={() => updateFilter(filterKey, option.value)}
                 className="group flex w-full items-center justify-between border-b border-[var(--cream-3)] px-5 py-3.5 text-left text-sm font-black font-condensed uppercase tracking-wider transition-colors hover:bg-[var(--cream)]"
               >
@@ -165,15 +191,23 @@ export function FilterSidebar({
   return (
     <div className="relative z-40 mb-6 w-full md:mb-8" ref={dropdownRef}>
       <div className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
-        <div className="group flex shrink-0 items-center gap-2 rounded-full border-2 border-[var(--black)] bg-white px-4 py-2 text-sm font-black font-condensed uppercase tracking-widest transition-all sm:px-5 sm:py-2.5">
+        <button
+          type="button"
+          onClick={togglePrimaryFilter}
+          aria-expanded={primaryFilterKey ? openDropdown === primaryFilterKey : undefined}
+          className="group flex shrink-0 items-center gap-2 rounded-full border-2 border-[var(--black)] bg-white px-4 py-2 text-sm font-black font-condensed uppercase tracking-widest transition-all active:scale-[0.98] sm:px-5 sm:py-2.5"
+        >
           <SlidersHorizontal className="h-4 w-4" />
-          <span className="hidden sm:inline">Filtres</span>
+          <span>Filtres</span>
           {totalActive > 0 ? (
             <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--terra)] text-[10px] text-white duration-300 animate-in zoom-in">
               {totalActive}
             </span>
           ) : null}
-        </div>
+          {primaryFilterKey ? (
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${openDropdown === primaryFilterKey ? 'rotate-180' : ''}`} />
+          ) : null}
+        </button>
 
         {showLeague
           ? renderDropdown({
@@ -228,6 +262,7 @@ export function FilterSidebar({
 
         {totalActive > 0 ? (
           <button
+            type="button"
             onClick={clearFilters}
             className="group flex items-center gap-2 rounded-full border-2 border-[var(--terra)] px-6 py-2.5 text-sm font-black font-condensed uppercase tracking-widest text-[var(--terra)] transition-all hover:bg-[var(--terra)] hover:text-white"
           >
