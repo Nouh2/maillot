@@ -13,20 +13,20 @@ const STRIP_IMAGES = [...CUSTOMER_IMAGES, ...CUSTOMER_IMAGES]
 
 export function CustomerProofStrip() {
   return (
-    <section className="overflow-hidden border-y border-[var(--cream-3)] bg-white py-5">
+    <section className="overflow-hidden border-y border-[var(--cream-3)] bg-white py-4">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-3 flex flex-col items-start gap-3">
           <div>
             <p className="font-condensed text-xs font-bold uppercase tracking-[0.2em] text-[var(--terra)]">Clients réels</p>
             <h2 className="mt-1 font-bebas text-3xl leading-none text-[var(--black)]">Ils l&apos;ont reçu</h2>
           </div>
-          <TrustBadge />
+          <TrustBadge className="w-full justify-between sm:w-auto sm:justify-start" />
         </div>
       </div>
 
-      <div className="flex w-max gap-3 px-4" style={{ animation: 'customer-proof-scroll 32s linear infinite' }}>
+      <div className="flex w-max gap-2 px-3 sm:gap-3 sm:px-4" style={{ animation: 'customer-proof-scroll 32s linear infinite' }}>
         {STRIP_IMAGES.map((src, index) => (
-          <div key={`${src}-${index}`} className="relative h-36 w-28 shrink-0 overflow-hidden rounded-lg bg-[var(--cream)] sm:h-44 sm:w-36">
+          <div key={`${src}-${index}`} className="relative h-32 w-24 shrink-0 overflow-hidden rounded-lg bg-[var(--cream)] sm:h-44 sm:w-36">
             <Image
               src={src}
               alt={`Photo client ${index + 1}`}

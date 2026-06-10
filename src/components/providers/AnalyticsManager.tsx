@@ -78,18 +78,18 @@ export function AnalyticsManager() {
       ) : null}
 
       {consent === null ? (
-        <div className="fixed bottom-4 left-4 right-4 z-[70] mx-auto max-w-3xl rounded-[2rem] border border-[var(--cream-3)] bg-white p-5 shadow-xl">
-          <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--terra)]">Cookies et mesure</p>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--black)]">
+        <div className="fixed inset-x-2 bottom-2 z-[70] mx-auto max-w-4xl rounded-xl border border-[var(--cream-3)] bg-white/95 p-3 shadow-xl backdrop-blur sm:bottom-3 sm:p-4">
+          <p className="sr-only">Cookies et mesure</p>
+          <p className="text-xs leading-snug text-[var(--black)] sm:text-sm">
             Nous utilisons des cookies de mesure pour suivre les campagnes et améliorer la boutique. Rien n’est activé sans ton accord.
           </p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
             <button
               type="button"
               onClick={() => {
                 setTrackingConsent('granted')
               }}
-              className="inline-flex items-center justify-center rounded-full bg-[var(--black)] px-5 py-3 font-condensed text-sm uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--terra)]"
+              className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--black)] px-4 py-2 font-condensed text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[var(--terra)]"
             >
               Accepter
             </button>
@@ -98,7 +98,7 @@ export function AnalyticsManager() {
               onClick={() => {
                 setTrackingConsent('denied')
               }}
-              className="inline-flex items-center justify-center rounded-full border border-[var(--cream-3)] px-5 py-3 font-condensed text-sm uppercase tracking-[0.18em] text-[var(--black)] transition-colors hover:border-[var(--black)]"
+              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--cream-3)] px-4 py-2 font-condensed text-xs font-bold uppercase tracking-[0.14em] text-[var(--black)] transition-colors hover:border-[var(--black)]"
             >
               Refuser
             </button>

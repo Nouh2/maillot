@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Minus, Plus } from 'lucide-react'
 import {
   FLOCAGE_PRICE,
@@ -25,7 +25,15 @@ const PAYMENT_METHODS = [
   { name: 'Shop Pay', src: '/payment/shop-pay.svg' },
   { name: 'Visa', src: '/payment/visa.svg' },
 ] as const
-export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
+export function AddToCartForm({
+  product,
+  patches,
+  openSizeOnLoad = false,
+}: {
+  product: Product
+  patches: Patch[]
+  openSizeOnLoad?: boolean
+}) {
   const [size, setSize] = useState<string | null>(null)
   const [selectedPatches, setSelectedPatches] = useState<string[]>([])
   const [qty, setQty] = useState(1)
@@ -33,6 +41,9 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const [flocageName, setFlocageName] = useState('')
   const [flocageNumber, setFlocageNumber] = useState('')
   const [error, setError] = useState('')
+  const [sizeOpenSignal, setSizeOpenSignal] = useState(0)
+  const sizeBlockRef = useRef<HTMLDivElement>(null)
+  const didApplySizeIntent = useRef(false)
 
   const addItem = useCartStore((state) => state.addItem)
   const pricing = getProductPricing({
@@ -64,9 +75,35 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     })
   }, [pricing.currentPrice, product.id, product.league, product.name])
 
+  const promptForSize = useCallback(() => {
+    setError('Choisis ta taille pour continuer')
+    setSizeOpenSignal((value) => value + 1)
+    requestAnimationFrame(() => {
+      sizeBlockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }, [])
+
+  useEffect(() => {
+    const handleSizeRequired = () => promptForSize()
+    document.addEventListener('maillot:size-required', handleSizeRequired)
+    return () => document.removeEventListener('maillot:size-required', handleSizeRequired)
+  }, [promptForSize])
+
+  useEffect(() => {
+    const hasSizeIntent = openSizeOnLoad || new URLSearchParams(window.location.search).get('taille') === '1'
+    if (!hasSizeIntent || didApplySizeIntent.current || size) return
+
+    const timeoutId = window.setTimeout(() => {
+      didApplySizeIntent.current = true
+      promptForSize()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [openSizeOnLoad, promptForSize, size])
+
   const handleAdd = () => {
     if (!size) {
-      setError('Veuillez sélectionner une taille')
+      promptForSize()
       return
     }
 
@@ -106,7 +143,18 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   return (
     <div className="space-y-4">
       <div className="space-y-4">
-        <SizeSelector available={product.sizes} selected={size} onSelect={setSize} />
+        <div ref={sizeBlockRef}>
+          <SizeSelector
+            available={product.sizes}
+            selected={size}
+            onSelect={(nextSize) => {
+              setSize(nextSize)
+              setError('')
+            }}
+            openSignal={sizeOpenSignal}
+            hasError={Boolean(error)}
+          />
+        </div>
         <PatchSelector patches={availablePatches} selected={selectedPatches} onSelect={setSelectedPatches} />
       </div>
 
@@ -159,11 +207,15 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       </div>
 
       <div className="border-t border-[var(--cream-3)] pt-3">
-        {error ? <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p> : null}
+        {error ? (
+          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-bold uppercase tracking-[0.14em] text-red-600" aria-live="polite">
+            {error}
+          </p>
+        ) : null}
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center">
-            <div className="flex h-[52px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
+            <div className="flex h-[58px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
               <button
                 onClick={() => setQty(Math.max(1, qty - 1))}
                 className="flex h-9 w-9 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
@@ -181,7 +233,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
 
             <button
               onClick={handleAdd}
-              className="ml-3 flex min-h-[58px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-4 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
+              className="ml-3 flex h-[58px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-0 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
             >
               Ajouter au panier - {formatEuro(totalPrice)}
             </button>

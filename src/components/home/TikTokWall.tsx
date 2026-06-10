@@ -13,8 +13,8 @@ const ITEMS = [...AVIS_IMAGES, ...AVIS_IMAGES, ...AVIS_IMAGES]
 
 export function TikTokWall() {
   return (
-    <section className="overflow-hidden bg-[var(--black)] py-12 md:py-20">
-      <div className="mx-auto mb-10 max-w-7xl px-4 text-center sm:px-6">
+    <section className="overflow-hidden bg-[var(--black)] py-8 md:py-20">
+      <div className="mx-auto mb-6 max-w-7xl px-4 text-center sm:px-6 md:mb-10">
         <p className="mb-2 font-condensed text-xs font-semibold uppercase tracking-[0.3em] text-[var(--terra)]">
           Communaute MAILLOT ADDICT
         </p>
@@ -37,7 +37,7 @@ export function TikTokWall() {
 
       <div className="relative">
         <div
-          className="flex gap-3 md:gap-4"
+          className="flex gap-2 md:gap-4"
           style={{ animation: 'kitlab-scroll 40s linear infinite', width: 'max-content' }}
         >
           {ITEMS.map((src, index) => (
@@ -45,7 +45,7 @@ export function TikTokWall() {
               key={index}
               className="relative flex-shrink-0 overflow-hidden rounded-xl border border-white/5 bg-[var(--black-2)]"
               style={{
-                width: 160,
+                width: 'clamp(132px, 34vw, 180px)',
                 aspectRatio: '4/5',
               }}
             >

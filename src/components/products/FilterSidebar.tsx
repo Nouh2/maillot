@@ -115,7 +115,7 @@ export function FilterSidebar({
     options: { value: string; label: string }[]
     align?: 'left' | 'right'
   }) => (
-    <div className="relative flex-1 sm:flex-initial">
+    <div className="relative shrink-0 sm:flex-initial">
       <button
         onClick={() => setOpenDropdown(openDropdown === filterKey ? null : filterKey)}
         className={`flex w-full items-center justify-between gap-4 rounded-full border-2 px-6 py-2.5 text-sm font-black font-condensed uppercase tracking-widest transition-all sm:w-auto sm:justify-start ${
@@ -163,9 +163,9 @@ export function FilterSidebar({
   )
 
   return (
-    <div className="relative z-40 mb-8 w-full" ref={dropdownRef}>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="group flex items-center gap-2 rounded-full border-2 border-[var(--black)] bg-white px-5 py-2.5 text-sm font-black font-condensed uppercase tracking-widest transition-all">
+    <div className="relative z-40 mb-6 w-full md:mb-8" ref={dropdownRef}>
+      <div className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
+        <div className="group flex shrink-0 items-center gap-2 rounded-full border-2 border-[var(--black)] bg-white px-4 py-2 text-sm font-black font-condensed uppercase tracking-widest transition-all sm:px-5 sm:py-2.5">
           <SlidersHorizontal className="h-4 w-4" />
           <span className="hidden sm:inline">Filtres</span>
           {totalActive > 0 ? (

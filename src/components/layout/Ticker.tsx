@@ -1,3 +1,6 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
 import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const TICKER_ITEMS = [
@@ -10,6 +13,19 @@ const TICKER_ITEMS = [
 ]
 
 export function Ticker() {
+  const pathname = usePathname()
+  const isSelectionLanding = pathname === '/selection-maillots' || pathname === '/coupe-du-monde'
+
+  if (isSelectionLanding) {
+    return (
+      <div className="w-full bg-[var(--terra)] px-4 py-2 text-center" role="region" aria-label="Offre du moment">
+        <span className="font-condensed text-sm font-bold uppercase tracking-[0.18em] text-white">
+          3 maillots = livraison offerte
+        </span>
+      </div>
+    )
+  }
+
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
 
   return (

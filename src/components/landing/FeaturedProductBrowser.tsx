@@ -101,6 +101,7 @@ function matchesFilter(product: Product, filter: FilterKey) {
 }
 
 function ProductTile({ product, priority = false }: { product: Product; priority?: boolean }) {
+  const sizeHref = `/shop/${product.slug}?taille=1`
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -145,7 +146,7 @@ function ProductTile({ product, priority = false }: { product: Product; priority
         </div>
         <div className="mt-3 grid gap-2">
           <Link
-            href={`/shop/${product.slug}`}
+            href={sizeHref}
             className="flex min-h-[42px] items-center justify-center rounded-md bg-[var(--black)] px-3 py-2 text-center font-condensed text-xs font-bold uppercase tracking-[0.16em] text-white"
           >
             Choisir ma taille - {formatEuro(pricing.currentPrice)}

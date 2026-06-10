@@ -3,13 +3,18 @@
 // il est implicitement côté client car ProductCard utilise 'use client'
 // (useState pour le hover d'image). C'est acceptable — les données
 // sont chargées dans le Server Component parent (page.tsx).
+import { Fragment } from 'react'
 import { ProductCard } from './ProductCard'
+import { BundleOffer } from '@/components/landing/BundleOffer'
+import { CustomerProofStrip } from '@/components/landing/CustomerProofStrip'
 import type { Product } from '@/types/product'
 
-export function ProductsGrid({ products, title, sub }: {
+export function ProductsGrid({ products, title, sub, showConversionBreaks = false, openSizeOnClick = false }: {
   products: Product[]
   title?: string
   sub?: string
+  showConversionBreaks?: boolean
+  openSizeOnClick?: boolean
 }) {
   return (
     <div>
@@ -25,7 +30,21 @@ export function ProductsGrid({ products, title, sub }: {
         </div>
       )}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-        {products.map((p) => <ProductCard key={p.id} product={p} />)}
+        {products.map((p, index) => (
+          <Fragment key={p.id}>
+            <ProductCard product={p} priority={index < 6} openSizeOnClick={openSizeOnClick} />
+            {showConversionBreaks && index === 7 ? (
+              <div key="bundle-offer-break" className="col-span-2 -mx-4 md:col-span-3 lg:col-span-4">
+                <BundleOffer />
+              </div>
+            ) : null}
+            {showConversionBreaks && index === 15 ? (
+              <div key="customer-proof-break" className="col-span-2 -mx-4 md:col-span-3 lg:col-span-4">
+                <CustomerProofStrip />
+              </div>
+            ) : null}
+          </Fragment>
+        ))}
       </div>
     </div>
   )

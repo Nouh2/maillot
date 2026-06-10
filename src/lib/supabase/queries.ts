@@ -41,6 +41,11 @@ const CATALOG_LIST_SELECT =
   'id, slug, name, club, league, country, product_kind, jersey_version, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override'
 const CATALOG_LIST_SELECT_LEGACY =
   'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at'
+const BLOCKED_PRODUCT_SLUGS = new Set(['portugal-maillot-domicile-2026-226332504'])
+
+function isBlockedProductSlug(slug: string): boolean {
+  return BLOCKED_PRODUCT_SLUGS.has(slug)
+}
 
 function isMissingCatalogOptionalColumn(error: unknown): boolean {
   return (
@@ -102,7 +107,9 @@ const getCachedProducts = unstable_cache(
       )
     }
 
-    return (rawProducts as CatalogListRow[]).map((row) => toCatalogProduct(row, { photoLimit: 2 }))
+    return (rawProducts as CatalogListRow[])
+      .filter((row) => !isBlockedProductSlug(row.slug))
+      .map((row) => toCatalogProduct(row, { photoLimit: 2 }))
   },
   ['catalog-products-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
@@ -154,6 +161,7 @@ async function fetchRelatedProductCandidates(product: Product, limit: number): P
   }
 
   return Array.from(rowsById.values())
+    .filter((row) => !isBlockedProductSlug(row.slug))
     .map((row) => toCatalogProduct(row, { photoLimit: 2 }))
     .map((candidate) => {
       let score = 0
@@ -187,6 +195,8 @@ const getCachedLeagues = unstable_cache(
 
 const getCachedProductBySlug = unstable_cache(
   async (slug: string): Promise<Product | null> => {
+    if (isBlockedProductSlug(slug)) return null
+
     const supabase = getSupabasePublicClient()
     const { data, error } = await supabase
       .from('products')

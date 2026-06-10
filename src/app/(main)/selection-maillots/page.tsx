@@ -12,21 +12,16 @@ import { getProductBySlug } from '@/lib/supabase/queries'
 import { normalizeProductTextSeasons } from '@/lib/season'
 
 export const metadata: Metadata = {
-  title: 'Sélection maillots du moment',
-  description: 'Sélection mobile des maillots Maillot Addict les plus demandés: France, PSG, Espagne, Algérie et Maroc.',
+  title: 'Sélection maillots Coupe du monde',
+  description: 'Sélection mobile des maillots de sélections nationales les plus demandés: France, Espagne, Algérie et Maroc.',
 }
 
 const FEATURED_PRODUCT_SLUGS = [
   'france-maillot-exterieur-2026',
   'france-maillot-exterieur-version-joueur-2026',
   'espagne-maillot-exterieur-2026',
-  'paris-saint-germain-maillot-domicile-2026-2027',
-  'maillot-domicile-stadium-psg-25-26-flocage-champions-of-europe',
   'algerie-maillot-domicile-2026-219066038',
   'maroc-maillot-domicile-2026',
-  'fc-barcelone-maillot-domicile-207893589',
-  'fc-barcelone-maillot-domicile-edition-speciale-187049732',
-  'fc-barcelone-maillot-domicile-2025-2026-219063956',
 ] as const
 
 async function getFeaturedProducts() {
@@ -65,7 +60,7 @@ export default async function FeaturedSelectionPage() {
 
             {heroProduct && heroPricing ? (
               <Link
-                href={`/shop/${heroProduct.slug}`}
+                href={`/shop/${heroProduct.slug}?taille=1`}
                 className="mt-5 flex min-h-[54px] items-center justify-center rounded-md bg-[var(--terra)] px-5 py-4 font-condensed text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[var(--terra-2)]"
               >
                 Choisir ma taille - {formatEuro(heroPricing.currentPrice)}
@@ -133,10 +128,10 @@ export default async function FeaturedSelectionPage() {
       {heroProduct && heroPricing ? (
         <div className="fixed inset-x-0 bottom-0 z-[80] border-t border-[var(--cream-3)] bg-white/95 p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur md:hidden">
           <Link
-            href={`/shop/${heroProduct.slug}`}
+            href="#selection-products"
             className="flex min-h-[52px] items-center justify-center rounded-md bg-[var(--terra)] px-4 py-3 font-condensed text-sm font-bold uppercase tracking-[0.16em] text-white"
           >
-            Choisir ma taille - {formatEuro(heroPricing.currentPrice)}
+            Voir la sélection - dès 19,90 €
           </Link>
         </div>
       ) : null}

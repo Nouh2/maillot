@@ -20,6 +20,7 @@ export const revalidate = 86400
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams?: Promise<{ taille?: string | string[] }>
 }
 
 const IMPORTED_PRODUCT_DESCRIPTION_PATTERN =
@@ -80,8 +81,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const resolvedSearchParams = await searchParams
+  const sizeIntent = resolvedSearchParams?.taille
+  const openSizeOnLoad = Array.isArray(sizeIntent) ? sizeIntent.includes('1') : sizeIntent === '1'
   const [product, patches] = await Promise.all([getProductBySlug(slug), getPatches()])
   if (!product) notFound()
 
@@ -145,7 +149,7 @@ export default async function ProductPage({ params }: Props) {
 
             <div id="product-cta-sentinel" />
 
-            <AddToCartForm product={product} patches={patches} />
+            <AddToCartForm product={product} patches={patches} openSizeOnLoad={openSizeOnLoad} />
 
             <div className="mt-5">
               <ProductConversionProof />

@@ -14,10 +14,14 @@ export function SizeSelector({
   available,
   selected,
   onSelect,
+  openSignal = 0,
+  hasError = false,
 }: {
   available: string[]
   selected: string | null
   onSelect: (size: string) => void
+  openSignal?: number
+  hasError?: boolean
 }) {
   const [isGuideOpen, setIsGuideOpen] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -32,6 +36,13 @@ export function SizeSelector({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (openSignal > 0 && !selected) {
+      const timeoutId = window.setTimeout(() => setIsOpen(true), 0)
+      return () => window.clearTimeout(timeoutId)
+    }
+  }, [openSignal, selected])
 
   return (
     <>
@@ -48,6 +59,11 @@ export function SizeSelector({
             Guide des tailles
           </button>
         </div>
+        {hasError && !selected ? (
+          <p className="px-1 text-xs font-bold uppercase tracking-[0.12em] text-red-600" aria-live="polite">
+            Choisis une taille pour continuer
+          </p>
+        ) : null}
         
         <div className="relative">
           <button
@@ -55,7 +71,8 @@ export function SizeSelector({
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
               "w-full flex items-center justify-between bg-white border-2 border-[var(--cream-3)] rounded-2xl px-5 py-3.5 text-[16px] font-bold text-[var(--black)] cursor-pointer transition-all hover:border-[var(--black)] shadow-sm text-left",
-              isOpen && "border-[var(--black)] ring-4 ring-[var(--black)]/5"
+              isOpen && "border-[var(--black)] ring-4 ring-[var(--black)]/5",
+              hasError && !selected && "border-red-500 ring-4 ring-red-500/10"
             )}
           >
             <span className={cn(!selected && "text-[var(--grey)]")}>

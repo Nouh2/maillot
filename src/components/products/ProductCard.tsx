@@ -7,8 +7,17 @@ import { getProductMetaLine } from '@/lib/productLabels'
 import type { Product } from '@/types/product'
 import { ProductFamilyBadge } from './ProductFamilyBadge'
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  priority = false,
+  openSizeOnClick = false,
+}: {
+  product: Product
+  priority?: boolean
+  openSizeOnClick?: boolean
+}) {
   const photo = product.photos[0]
+  const productHref = `/shop/${product.slug}${openSizeOnClick ? '?taille=1' : ''}`
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -18,16 +27,17 @@ export function ProductCard({ product }: { product: Product }) {
   })
 
   return (
-    <Link href={`/shop/${product.slug}`} className="group block">
+    <Link href={productHref} className="group block">
       <div
         className="border border-[var(--cream-3)] bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[var(--terra)] hover:shadow-[0_8px_24px_rgba(193,68,14,0.12)]"
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream)]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--cream-2)]">
           {photo ? (
             <ExternalProductImage
               src={photo}
               alt={product.name}
               fill
+              priority={priority}
               unoptimized
               fallbackMode="proxy"
               bunnyTransform="card"
@@ -68,6 +78,10 @@ export function ProductCard({ product }: { product: Product }) {
             {product.available_patches.length > 0 ? (
               <span className="text-xs text-[var(--grey)]">+{product.available_patches.length} patchs</span>
             ) : null}
+          </div>
+
+          <div className="mt-3 flex min-h-[40px] items-center justify-center rounded-md bg-[var(--black)] px-3 py-2 text-center font-condensed text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors group-hover:bg-[var(--terra)]">
+            Choisir ma taille - {formatEuro(pricing.currentPrice)}
           </div>
         </div>
       </div>
