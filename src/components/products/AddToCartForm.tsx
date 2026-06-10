@@ -2,10 +2,9 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { BadgePercent, Check, Minus, Plus, Truck } from 'lucide-react'
+import { Check, Minus, Plus } from 'lucide-react'
 import {
   FLOCAGE_PRICE,
-  FREE_SHIPPING_MIN_ITEMS,
   calculateCartItemUnitPrice,
   formatEuro,
   getProductPricing,
@@ -14,7 +13,6 @@ import { normalizeProductTextSeasons } from '@/lib/season'
 import { trackAddToCart, trackEvent } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import type { Patch, Product } from '@/types/product'
-import { cn } from '@/lib/utils'
 import { PatchSelector } from './PatchSelector'
 import { SizeSelector } from './SizeSelector'
 
@@ -27,36 +25,6 @@ const PAYMENT_METHODS = [
   { name: 'Shop Pay', src: '/payment/shop-pay.svg' },
   { name: 'Visa', src: '/payment/visa.svg' },
 ] as const
-const BUNDLE_OPTIONS = [
-  {
-    qty: 1,
-    title: 'Solo',
-    benefit: '1 maillot',
-    badge: null,
-    icon: BadgePercent,
-  },
-  {
-    qty: 3,
-    title: 'Pack de 3',
-    benefit: 'Livraison offerte',
-    badge: null,
-    icon: Truck,
-  },
-] as const
-
-function pluralizeMaillot(count: number) {
-  return `maillot${count > 1 ? 's' : ''}`
-}
-
-function getBundlePreview(unitPrice: number, qty: number) {
-  const subtotal = unitPrice * qty
-
-  return {
-    subtotal,
-    total: subtotal,
-  }
-}
-
 export function AddToCartForm({ product, patches }: { product: Product; patches: Patch[] }) {
   const [size, setSize] = useState<string | null>(null)
   const [selectedPatches, setSelectedPatches] = useState<string[]>([])
@@ -65,10 +33,8 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
   const [flocageName, setFlocageName] = useState('')
   const [flocageNumber, setFlocageNumber] = useState('')
   const [error, setError] = useState('')
-  const [selectedBundleTarget, setSelectedBundleTarget] = useState(1)
 
   const addItem = useCartStore((state) => state.addItem)
-  const getCartItemCount = useCartStore((state) => state.itemCount)
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -87,20 +53,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
     patchCount: selectedPatches.length,
     hasFlocage,
   })
-  const bundlePreview = getBundlePreview(unitPrice, qty)
-  const currentCartCount = getCartItemCount()
-  const projectedBundleCount = currentCartCount + qty
-  const bundleProgressTarget = selectedBundleTarget === 1 ? FREE_SHIPPING_MIN_ITEMS : Math.max(1, selectedBundleTarget)
-  const missingForSelectedBundle = Math.max(0, selectedBundleTarget - projectedBundleCount)
-  const selectedBundleOption = BUNDLE_OPTIONS.find((option) => option.qty === selectedBundleTarget) ?? BUNDLE_OPTIONS[0]
-  const progressCount = Math.min(projectedBundleCount, bundleProgressTarget)
-  const progressWidth = Math.min(100, (progressCount / bundleProgressTarget) * 100)
-  const progressLabel = selectedBundleTarget === 1 ? 'Livraison offerte' : selectedBundleOption.title
-
-  const selectBundleOption = (targetQty: number) => {
-    setSelectedBundleTarget(targetQty)
-    setQty(Math.max(1, targetQty - currentCartCount))
-  }
+  const totalPrice = unitPrice * qty
 
   useEffect(() => {
     trackEvent('product_view', {
@@ -146,7 +99,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
       patchCount: selectedPatches.length,
       hasFlocage,
       unitPrice,
-      value: bundlePreview.total,
+      value: totalPrice,
     })
   }
 
@@ -205,74 +158,6 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
         ) : null}
       </div>
 
-      <div className="rounded-[1.25rem] border border-[var(--cream-3)] bg-white p-1.5 text-[var(--black)] shadow-[0_14px_32px_rgba(28,23,18,0.1)]">
-        <div className="flex items-center justify-between gap-3 px-2.5 py-1.5">
-          <div className="min-w-0">
-            <p className="font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--terra)]">Bundle 3 maillots</p>
-            <h3 className="mt-0.5 whitespace-nowrap font-bebas text-[22px] leading-none tracking-wide sm:text-2xl">
-              3 maillots = livraison offerte
-            </h3>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-1.5">
-          {BUNDLE_OPTIONS.map((option) => {
-            const Icon = option.icon
-            const selected = selectedBundleTarget === option.qty
-
-            return (
-              <button
-                key={option.qty}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => selectBundleOption(option.qty)}
-                className={cn(
-                  'relative min-h-[86px] overflow-hidden rounded-xl border px-2.5 py-2.5 text-left transition-all',
-                  selected
-                    ? 'border-[var(--terra)] bg-[var(--terra-lt)] text-[var(--black)] shadow-[0_0_0_2px_rgba(193,68,14,0.14)]'
-                    : 'border-[var(--cream-3)] bg-[var(--cream)] text-[var(--black)] hover:border-[var(--terra)]/35 hover:bg-[var(--terra-lt)]',
-                )}
-              >
-                {option.badge ? (
-                  <span className="absolute right-1.5 top-1.5 rounded-full bg-[var(--terra)] px-1.5 py-0.5 font-condensed text-[8px] uppercase tracking-[0.1em] text-white">
-                    Top
-                  </span>
-                ) : null}
-
-                <Icon className="mb-1.5 h-4 w-4 text-[var(--terra)]" />
-                <p className="font-bebas text-[19px] leading-none tracking-wide sm:text-[20px]">{option.title}</p>
-
-                <p className="mt-1.5 font-condensed text-[11px] font-bold uppercase leading-tight tracking-[0.08em] text-[var(--terra)]">
-                  {option.benefit}
-                </p>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="mt-1 rounded-xl border border-[var(--cream-3)] bg-[var(--cream)] px-3 py-1.5">
-          <div className="mb-1 flex items-center justify-between font-condensed text-[10px] uppercase tracking-[0.14em] text-[var(--grey)]">
-            <span>{progressLabel}</span>
-            <span>
-              {progressCount}/{bundleProgressTarget}
-            </span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--cream-3)]">
-            <div
-              className="h-full rounded-full bg-[var(--terra)] transition-all"
-              style={{ width: `${progressWidth}%` }}
-            />
-          </div>
-          <p className="mt-1 text-[10px] leading-snug text-[var(--grey)]">
-            {selectedBundleTarget === 1
-              ? 'Ajoute ce maillot seul, ou complète un pack pour activer les avantages.'
-              : missingForSelectedBundle === 0
-                ? `Pack complet: livraison offerte dès le ${FREE_SHIPPING_MIN_ITEMS}e maillot.`
-                : `Encore ${missingForSelectedBundle} ${pluralizeMaillot(missingForSelectedBundle)} pour compléter ce pack.`}
-          </p>
-        </div>
-      </div>
-
       <div className="border-t border-[var(--cream-3)] pt-3">
         {error ? <p className="mb-4 animate-pulse text-center text-xs font-bold tracking-widest text-red-500">{error}</p> : null}
 
@@ -298,7 +183,7 @@ export function AddToCartForm({ product, patches }: { product: Product; patches:
               onClick={handleAdd}
               className="ml-3 flex min-h-[58px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-4 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
             >
-              Ajouter au panier - {formatEuro(bundlePreview.total)}
+              Ajouter au panier - {formatEuro(totalPrice)}
             </button>
           </div>
 

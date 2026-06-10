@@ -17,7 +17,7 @@ export function ProductTrustBadges() {
     {
       icon: <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5" />,
       text: 'Patchs',
-      subtext: 'officiels',
+      subtext: 'maillot',
     },
   ]
 

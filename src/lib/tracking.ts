@@ -14,6 +14,7 @@ export type StoredAttribution = {
   fbclid?: string
   ttclid?: string
   source_channel?: string
+  referrer_host?: string
 }
 
 type TrackingParams = Record<string, unknown>
@@ -296,6 +297,40 @@ export function hasTrackingConsent(): boolean {
   return getTrackingConsent() === 'granted'
 }
 
+function getExternalReferrerHost(): string | null {
+  if (typeof document === 'undefined' || !document.referrer) return null
+
+  try {
+    const referrer = new URL(document.referrer)
+    if (referrer.hostname === window.location.hostname) return null
+    return referrer.hostname.replace(/^www\./, '').toLowerCase()
+  } catch {
+    return null
+  }
+}
+
+function getReferrerAttribution(host: string): Pick<StoredAttribution, 'utm_source' | 'utm_medium' | 'source_channel' | 'referrer_host'> | null {
+  if (host.includes('checkout.stripe.com')) return null
+
+  if (host.includes('google.')) {
+    return { utm_source: 'google', utm_medium: 'organic', source_channel: 'google', referrer_host: host }
+  }
+
+  if (host.includes('bing.')) {
+    return { utm_source: 'bing', utm_medium: 'organic', source_channel: 'bing', referrer_host: host }
+  }
+
+  if (host.includes('chatgpt.com')) {
+    return { utm_source: 'chatgpt.com', utm_medium: 'referral', source_channel: 'chatgpt.com', referrer_host: host }
+  }
+
+  if (host.includes('tiktok.com')) {
+    return { utm_source: 'tiktok', utm_medium: 'referral', source_channel: 'tiktok', referrer_host: host }
+  }
+
+  return { utm_source: host, utm_medium: 'referral', source_channel: host, referrer_host: host }
+}
+
 export function captureAttribution(searchParams: URLSearchParams) {
   if (!hasTrackingConsent()) return
 
@@ -308,14 +343,21 @@ export function captureAttribution(searchParams: URLSearchParams) {
   const fbclid = searchParams.get('fbclid')?.trim()
   const ttclid = searchParams.get('ttclid')?.trim()
 
-  if (!utmSource && !utmMedium && !utmCampaign && !utmContent && !utmTerm && !gclid && !fbclid && !ttclid) return
-
   const storage = getStorageSafe()
   if (!storage) return
+
+  const hasExplicitAttribution = Boolean(utmSource || utmMedium || utmCampaign || utmContent || utmTerm || gclid || fbclid || ttclid)
+  const existingAttribution = getStoredAttribution()
+  const referrerHost = getExternalReferrerHost()
+  const referrerAttribution = !hasExplicitAttribution && referrerHost ? getReferrerAttribution(referrerHost) : null
+
+  if (!hasExplicitAttribution && !referrerAttribution) return
+  if (!hasExplicitAttribution && existingAttribution.source_channel && existingAttribution.source_channel !== 'direct') return
 
   const sourceChannel = utmSource || (gclid ? 'google' : fbclid ? 'meta' : ttclid ? 'tiktok' : 'direct')
 
   const payload: StoredAttribution = {
+    ...referrerAttribution,
     ...(utmSource ? { utm_source: utmSource } : {}),
     ...(utmMedium ? { utm_medium: utmMedium } : {}),
     ...(utmCampaign ? { utm_campaign: utmCampaign } : {}),
@@ -324,7 +366,7 @@ export function captureAttribution(searchParams: URLSearchParams) {
     ...(gclid ? { gclid } : {}),
     ...(fbclid ? { fbclid } : {}),
     ...(ttclid ? { ttclid } : {}),
-    source_channel: sourceChannel,
+    source_channel: hasExplicitAttribution ? sourceChannel : referrerAttribution?.source_channel ?? sourceChannel,
   }
 
   storage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(payload))

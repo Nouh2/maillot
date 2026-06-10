@@ -14,7 +14,6 @@ import {
   LEGAL_HOST_ADDRESS,
   LEGAL_HOST_NAME,
   LEGAL_INFRASTRUCTURE_ITEMS,
-  LEGAL_PLACEHOLDER,
   LEGAL_PUBLICATION_DIRECTOR,
   isLegalPlaceholder,
 } from '@/lib/legal'
@@ -35,7 +34,8 @@ const HOST_ROWS = [
   ['Adresse de l’hébergeur', LEGAL_HOST_ADDRESS],
 ] as const
 
-const hasMissingAdministrativeFields = [...LEGAL_ROWS, ...HOST_ROWS].some(([, value]) => isLegalPlaceholder(value))
+const visibleLegalRows = LEGAL_ROWS.filter(([, value]) => !isLegalPlaceholder(value))
+const visibleHostRows = HOST_ROWS.filter(([, value]) => !isLegalPlaceholder(value))
 
 export const metadata = { title: 'Mentions légales' }
 
@@ -46,21 +46,12 @@ export default function MentionsLegalesPage() {
       title="Mentions légales"
       intro="Cette page regroupe les informations d’identification de l’éditeur du site, les éléments d’hébergement ainsi que les règles d’usage applicables à Maillot Addict."
     >
-      {hasMissingAdministrativeFields ? (
-        <LegalSection title="Informations administratives à compléter" className="border-[var(--terra)]/30 bg-[var(--terra-lt)]">
-          <p className="text-[var(--black)]">
-            Certaines informations obligatoires restent à compléter avant mise en ligne définitive: forme juridique, siège social,
-            immatriculation, TVA et hébergeur.
-          </p>
-        </LegalSection>
-      ) : null}
-
       <LegalSection title="Éditeur du site">
         <dl className="grid gap-3">
-          {LEGAL_ROWS.map(([label, value]) => (
+          {visibleLegalRows.map(([label, value]) => (
             <div key={label} className="grid gap-1 md:grid-cols-[220px_1fr] md:gap-4">
               <dt className="font-condensed uppercase tracking-[0.12em] text-[var(--black)]">{label}</dt>
-              <dd className={value === LEGAL_PLACEHOLDER ? 'text-[var(--terra)]' : ''}>{value}</dd>
+              <dd>{value}</dd>
             </div>
           ))}
         </dl>
@@ -80,10 +71,10 @@ export default function MentionsLegalesPage() {
 
       <LegalSection title="Hébergement">
         <dl className="grid gap-3">
-          {HOST_ROWS.map(([label, value]) => (
+          {visibleHostRows.map(([label, value]) => (
             <div key={label} className="grid gap-1 md:grid-cols-[220px_1fr] md:gap-4">
               <dt className="font-condensed uppercase tracking-[0.12em] text-[var(--black)]">{label}</dt>
-              <dd className={value === LEGAL_PLACEHOLDER ? 'text-[var(--terra)]' : ''}>{value}</dd>
+              <dd>{value}</dd>
             </div>
           ))}
         </dl>
@@ -102,11 +93,13 @@ export default function MentionsLegalesPage() {
 
       <LegalSection title="Propriété intellectuelle">
         <p>
-          L’ensemble des éléments présents sur le site Maillot Addict, notamment les textes, visuels, photographies, éléments graphiques,
-          logos et contenus éditoriaux, est protégé par les règles applicables en matière de propriété intellectuelle.
+          L’ensemble des éléments présents sur le site Maillot Addict, notamment les textes, visuels, photographies,
+          éléments graphiques, logos et contenus éditoriaux, est protégé par les règles applicables en matière de
+          propriété intellectuelle.
         </p>
         <p>
-          Toute reproduction, représentation, adaptation ou exploitation, totale ou partielle, sans autorisation préalable, est interdite.
+          Toute reproduction, représentation, adaptation ou exploitation, totale ou partielle, sans autorisation
+          préalable, est interdite.
         </p>
       </LegalSection>
     </LegalPageLayout>

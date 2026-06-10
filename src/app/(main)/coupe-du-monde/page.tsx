@@ -6,7 +6,7 @@ import { getWorldCupProducts } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Maillots Coupe du Monde 2026',
-  description: 'Tous les maillots officiels des équipes qualifiées pour la Coupe du Monde 2026',
+  description: 'Selection de maillots des equipes qualifiees pour la Coupe du Monde 2026',
 }
 export const revalidate = 21600
 

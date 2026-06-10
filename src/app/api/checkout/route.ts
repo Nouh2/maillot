@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_MIN_ITEMS } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
-import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken } from '@/lib/orders'
+import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken, recordMarketingEvent } from '@/lib/orders'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { getStripe } from '@/lib/stripe'
 import { toCatalogProduct } from '@/lib/catalogProducts'
@@ -127,6 +127,15 @@ export async function POST(request: NextRequest) {
     sourceChannel: attribution.source_channel ?? null,
   })
   const now = new Date().toISOString()
+  const { data: existingCheckoutLead } = await supabase
+    .from('checkout_leads')
+    .select('id, recovered_order_id, last_checkout_started_at')
+    .eq('email', email)
+    .maybeSingle()
+  const duplicateCheckoutLead =
+    existingCheckoutLead &&
+    !existingCheckoutLead.recovered_order_id &&
+    Date.now() - new Date(existingCheckoutLead.last_checkout_started_at).getTime() < 24 * 60 * 60 * 1000
 
   const { data: pendingOrder, error: insertError } = await supabase
     .from('orders')
@@ -263,6 +272,55 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Order session update error:', updateError)
+    }
+
+    await recordMarketingEvent({
+      eventName: 'checkout_created',
+      pagePath: '/panier',
+      sourceChannel,
+      utmSource: attribution.utm_source ?? null,
+      utmMedium: attribution.utm_medium ?? null,
+      utmCampaign: attribution.utm_campaign ?? null,
+      utmContent: attribution.utm_content ?? null,
+      utmTerm: attribution.utm_term ?? null,
+      gclid: attribution.gclid ?? null,
+      fbclid: attribution.fbclid ?? null,
+      ttclid: attribution.ttclid ?? null,
+      value: orderTotal,
+      currency: 'EUR',
+      itemCount,
+      productIds: normalizedItems.map((item) => item.product_id).join(','),
+      orderNumber: pendingOrder.order_number,
+      payload: {
+        stripe_session_id: session.id,
+        marketing_opt_in: marketingOptIn,
+        duplicate_checkout_lead: Boolean(duplicateCheckoutLead),
+      },
+    })
+
+    if (duplicateCheckoutLead) {
+      await recordMarketingEvent({
+        eventName: 'checkout_duplicate_attempt',
+        pagePath: '/panier',
+        sourceChannel,
+        utmSource: attribution.utm_source ?? null,
+        utmMedium: attribution.utm_medium ?? null,
+        utmCampaign: attribution.utm_campaign ?? null,
+        utmContent: attribution.utm_content ?? null,
+        utmTerm: attribution.utm_term ?? null,
+        gclid: attribution.gclid ?? null,
+        fbclid: attribution.fbclid ?? null,
+        ttclid: attribution.ttclid ?? null,
+        value: orderTotal,
+        currency: 'EUR',
+        itemCount,
+        productIds: normalizedItems.map((item) => item.product_id).join(','),
+        orderNumber: pendingOrder.order_number,
+        payload: {
+          previous_checkout_lead_id: existingCheckoutLead.id,
+          stripe_session_id: session.id,
+        },
+      })
     }
 
     return NextResponse.json({ url: session.url })

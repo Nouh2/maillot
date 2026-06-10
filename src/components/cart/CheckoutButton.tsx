@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { formatEuro } from '@/lib/cartPricing'
 import { getStoredAttribution, trackBeginCheckout, trackEvent } from '@/lib/tracking'
@@ -13,12 +14,16 @@ interface CheckoutButtonProps {
 
 export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonProps) {
   const { items, total, customerEmail, marketingOptIn, promoCode } = useCartStore()
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleCheckout = async () => {
-    if (items.length === 0) return
+    if (items.length === 0 || loading) return
+
+    setError('')
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      window.alert('Renseigne un email valide pour recevoir le suivi de commande.')
+      setError('Renseigne un email valide pour recevoir le suivi de commande.')
       return
     }
 
@@ -31,6 +36,7 @@ export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonPr
     })
 
     try {
+      setLoading(true)
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,18 +65,27 @@ export function CheckoutButton({ className, fullWidth = true }: CheckoutButtonPr
       }
     } catch (error) {
       console.error('Checkout echoue', error)
-      window.alert(error instanceof Error ? error.message : 'Impossible de lancer le paiement pour le moment.')
+      setError(error instanceof Error ? error.message : 'Impossible de lancer le paiement pour le moment.')
+      setLoading(false)
     }
   }
 
   return (
-    <Button
-      onClick={handleCheckout}
-      size="lg"
-      className={cn(fullWidth ? 'w-full' : '', className)}
-      disabled={items.length === 0}
-    >
-      Commander - {formatEuro(total())}
-    </Button>
+    <div className={cn(fullWidth ? 'w-full' : '', className)}>
+      {error ? (
+        <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm font-semibold text-red-700">
+          {error}
+        </p>
+      ) : null}
+
+      <Button
+        onClick={handleCheckout}
+        size="lg"
+        className="w-full"
+        disabled={items.length === 0 || loading}
+      >
+        {loading ? 'Redirection paiement...' : `Commander - ${formatEuro(total())}`}
+      </Button>
+    </div>
   )
 }

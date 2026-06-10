@@ -17,15 +17,15 @@ interface TrustBadgeProps {
 
 export function TrustBadge({ className = '' }: TrustBadgeProps) {
   return (
-    <div className={`inline-flex items-center gap-3 rounded-full border border-[var(--cream-3)] bg-white px-4 py-2 shadow-sm ${className}`}>
-      <div className="flex items-center gap-2">
+    <div className={`inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--cream-3)] bg-white px-3 py-2 shadow-sm sm:gap-3 sm:px-4 ${className}`}>
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <StarRating size="md" />
-        <span className="font-condensed text-sm font-bold text-[var(--black)]">Excellent</span>
+        <span className="whitespace-nowrap font-condensed text-sm font-bold text-[var(--black)]">Excellent</span>
       </div>
       <span className="h-4 w-px bg-[var(--cream-3)]" />
-      <span className="font-condensed text-sm font-bold text-[var(--terra)]">4.8 / 5</span>
+      <span className="whitespace-nowrap font-condensed text-sm font-bold text-[var(--terra)]">4.8 / 5</span>
       <span className="h-4 w-px bg-[var(--cream-3)]" />
-      <span className="font-condensed text-xs text-[var(--grey)]">+1000 clients satisfaits</span>
+      <span className="whitespace-nowrap font-condensed text-xs text-[var(--grey)]">+1000 clients satisfaits</span>
     </div>
   )
 }

@@ -52,7 +52,7 @@ export function PatchSelector({
     <>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--black)]">Patch officiel</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--black)]">Patch maillot</p>
           {selected.length > 0 ? (
             <button
               onClick={() => onSelect([])}
@@ -118,7 +118,7 @@ export function PatchSelector({
           <div className="mx-auto mb-4 h-[3px] w-8 rounded-full bg-[#DEDEDE]" />
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-bebas text-[28px] leading-none tracking-wide text-[var(--black)]">Patchs officiels</p>
+              <p className="font-bebas text-[28px] leading-none tracking-wide text-[var(--black)]">Patchs maillot</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[#999]">
                 {patches.length} patchs · +{formatEuro(PATCH_PRICE)} / patch · cumul possible
               </p>

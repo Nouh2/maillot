@@ -1,4 +1,4 @@
-export const LEGAL_PLACEHOLDER = 'À compléter avant mise en ligne'
+export const LEGAL_PLACEHOLDER = '__LEGAL_FIELD_MISSING__'
 
 export const LEGAL_NAV_ITEMS = [
   { label: 'CGV', href: '/legal/cgv' },

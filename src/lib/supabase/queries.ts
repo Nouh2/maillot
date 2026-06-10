@@ -37,6 +37,10 @@ type CatalogListRow = Pick<
 
 const CATALOG_REVALIDATE_SECONDS = 60 * 60 * 6
 const STATIC_REVALIDATE_SECONDS = 86400
+const CATALOG_LIST_SELECT =
+  'id, slug, name, club, league, country, product_kind, jersey_version, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override'
+const CATALOG_LIST_SELECT_LEGACY =
+  'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at'
 
 function isMissingCatalogOptionalColumn(error: unknown): boolean {
   return (
@@ -78,9 +82,7 @@ const getCachedProducts = unstable_cache(
       rawProducts = await fetchAllProducts((from, to) =>
         supabase
           .from('products')
-          .select(
-            'id, slug, name, club, league, country, product_kind, jersey_version, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at, manual_override',
-          )
+          .select(CATALOG_LIST_SELECT)
           .eq('is_active', true)
           .order('id', { ascending: true })
           .range(from, to),
@@ -93,9 +95,7 @@ const getCachedProducts = unstable_cache(
       rawProducts = await fetchAllProducts((from, to) =>
         supabase
           .from('products')
-          .select(
-            'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at',
-          )
+          .select(CATALOG_LIST_SELECT_LEGACY)
           .eq('is_active', true)
           .order('id', { ascending: true })
           .range(from, to),
@@ -107,6 +107,73 @@ const getCachedProducts = unstable_cache(
   ['catalog-products-v3'],
   { revalidate: CATALOG_REVALIDATE_SECONDS, tags: [CATALOG_CACHE_TAG] },
 )
+
+async function fetchRelatedProductCandidates(product: Product, limit: number): Promise<Product[]> {
+  const supabase = getSupabasePublicClient()
+  const rowsById = new Map<string, CatalogListRow>()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function collect(applyFilters: (query: any) => any, expectedLimit: number) {
+    try {
+      const { data, error } = await applyFilters(supabase.from('products').select(CATALOG_LIST_SELECT))
+        .eq('is_active', true)
+        .neq('id', product.id)
+        .order('created_at', { ascending: false })
+        .limit(expectedLimit)
+
+      if (error) throw error
+
+      for (const row of (data ?? []) as CatalogListRow[]) {
+        rowsById.set(row.id, row)
+      }
+    } catch (error) {
+      if (!isMissingCatalogOptionalColumn(error)) {
+        throw error
+      }
+
+      const { data } = await applyFilters(supabase.from('products').select(CATALOG_LIST_SELECT_LEGACY))
+        .eq('is_active', true)
+        .neq('id', product.id)
+        .order('created_at', { ascending: false })
+        .limit(expectedLimit)
+
+      for (const row of (data ?? []) as CatalogListRow[]) {
+        rowsById.set(row.id, row)
+      }
+    }
+  }
+
+  await collect((query) => query.eq('club', product.club), limit * 3)
+
+  if (rowsById.size < limit) {
+    await collect((query) => query.eq('league', product.league), limit * 3)
+  }
+
+  if (rowsById.size < limit) {
+    await collect((query) => query.eq('is_featured', true), limit * 2)
+  }
+
+  return Array.from(rowsById.values())
+    .map((row) => toCatalogProduct(row, { photoLimit: 2 }))
+    .map((candidate) => {
+      let score = 0
+
+      if (candidate.club === product.club) score += 8
+      if (candidate.league === product.league) score += 5
+      if (candidate.product_kind === product.product_kind) score += 3
+      if (candidate.type === product.type) score += 2
+      if (candidate.season === product.season) score += 1
+      if (candidate.is_retro === product.is_retro) score += 1
+
+      return { candidate, score }
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score
+      return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
+    })
+    .map(({ candidate }) => candidate)
+    .slice(0, limit)
+}
 
 const getCachedLeagues = unstable_cache(
   async (): Promise<League[]> => {
@@ -223,6 +290,15 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
     featured: true,
     limit,
   })
+}
+
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  try {
+    return await fetchRelatedProductCandidates(product, limit)
+  } catch (error) {
+    console.error('Related products fetch failed:', product.slug, error)
+    return []
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

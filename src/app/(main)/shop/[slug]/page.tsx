@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AddToCartForm } from '@/components/products/AddToCartForm'
 import { PhotoGallery } from '@/components/products/PhotoGallery'
+import { ProductConversionProof } from '@/components/products/ProductConversionProof'
+import { ProductDetailsPanels } from '@/components/products/ProductDetailsPanels'
 import { ProductFamilyBadge } from '@/components/products/ProductFamilyBadge'
-import { ProductTrustBadges } from '@/components/products/ProductTrustBadges'
 import { ProductsGrid } from '@/components/products/ProductsGrid'
 import { StickyAddToCart } from '@/components/products/StickyAddToCart'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
@@ -12,36 +13,13 @@ import { TrustBadge } from '@/components/ui/TrustBadge'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
-import { getPatches, getProductBySlug, getProducts } from '@/lib/supabase/queries'
+import { getPatches, getProductBySlug, getRelatedProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
 export const revalidate = 86400
 
 interface Props {
   params: Promise<{ slug: string }>
-}
-
-function getRelatedProducts(product: Product, catalog: Product[]): Product[] {
-  return catalog
-    .filter((candidate) => candidate.id !== product.id)
-    .map((candidate) => {
-      let score = 0
-
-      if (candidate.club === product.club) score += 8
-      if (candidate.league === product.league) score += 5
-      if (candidate.product_kind === product.product_kind) score += 3
-      if (candidate.type === product.type) score += 2
-      if (candidate.season === product.season) score += 1
-      if (candidate.is_retro === product.is_retro) score += 1
-
-      return { candidate, score }
-    })
-    .sort((left, right) => {
-      if (right.score !== left.score) return right.score - left.score
-      return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
-    })
-    .map(({ candidate }) => candidate)
-    .slice(0, 4)
 }
 
 const IMPORTED_PRODUCT_DESCRIPTION_PATTERN =
@@ -102,11 +80,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-import { TikTokWall } from '@/components/home/TikTokWall'
-
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const [product, patches, catalog] = await Promise.all([getProductBySlug(slug), getPatches(), getProducts()])
+  const [product, patches] = await Promise.all([getProductBySlug(slug), getPatches()])
   if (!product) notFound()
 
   const pricing = getProductPricing({
@@ -116,7 +92,7 @@ export default async function ProductPage({ params }: Props) {
     jerseyVersion: product.jersey_version,
     productSlug: product.slug,
   })
-  const relatedProducts = getRelatedProducts(product, catalog)
+  const relatedProducts = await getRelatedProducts(product)
   const productDescription = getProductDisplayDescription(product)
 
   return (
@@ -164,26 +140,26 @@ export default async function ProductPage({ params }: Props) {
               originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined}
               promoLabel={pricing.promoLabel ?? undefined}
               size="lg"
-              className="mb-4"
+              className="mb-3"
             />
-
-            {productDescription ? (
-              <p className="mb-4 text-sm leading-relaxed text-[var(--grey)] md:text-base">{productDescription}</p>
-            ) : null}
 
             <div id="product-cta-sentinel" />
 
-            <div className="mb-4">
-              <ProductTrustBadges />
+            <AddToCartForm product={product} patches={patches} />
+
+            <div className="mt-5">
+              <ProductConversionProof />
             </div>
 
-            <AddToCartForm product={product} patches={patches} />
+            <ProductDetailsPanels product={product} />
+
+            {productDescription ? (
+              <p className="mt-5 text-sm leading-relaxed text-[var(--grey)] md:text-base">{productDescription}</p>
+            ) : null}
             <div className="h-20" />
           </div>
         </div>
       </div>
-
-      <TikTokWall />
 
       <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 md:pb-24">
         {relatedProducts.length > 0 ? (

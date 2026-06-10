@@ -16,6 +16,15 @@ type CheckoutLeadRow = {
   id: string
   email: string
   cart_snapshot: CartItem[] | null
+  source_channel?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_content?: string | null
+  utm_term?: string | null
+  gclid?: string | null
+  fbclid?: string | null
+  ttclid?: string | null
   recovered_order_id?: string | null
   last_checkout_started_at: string
   abandoned_cart_30m_sent_at?: string | null
@@ -26,6 +35,52 @@ type CheckoutLeadRow = {
 function service() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return getSupabaseServiceClient() as any
+}
+
+export async function recordMarketingEvent(params: {
+  eventName: string
+  pagePath?: string | null
+  sourceChannel?: string | null
+  utmSource?: string | null
+  utmMedium?: string | null
+  utmCampaign?: string | null
+  utmContent?: string | null
+  utmTerm?: string | null
+  gclid?: string | null
+  fbclid?: string | null
+  ttclid?: string | null
+  value?: number | null
+  currency?: string | null
+  itemCount?: number | null
+  productIds?: string | null
+  orderNumber?: string | null
+  payload?: Record<string, unknown>
+}): Promise<void> {
+  const { error } = await service()
+    .from('marketing_events')
+    .insert({
+      event_name: params.eventName,
+      page_path: params.pagePath ?? null,
+      source_channel: params.sourceChannel ?? null,
+      utm_source: params.utmSource ?? null,
+      utm_medium: params.utmMedium ?? null,
+      utm_campaign: params.utmCampaign ?? null,
+      utm_content: params.utmContent ?? null,
+      utm_term: params.utmTerm ?? null,
+      gclid: params.gclid ?? null,
+      fbclid: params.fbclid ?? null,
+      ttclid: params.ttclid ?? null,
+      value: params.value ?? null,
+      currency: params.currency ?? null,
+      item_count: params.itemCount ?? null,
+      product_ids: params.productIds ?? null,
+      order_number: params.orderNumber ?? null,
+      event_payload: params.payload ?? {},
+    })
+
+  if (error) {
+    console.error('Failed to record marketing event:', params.eventName, error)
+  }
 }
 
 export function generateOrderNumber(now = new Date()): string {
@@ -309,6 +364,7 @@ export async function synchronizeOrderFromCheckoutSession(
 
   const order = existingOrder as OrderRow
   const isCheckoutCompleted = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+  const wasPending = order.status === 'pending'
   const paidAt = isCheckoutCompleted ? new Date().toISOString() : order.paid_at ?? null
 
   const { data: updatedOrder, error: updateError } = await service()
@@ -333,6 +389,30 @@ export async function synchronizeOrderFromCheckoutSession(
   }
 
   const nextOrder = updatedOrder as OrderRow
+
+  if (wasPending && isCheckoutCompleted) {
+    await recordMarketingEvent({
+      eventName: 'purchase_confirmed',
+      sourceChannel: nextOrder.source_channel,
+      utmSource: nextOrder.utm_source,
+      utmMedium: nextOrder.utm_medium,
+      utmCampaign: nextOrder.utm_campaign,
+      utmContent: nextOrder.utm_content,
+      utmTerm: nextOrder.utm_term,
+      gclid: nextOrder.gclid,
+      fbclid: nextOrder.fbclid,
+      ttclid: nextOrder.ttclid,
+      value: nextOrder.total_amount ?? null,
+      currency: 'EUR',
+      itemCount: nextOrder.items.reduce((sum, item) => sum + item.qty, 0),
+      productIds: nextOrder.items.map((item) => item.product_id).join(','),
+      orderNumber: getOrderDisplayReference(nextOrder),
+      payload: {
+        stripe_session_id: session.id,
+        status: nextOrder.status,
+      },
+    })
+  }
 
   if (options?.runPostProcessing !== false) {
     await runOrderPostCheckoutTasksForOrder(nextOrder)
@@ -434,7 +514,7 @@ export async function dispatchAbandonedCartEmails(): Promise<{ abandonedCartEmai
 
   const { data: leads, error } = await service()
     .from('checkout_leads')
-    .select('id, email, cart_snapshot, recovered_order_id, last_checkout_started_at, abandoned_cart_30m_sent_at, abandoned_cart_6h_sent_at, abandoned_cart_24h_sent_at')
+    .select('id, email, cart_snapshot, source_channel, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid, ttclid, recovered_order_id, last_checkout_started_at, abandoned_cart_30m_sent_at, abandoned_cart_6h_sent_at, abandoned_cart_24h_sent_at')
     .is('recovered_order_id', null)
     .not('email', 'is', null)
     .lte('last_checkout_started_at', thirtyMinutesAgo)
@@ -459,6 +539,7 @@ export async function dispatchAbandonedCartEmails(): Promise<{ abandonedCartEmai
 
     abandonedCartEmails += 1
     const sentColumn = getAbandonedCartSentColumn(stage)
+    const items = lead.cart_snapshot ?? []
 
     await service()
       .from('checkout_leads')
@@ -469,6 +550,27 @@ export async function dispatchAbandonedCartEmails(): Promise<{ abandonedCartEmai
       .eq('id', lead.id)
       .is('recovered_order_id', null)
       .is(sentColumn, null)
+
+    await recordMarketingEvent({
+      eventName: 'checkout_abandoned_email_sent',
+      sourceChannel: lead.source_channel,
+      utmSource: lead.utm_source,
+      utmMedium: lead.utm_medium,
+      utmCampaign: lead.utm_campaign,
+      utmContent: lead.utm_content,
+      utmTerm: lead.utm_term,
+      gclid: lead.gclid,
+      fbclid: lead.fbclid,
+      ttclid: lead.ttclid,
+      value: items.reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.qty ?? 1), 0),
+      currency: 'EUR',
+      itemCount: items.reduce((sum, item) => sum + Number(item.qty ?? 1), 0),
+      productIds: items.map((item) => item.product_id).filter(Boolean).join(','),
+      payload: {
+        stage,
+        lead_id: lead.id,
+      },
+    })
   }
 
   return { abandonedCartEmails }
