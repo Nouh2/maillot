@@ -1,7 +1,7 @@
 import type { Order } from '@/types/order'
-import { formatOrderMessage } from './formatOrder'
+import { formatOrderCustomerDetails, formatOrderMessage } from './formatOrder'
 
-const TELEGRAM_CAPTION_LIMIT = 1024
+const TELEGRAM_COPY_TEXT_LIMIT = 256
 const SUPPORT_REPLY_CALLBACK_PREFIX = 'support_reply:'
 
 type TelegramMessageResult = {
@@ -80,6 +80,23 @@ function escapeTelegramHtml(value: string): string {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
+}
+
+function truncateTelegramCopyText(text: string): string {
+  const chars = Array.from(text)
+  if (chars.length <= TELEGRAM_COPY_TEXT_LIMIT) return text
+  return `${chars.slice(0, TELEGRAM_COPY_TEXT_LIMIT - 3).join('')}...`
+}
+
+function getOrderCopyReplyMarkup(order: Order): Record<string, unknown> {
+  return {
+    inline_keyboard: [[{
+      text: 'Copier infos client',
+      copy_text: {
+        text: truncateTelegramCopyText(formatOrderCustomerDetails(order)),
+      },
+    }]],
+  }
 }
 
 async function sendTelegramPhoto(token: string, chatId: string, photo: string, caption: string): Promise<void> {
@@ -229,26 +246,15 @@ export async function sendTelegramNotification(order: Order): Promise<boolean> {
   try {
     const message = formatOrderMessage(order)
     const photos = getOrderPhotos(order)
+    const copyReplyMarkup = getOrderCopyReplyMarkup(order)
+
+    await sendTelegramMessage(token, chatId, message, {
+      replyMarkup: copyReplyMarkup,
+    })
 
     if (photos.length === 0) {
-      await sendTelegramMessage(token, chatId, message)
       return true
     }
-
-    if (message.length <= TELEGRAM_CAPTION_LIMIT) {
-      try {
-        if (photos.length === 1) {
-          await sendTelegramPhoto(token, chatId, photos[0], message)
-        } else {
-          await sendTelegramMediaGroup(token, chatId, photos, message)
-        }
-        return true
-      } catch (photoErr) {
-        console.error('Telegram photo delivery failed, falling back to text:', photoErr)
-      }
-    }
-
-    await sendTelegramMessage(token, chatId, message)
 
     try {
       if (photos.length === 1) {

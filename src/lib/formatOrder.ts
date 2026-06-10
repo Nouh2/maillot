@@ -10,19 +10,45 @@ function escapeHtml(value: string): string {
 
 function formatField(value?: string | null): string {
   const cleaned = value?.trim()
-  return cleaned ? escapeHtml(cleaned) : 'Non renseigné'
+  return cleaned ? escapeHtml(cleaned) : 'Non renseigne'
 }
 
-function formatCountry(countryCode?: string | null): string {
+function formatPlainField(value?: string | null): string {
+  const cleaned = value?.trim()
+  return cleaned || 'Non renseigne'
+}
+
+function formatPlainCountry(countryCode?: string | null): string {
   const cleaned = countryCode?.trim()
-  if (!cleaned) return 'Non renseigné'
+  if (!cleaned) return 'Non renseigne'
 
   try {
     const displayNames = new Intl.DisplayNames(['fr-FR'], { type: 'region' })
-    return escapeHtml(displayNames.of(cleaned.toUpperCase()) ?? cleaned.toUpperCase())
+    return displayNames.of(cleaned.toUpperCase()) ?? cleaned.toUpperCase()
   } catch {
-    return escapeHtml(cleaned.toUpperCase())
+    return cleaned.toUpperCase()
   }
+}
+
+export function formatOrderCustomerDetails(order: Order, options: { html?: boolean } = {}): string {
+  const address = order.shipping_address
+  const street = [address?.street, address?.line2]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(', ')
+  const lines = [
+    ['Name', formatPlainField(order.customer_name)],
+    ['Address', formatPlainField(street)],
+    ['City', formatPlainField(address?.city)],
+    ['Province', formatPlainField(address?.state)],
+    ['Cap', formatPlainField(address?.postal_code)],
+    ['Telephone number', formatPlainField(order.customer_phone)],
+    ['State', formatPlainCountry(address?.country)],
+  ]
+
+  return lines
+    .map(([label, value]) => `${label}: ${options.html ? escapeHtml(value) : value}`)
+    .join('\n')
 }
 
 export function formatOrderMessage(order: Order): string {
@@ -56,29 +82,11 @@ export function formatOrderMessage(order: Order): string {
     ].join('\n')
   }).join('\n\n')
 
-  const addressLines = order.shipping_address
-    ? [
-        formatField(order.shipping_address.street),
-        order.shipping_address.line2 ? formatField(order.shipping_address.line2) : null,
-        [order.shipping_address.postal_code, order.shipping_address.city]
-          .filter(Boolean)
-          .map((value) => escapeHtml(value!))
-          .join(' ') || null,
-        order.shipping_address.state ? formatField(order.shipping_address.state) : null,
-        formatCountry(order.shipping_address.country),
-      ].filter(Boolean)
-    : ['Non renseigné']
-
   return [
     `<b>NOUVELLE COMMANDE ${escapeHtml(order.order_number)}</b>`,
     '',
-    '<b>CLIENT</b>',
-    `Nom / prenom : ${formatField(order.customer_name)}`,
-    `Email : ${formatField(order.customer_email)}`,
-    `Telephone : ${formatField(order.customer_phone)}`,
-    '',
-    '<b>LIVRAISON</b>',
-    ...addressLines,
+    '<b>INFOS CLIENT</b>',
+    formatOrderCustomerDetails(order, { html: true }),
     '',
     '<b>DETAIL COMMANDE</b>',
     itemLines,
