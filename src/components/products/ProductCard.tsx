@@ -39,7 +39,6 @@ export function ProductCard({
               fill
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
-              unoptimized
               fallbackMode="proxy"
               bunnyTransform="card"
               className="object-cover transition-transform duration-500 group-hover:scale-105"

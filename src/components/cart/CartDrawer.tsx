@@ -16,9 +16,7 @@ export function CartDrawer() {
     closeCart,
     subtotal,
     discountTotal,
-    shippingTotal,
     total,
-    freeShippingUnlocked,
   } = useCartStore()
   const discount = discountTotal()
 
@@ -91,10 +89,6 @@ export function CartDrawer() {
                     <span>-{formatEuro(discount)}</span>
                   </div>
                 ) : null}
-                <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">
-                  <span>Livraison</span>
-                  <span>{freeShippingUnlocked() ? 'Offerte' : formatEuro(shippingTotal())}</span>
-                </div>
                 <div className="flex justify-between font-condensed text-lg tracking-wide text-[var(--black)]">
                   <span>Total</span>
                   <span className="font-bold">{formatEuro(total())}</span>

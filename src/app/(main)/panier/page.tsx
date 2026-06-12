@@ -5,18 +5,16 @@ import Link from 'next/link'
 import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
 import { CartItem } from '@/components/cart/CartItem'
-import { formatEuro, FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE } from '@/lib/cartPricing'
+import { formatEuro, PACK_DISCOUNT_AMOUNT } from '@/lib/cartPricing'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { useCartStore } from '@/store/cart'
 import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
 import { CartBundleOffer } from '@/components/cart/CartBundleOffer'
 
 export default function CartPage() {
-  const { items, subtotal, discountTotal, shippingTotal, total, itemCount, freeShippingUnlocked, promoCode, setPromoCode } = useCartStore()
+  const { items, subtotal, discountTotal, total, itemCount, promoCode, setPromoCode } = useCartStore()
   const quantity = itemCount()
   const discount = discountTotal()
-  const shipping = shippingTotal()
-  const shippingUnlocked = freeShippingUnlocked()
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
@@ -70,14 +68,10 @@ export default function CartPage() {
               </div>
               {discount > 0 ? (
                 <div className="flex items-center justify-between text-sm text-[var(--terra)]">
-                  <span>{promoCode ? `Code ${promoCode}` : 'Remise'}</span>
+                  <span>{promoCode ? `Code ${promoCode}` : 'Remise pack'}</span>
                   <span>-{formatEuro(discount)}</span>
                 </div>
               ) : null}
-              <div className="flex items-center justify-between text-sm text-[var(--grey)]">
-                <span>Livraison</span>
-                <span>{shippingUnlocked ? 'Offerte' : formatEuro(shipping)}</span>
-              </div>
               <div className="flex items-center justify-between border-t border-[var(--cream-3)] pt-3 font-condensed text-lg uppercase tracking-[0.08em] text-[var(--black)]">
                 <span>Total</span>
                 <span className="font-bold">{formatEuro(total())}</span>
@@ -86,12 +80,11 @@ export default function CartPage() {
 
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
-              <p className="mt-2">Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés{shippingUnlocked ? ' - débloquée' : ''}.</p>
-              <p className="mt-1">Les maillots restent facturés normalement, y compris au-delà de 3 articles.</p>
-              {discount > 0 ? (
-                <p className="mt-1 text-[var(--terra)]">Code {promoCode} appliqué: -10% sur les maillots du panier.</p>
+              <p className="mt-2">Livraison incluse sur toutes les commandes.</p>
+              <p className="mt-1">Pack 3 maillots : {formatEuro(PACK_DISCOUNT_AMOUNT)} de remise immediate, appliquee automatiquement si elle est plus avantageuse que le code promo.</p>
+              {discount > 0 && promoCode ? (
+                <p className="mt-1 text-[var(--terra)]">Code {promoCode} applique : -10% sur les maillots du panier.</p>
               ) : null}
-              <p className="mt-1">En dessous du seuil, les frais de port sont de {formatEuro(STANDARD_SHIPPING_PRICE)}.</p>
             </div>
 
             <div className="mt-4">
@@ -105,13 +98,12 @@ export default function CartPage() {
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Rappel</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Personnalisation</h2>
             <p className="mt-4 text-sm leading-relaxed text-[var(--grey)]">
-              Le flocage est facturé {formatEuro(5)} par maillot. Les patchs sélectionnés restent ajoutés article par article.
+              Le flocage est facture {formatEuro(5)} par maillot. Les patchs selectionnes restent ajoutes article par article.
             </p>
           </section>
         </aside>
       </div>
 
-      {/* Barre sticky mobile */}
       <MobileCheckoutBar />
     </div>
   )

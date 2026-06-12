@@ -70,17 +70,24 @@ export function HeroSlideshow({ heroProducts }: { heroProducts: (Product | null)
                 {/* Image du produit */}
                 {imgSrc ? (
                   slide.staticImage ? (
-                    <Image src={imgSrc} alt={slide.bigText} fill className="object-cover object-center" priority={i === 0} />
+                    <Image
+                      src={imgSrc}
+                      alt={slide.bigText}
+                      fill
+                      className="object-cover object-center"
+                      priority={i < 4}
+                      sizes="100vw"
+                    />
                   ) : (
                     <ExternalProductImage
                       src={imgSrc}
                       alt={slide.bigText}
                       fill
-                      unoptimized
                       fallbackMode="proxy"
                       bunnyTransform="hero"
                       className="object-cover"
-                      priority={i === 0}
+                      priority={i < 4}
+                      sizes="100vw"
                     />
                   )
                 ) : (

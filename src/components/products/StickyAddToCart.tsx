@@ -54,7 +54,7 @@ export function StickyAddToCart({ productName, currentPrice, originalPrice, prom
           className="flex w-full items-center justify-center gap-2 bg-[var(--terra)] py-3.5 font-condensed text-sm font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[var(--terra-2)]"
         >
           <ShoppingCart className="h-4 w-4" />
-          Choisir ma taille
+          Choisir ma taille - {formatEuro(currentPrice)}
         </button>
       </div>
     </div>

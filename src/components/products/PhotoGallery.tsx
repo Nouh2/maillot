@@ -28,7 +28,6 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           src={activePhoto}
           alt={`${name} - Photo ${active + 1}`}
           fill
-          unoptimized
           fallbackMode="proxy"
           bunnyTransform="gallery"
           className="object-cover transition-transform duration-500 hover:scale-105"
@@ -81,7 +80,6 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
               src={photo}
               alt={`${name} miniature ${index + 1}`}
               fill
-              unoptimized
               fallbackMode="proxy"
               bunnyTransform="thumb"
               sizes="80px"

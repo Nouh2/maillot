@@ -9,18 +9,19 @@ import { getPromoDiscountRate, normalizePromoCode } from './promoCodes'
 
 export const FLOCAGE_PRICE = 5
 export const PATCH_PRICE = 2.5
-export const FAN_JERSEY_PRICE = 19.9
-export const PLAYER_JERSEY_PRICE = 27.99
-export const STANDARD_PRICE = 27.99
-export const STANDARD_PROMO_PRICE = 19.99
-export const RETRO_PRICE = 34.99
-export const RETRO_PROMO_PRICE = 27.99
-export const STANDARD_SHIPPING_PRICE = 6
+export const FAN_JERSEY_PRICE = 25.9
+export const PLAYER_JERSEY_PRICE = 33.99
+export const STANDARD_PRICE = 33.99
+export const STANDARD_PROMO_PRICE = 25.99
+export const RETRO_PRICE = 40.99
+export const RETRO_PROMO_PRICE = 33.99
+export const PACK_DISCOUNT_MIN_ITEMS = 3
+export const PACK_DISCOUNT_AMOUNT = 5
 
 const FIXED_PRODUCT_PRICES: Record<string, number> = {
-  'maillot-domicile-stadium-psg-25-26-flocage-champions-of-europe': 30,
-  'maillot-exterieur-stadium-psg-25-26-flocage-champions-of-europe': 30,
-  'maillot-psg-jordan-night-edition-stadium-25-26-flocage-champions-of-europe': 30,
+  'maillot-domicile-stadium-psg-25-26-flocage-champions-of-europe': 36,
+  'maillot-exterieur-stadium-psg-25-26-flocage-champions-of-europe': 36,
+  'maillot-psg-jordan-night-edition-stadium-25-26-flocage-champions-of-europe': 36,
 }
 
 type PriceableCartItem = {
@@ -37,7 +38,7 @@ type DiscountedUnitGroup = {
 type DiscountableUnit = {
   sourceIndex: number
   unitCents: number
-  amountAfterPromoCents: number
+  amountAfterDiscountCents: number
 }
 
 type CartPricingOptions = {
@@ -48,10 +49,13 @@ export type CartPricingBreakdown = {
   itemCount: number
   subtotal: number
   discount: number
+  promoDiscount: number
+  packDiscount: number
   shipping: number
   total: number
   promoCode: string | null
   promoDiscountRate: number
+  discountSource: 'promo_code' | 'pack_3' | null
   freeShippingUnlocked: boolean
   discountedUnitGroups: DiscountedUnitGroup[]
 }
@@ -139,12 +143,9 @@ export function getProductPricing(params: {
   }
 }
 
-export const FREE_SHIPPING_MIN_ITEMS = 3
-
 export function calculateShippingAmount(itemCount: number): number {
-  if (itemCount <= 0) return 0
-  if (itemCount >= FREE_SHIPPING_MIN_ITEMS) return 0
-  return STANDARD_SHIPPING_PRICE
+  void itemCount
+  return 0
 }
 
 export function calculateItemsSubtotal(items: PriceableCartItem[]): number {
@@ -166,16 +167,46 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     promoDiscountCents += Math.max(0, unitCents - amountAfterPromoCents) * quantity
 
     for (let index = 0; index < quantity; index += 1) {
-      units.push({ sourceIndex, unitCents, amountAfterPromoCents })
+      units.push({ sourceIndex, unitCents, amountAfterDiscountCents: unitCents })
     }
   }
 
-  const discountCents = promoDiscountCents
+  const packDiscountCents = itemCount >= PACK_DISCOUNT_MIN_ITEMS ? Math.min(toCents(PACK_DISCOUNT_AMOUNT), subtotalCents) : 0
+  const shouldApplyPromo = promoDiscountCents > 0 && promoDiscountCents >= packDiscountCents
+  const shouldApplyPack = packDiscountCents > 0 && !shouldApplyPromo
+  const discountSource = shouldApplyPromo ? 'promo_code' : shouldApplyPack ? 'pack_3' : null
+  const discountCents = shouldApplyPromo ? promoDiscountCents : shouldApplyPack ? packDiscountCents : 0
   const discountedSubtotalCents = Math.max(0, subtotalCents - discountCents)
+
+  if (shouldApplyPromo) {
+    for (const unit of units) {
+      unit.amountAfterDiscountCents = Math.max(0, Math.round(unit.unitCents * (1 - promoDiscountRate)))
+    }
+  } else if (shouldApplyPack && subtotalCents > 0) {
+    let allocatedCents = 0
+    const allocations = units.map((unit) => {
+      const share = Math.min(unit.unitCents, Math.floor((discountCents * unit.unitCents) / subtotalCents))
+      allocatedCents += share
+      return share
+    })
+
+    let remainder = discountCents - allocatedCents
+    for (const [index, unit] of units.entries()) {
+      if (remainder <= 0) break
+      const capacity = unit.unitCents - allocations[index]
+      if (capacity <= 0) continue
+      allocations[index] += 1
+      remainder -= 1
+    }
+
+    units.forEach((unit, index) => {
+      unit.amountAfterDiscountCents = Math.max(0, unit.unitCents - allocations[index])
+    })
+  }
 
   const groupedUnits = new Map<string, DiscountedUnitGroup>()
   units.forEach((unit) => {
-    const groupKey = `${unit.sourceIndex}:${unit.amountAfterPromoCents}`
+    const groupKey = `${unit.sourceIndex}:${unit.amountAfterDiscountCents}`
     const existingGroup = groupedUnits.get(groupKey)
     if (existingGroup) {
       existingGroup.quantity += 1
@@ -184,7 +215,7 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
 
     groupedUnits.set(groupKey, {
       sourceIndex: unit.sourceIndex,
-      unitAmount: fromCents(unit.amountAfterPromoCents),
+      unitAmount: fromCents(unit.amountAfterDiscountCents),
       quantity: 1,
     })
   })
@@ -195,10 +226,13 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     itemCount,
     subtotal: fromCents(subtotalCents),
     discount: fromCents(discountCents),
+    promoDiscount: fromCents(promoDiscountCents),
+    packDiscount: fromCents(packDiscountCents),
     shipping: fromCents(shippingCents),
     total: fromCents(discountedSubtotalCents + shippingCents),
-    promoCode: promoDiscountRate > 0 ? promoCode : null,
+    promoCode: shouldApplyPromo ? promoCode : null,
     promoDiscountRate,
+    discountSource,
     freeShippingUnlocked: shippingCents === 0 && itemCount > 0,
     discountedUnitGroups: Array.from(groupedUnits.values()),
   }

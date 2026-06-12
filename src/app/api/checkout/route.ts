@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing, FREE_SHIPPING_MIN_ITEMS } from '@/lib/cartPricing'
+import { calculateCartItemUnitPrice, calculateCartPricing, getProductPricing } from '@/lib/cartPricing'
 import { normalizeAttributionPayload, syncLeadToBrevo, type AttributionPayload } from '@/lib/marketing'
 import { deriveSourceChannel, generateOrderNumber, generatePublicTrackingToken, recordMarketingEvent } from '@/lib/orders'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      allow_promotion_codes: true,
+      allow_promotion_codes: pricing.discountSource === null,
       locale: 'fr',
       client_reference_id: pendingOrder.id,
       customer_email: email,
@@ -244,21 +244,6 @@ export async function POST(request: NextRequest) {
             quantity: group.quantity,
           }
         }),
-        ...(shippingAmount > 0
-          ? [
-              {
-                price_data: {
-                  currency: 'eur',
-                  product_data: {
-                    name: 'Livraison',
-                    description: `Offerte dès ${FREE_SHIPPING_MIN_ITEMS} maillots`,
-                  },
-                  unit_amount: Math.round(shippingAmount * 100),
-                },
-                quantity: 1,
-              },
-            ]
-          : []),
       ],
       shipping_address_collection: {
         allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'ES', 'IT', 'GB', 'NL', 'PT'],
@@ -279,6 +264,11 @@ export async function POST(request: NextRequest) {
               promo_code: pricing.promoCode,
               promo_discount_rate: String(pricing.promoDiscountRate),
               promo_discount_amount: String(pricing.discount),
+            }
+          : {}),
+        ...(pricing.discountSource === 'pack_3'
+          ? {
+              pack_discount_amount: String(pricing.packDiscount),
             }
           : {}),
       },

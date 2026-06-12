@@ -1,8 +1,5 @@
 import Link from 'next/link'
 import { LegalPageLayout, LegalSection } from '@/components/legal/LegalPageLayout'
-import { FREE_SHIPPING_MIN_ITEMS, STANDARD_SHIPPING_PRICE, formatEuro } from '@/lib/cartPricing'
-
-const STANDARD_SHIPPING_LABEL = formatEuro(STANDARD_SHIPPING_PRICE)
 
 export const metadata = { title: 'Livraison' }
 
@@ -11,19 +8,15 @@ export default function LivraisonPage() {
     <LegalPageLayout
       currentPath="/legal/livraison"
       title="Livraison"
-      intro="Cette page résume les conditions de livraison actuellement appliquées sur Maillot Addict: délais indicatifs, frais de port et suivi des commandes."
+      intro="Cette page resume les conditions de livraison appliquees sur Maillot Addict: livraison incluse, delais indicatifs et suivi des commandes."
     >
       <LegalSection title="Delais indicatifs">
-        <p>Les commandes sont généralement livrées dans un délai estimé de 7 à 12 jours ouvrés après traitement.</p>
-        <p>Ces délais restent indicatifs et peuvent varier selon la période, la destination ou le transporteur.</p>
+        <p>Les commandes sont generalement livrees dans un delai estime de 7 a 12 jours ouvres apres traitement.</p>
+        <p>Ces delais restent indicatifs et peuvent varier selon la periode, la destination ou le transporteur.</p>
       </LegalSection>
 
-      <LegalSection title="Frais de livraison">
-        <p>Les frais de livraison sont calcules sur le montant du panier après application des offres automatiques:</p>
-        <ul className="list-disc space-y-2 pl-5">
-          <li>Livraison standard: {STANDARD_SHIPPING_LABEL}</li>
-          <li>Livraison offerte dès {FREE_SHIPPING_MIN_ITEMS} maillots commandés</li>
-        </ul>
+      <LegalSection title="Livraison incluse">
+        <p>La livraison est incluse dans le prix affiche des maillots. Le panier et le paiement Stripe affichent uniquement les articles et le total final.</p>
       </LegalSection>
 
       <LegalSection title="Suivi de commande">
@@ -38,14 +31,14 @@ export default function LivraisonPage() {
 
       <LegalSection title="Adresse de livraison">
         <p>
-          Le client doit vérifier l’exactitude des informations de livraison avant validation de la commande. Toute erreur d’adresse peut
+          Le client doit verifier les informations de livraison avant validation de la commande. Toute erreur dans l adresse peut
           entrainer un retard ou empecher la bonne reception du colis.
         </p>
       </LegalSection>
 
       <LegalSection title="Incident de livraison">
         <p>
-          En cas de retard important, de colis non reçu ou de produit arrivé endommagé, le client est invité à contacter rapidement le
+          En cas de retard important, de colis non recu ou de produit arrive endommage, le client est invite a contacter rapidement le
           service client via la{' '}
           <Link href="/contact" className="font-semibold text-[var(--terra)] underline underline-offset-4">
             page contact

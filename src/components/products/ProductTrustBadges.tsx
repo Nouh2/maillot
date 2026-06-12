@@ -7,7 +7,7 @@ export function ProductTrustBadges() {
     {
       icon: <Truck className="h-4 w-4 sm:h-5 sm:w-5" />,
       text: 'Livraison',
-      subtext: 'offerte',
+      subtext: 'incluse',
     },
     {
       icon: <Type className="h-4 w-4 sm:h-5 sm:w-5" />,

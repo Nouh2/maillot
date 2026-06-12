@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation'
 import { SHIPPING_DELAY_LABEL } from '@/lib/siteConfig'
 
 const TICKER_ITEMS = [
-  'BUNDLE 3 MAILLOTS - LIVRAISON OFFERTE',
-  'TOUS LES MAILLOTS RESTENT FACTURES',
+  'LIVRAISON INCLUSE SUR TOUS LES MAILLOTS',
+  'PACK 3 MAILLOTS - REMISE IMMEDIATE',
   'MIX LIBRE: CLUBS + SELECTIONS + RETRO',
   'FLOCAGE + PATCHS POUR UN MAILLOT UNIQUE',
   'PAIEMENT SECURISE + SUIVI INCLUS',
@@ -20,7 +20,7 @@ export function Ticker() {
     return (
       <div className="w-full bg-[var(--terra)] px-4 py-2 text-center" role="region" aria-label="Offre du moment">
         <span className="font-condensed text-sm font-bold uppercase tracking-[0.18em] text-white">
-          3 maillots = livraison offerte
+          Livraison incluse
         </span>
       </div>
     )

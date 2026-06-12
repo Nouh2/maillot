@@ -16,7 +16,7 @@ const WHY_ITEMS = [
   {
     icon: Truck,
     title: 'Livraison sans friction',
-    desc: 'Suivi partagé dès l’expédition. 1 maillot -> 6 EUR · 2 -> 5 EUR · gratuite dès 3. Simple, transparent, fiable.',
+    desc: 'Livraison incluse dans le prix, suivi partage des expedition. Simple, transparent, fiable.',
   },
 ] as const
 

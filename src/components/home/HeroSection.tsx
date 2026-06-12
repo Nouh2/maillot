@@ -74,7 +74,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                         src={product.photos[0]}
                         alt={product.name}
                         fill
-                        unoptimized
+                        priority
                         fallbackMode="proxy"
                         bunnyTransform="hero"
                         sizes="(max-width: 1024px) 50vw, 20vw"

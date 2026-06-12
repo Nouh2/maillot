@@ -17,8 +17,8 @@ const FILTERS: Array<{ key: FilterKey; label: string }> = [
   { key: 'africa', label: 'Afrique' },
   { key: 'europe', label: 'Europe' },
   { key: 'south-america', label: 'Amérique du Sud' },
-  { key: 'fan', label: 'Fan 19,90 €' },
-  { key: 'player', label: 'Player 27,99 €' },
+  { key: 'fan', label: 'Fan 25,90 €' },
+  { key: 'player', label: 'Player 33,99 €' },
   { key: 'home', label: 'Domicile' },
   { key: 'away', label: 'Extérieur' },
 ]
@@ -121,7 +121,6 @@ function ProductTile({ product, priority = false }: { product: Product; priority
               fill
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
-              unoptimized
               fallbackMode="proxy"
               bunnyTransform={priority ? 'hero' : 'card'}
               sizes="(max-width: 768px) 50vw, 25vw"
@@ -144,6 +143,9 @@ function ProductTile({ product, priority = false }: { product: Product; priority
             promoLabel={pricing.promoActive ? 'Promo' : undefined}
             size="sm"
           />
+          <p className="mt-1 font-condensed text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--terra)]">
+            Livraison incluse
+          </p>
         </div>
         <div className="mt-3 grid gap-2">
           <Link
@@ -176,8 +178,8 @@ export function FeaturedProductBrowser({ products }: { products: Product[] }) {
     <section id="selection-products" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-7 sm:px-6 md:py-10">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="font-condensed text-xs uppercase tracking-[0.22em] text-[var(--terra)]">Drop rapide</p>
-          <h2 className="mt-1 font-bebas text-4xl leading-none md:text-6xl">Complete ton panier</h2>
+          <p className="font-condensed text-xs uppercase tracking-[0.22em] text-[var(--terra)]">Sélection été</p>
+          <h2 className="mt-1 font-bebas text-4xl leading-none md:text-6xl">Choisis ton maillot</h2>
         </div>
       </div>
 

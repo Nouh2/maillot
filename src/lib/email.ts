@@ -699,13 +699,13 @@ function buildEmailTemplatePreview(templateId: EmailTemplateId): EmailTemplatePr
             name: 'Belgique Maillot Exterieur 2026',
             size: 'M',
             qty: 1,
-            price: 19.9,
+            price: 25.9,
           },
           {
             name: 'France Maillot Domicile 2026',
             size: 'L',
             qty: 1,
-            price: 19.9,
+            price: 25.9,
           },
         ],
       })

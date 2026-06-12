@@ -1,18 +1,19 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CheckCircle2, PackagePlus, Sparkles, Truck } from 'lucide-react'
+import { BadgePercent, CheckCircle2, PackagePlus, Sparkles } from 'lucide-react'
+import { PACK_DISCOUNT_AMOUNT, PACK_DISCOUNT_MIN_ITEMS, formatEuro } from '@/lib/cartPricing'
 
 const BUNDLE_OPTIONS = [
-  { qty: 1, label: '1 maillot', price: 'des 19,90 EUR', benefit: 'commande simple', icon: PackagePlus },
+  { qty: 1, label: '1 maillot', price: 'des 25,90 EUR', benefit: 'livraison incluse', icon: PackagePlus },
   { qty: 2, label: '2 maillots', price: 'mix libre', benefit: 'plus de choix', icon: Sparkles },
-  { qty: 3, label: '3 maillots', price: 'livraison offerte', benefit: 'pack gagnant', tag: 'Le plus choisi', icon: Truck },
+  { qty: 3, label: '3 maillots', price: `-${formatEuro(PACK_DISCOUNT_AMOUNT)}`, benefit: 'remise immediate', tag: 'Le plus choisi', icon: BadgePercent },
 ] as const
 
 export function BundleOffer() {
-  const [selectedQty, setSelectedQty] = useState(3)
-  const progress = useMemo(() => Math.min(100, (selectedQty / 3) * 100), [selectedQty])
-  const shippingUnlocked = selectedQty >= 3
+  const [selectedQty, setSelectedQty] = useState(PACK_DISCOUNT_MIN_ITEMS)
+  const progress = useMemo(() => Math.min(100, (selectedQty / PACK_DISCOUNT_MIN_ITEMS) * 100), [selectedQty])
+  const packUnlocked = selectedQty >= PACK_DISCOUNT_MIN_ITEMS
 
   const scrollToProducts = () => {
     document.getElementById('selection-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -30,27 +31,27 @@ export function BundleOffer() {
               Compose ton pack
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
-              Choisis plusieurs maillots de la selection. Au 3e maillot, la livraison offerte se debloque automatiquement au panier.
+              Choisis plusieurs maillots de la selection. Au 3e maillot, {formatEuro(PACK_DISCOUNT_AMOUNT)} de remise se declenchent automatiquement.
             </p>
 
             <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.06] p-4">
               <div className="mb-2 flex items-center justify-between font-condensed text-xs font-bold uppercase tracking-[0.16em] text-white/60">
                 <span>Progression pack</span>
-                <span>{selectedQty}/3</span>
+                <span>{selectedQty}/{PACK_DISCOUNT_MIN_ITEMS}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/15">
                 <div className="h-full rounded-full bg-[var(--terra)] transition-all" style={{ width: `${progress}%` }} />
               </div>
               <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
-                {shippingUnlocked ? (
+                {packUnlocked ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 text-[var(--terra)]" />
-                    Livraison offerte debloquee
+                    Remise pack active
                   </>
                 ) : (
                   <>
-                    <Truck className="h-4 w-4 text-white/50" />
-                    Ajoute encore {3 - selectedQty} maillot{3 - selectedQty > 1 ? 's' : ''} pour l&apos;offrir
+                    <BadgePercent className="h-4 w-4 text-white/50" />
+                    Ajoute encore {PACK_DISCOUNT_MIN_ITEMS - selectedQty} maillot{PACK_DISCOUNT_MIN_ITEMS - selectedQty > 1 ? 's' : ''} pour la remise
                   </>
                 )}
               </p>
