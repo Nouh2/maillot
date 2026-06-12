@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { getClarityProjectId } from '@/lib/clarityConfig'
 import { getTikTokPixelId } from '@/lib/tiktokConfig'
 import {
   captureAttribution,
@@ -19,6 +20,7 @@ export function AnalyticsManager() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
   const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID?.trim()
   const tiktokPixelId = getTikTokPixelId()
+  const clarityProjectId = getClarityProjectId()
 
   useEffect(() => {
     captureAttribution(searchParams)
@@ -65,6 +67,18 @@ export function AnalyticsManager() {
     `
   }, [tiktokPixelId])
 
+  const clarityScript = useMemo(() => {
+    if (!clarityProjectId) return null
+
+    return `
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "${clarityProjectId}");
+    `
+  }, [clarityProjectId])
+
   return (
     <>
       {consent === 'granted' && gtmId ? <Script id="gtm-loader" strategy="afterInteractive">{gtmScript}</Script> : null}
@@ -76,6 +90,9 @@ export function AnalyticsManager() {
       ) : null}
       {consent === 'granted' && tiktokPixelId ? (
         <Script id="tiktok-pixel-loader" strategy="afterInteractive">{tiktokScript}</Script>
+      ) : null}
+      {consent === 'granted' && clarityProjectId ? (
+        <Script id="clarity-loader" strategy="afterInteractive">{clarityScript}</Script>
       ) : null}
 
       {consent === null ? (
