@@ -96,10 +96,10 @@ export function AnalyticsManager() {
       ) : null}
 
       {consent === null ? (
-        <div className="fixed inset-x-2 bottom-2 z-[70] mx-auto max-w-4xl rounded-xl border border-[var(--cream-3)] bg-white/95 p-3 shadow-xl backdrop-blur sm:bottom-3 sm:p-4">
+        <div className="fixed inset-x-2 bottom-[calc(82px+env(safe-area-inset-bottom,0px))] z-[180] mx-auto max-w-4xl rounded-xl border border-[var(--cream-3)] bg-white/95 p-3 shadow-xl backdrop-blur sm:bottom-3 sm:p-4">
           <p className="sr-only">Cookies et mesure</p>
           <p className="text-xs leading-snug text-[var(--black)] sm:text-sm">
-            Nous utilisons des cookies de mesure pour suivre les campagnes et améliorer la boutique. Rien n’est activé sans ton accord.
+            Cookies de mesure pour TikTok, Clarity et analytics. Rien sans ton accord.
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
             <button
