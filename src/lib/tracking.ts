@@ -209,7 +209,7 @@ function sendToTikTok(name: string, params: TrackingParams = {}) {
     product_view: 'ViewContent',
     add_to_cart: 'AddToCart',
     begin_checkout: 'InitiateCheckout',
-    purchase: 'Purchase',
+    purchase: 'CompletePayment',
   }
   const tiktokEventName = eventMap[name]
   if (!tiktokEventName) return
