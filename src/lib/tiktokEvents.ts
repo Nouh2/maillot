@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import type Stripe from 'stripe'
 import { getOrderDisplayReference } from '@/lib/orders'
+import { DEFAULT_TIKTOK_PIXEL_ID } from '@/lib/tiktokConfig'
 import type { Order } from '@/types/order'
 
 const TIKTOK_EVENTS_API_URL = 'https://business-api.tiktok.com/open_api/v1.3/event/track/'
@@ -11,7 +12,10 @@ type TikTokEventResult =
 
 function getTikTokEventsConfig() {
   const accessToken = process.env.TIKTOK_EVENTS_API_ACCESS_TOKEN?.trim()
-  const pixelCode = process.env.TIKTOK_EVENTS_API_PIXEL_CODE?.trim() || process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim()
+  const pixelCode =
+    process.env.TIKTOK_EVENTS_API_PIXEL_CODE?.trim() ||
+    process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim() ||
+    DEFAULT_TIKTOK_PIXEL_ID
   const testEventCode = process.env.TIKTOK_EVENTS_API_TEST_EVENT_CODE?.trim()
 
   if (!accessToken || !pixelCode) return null

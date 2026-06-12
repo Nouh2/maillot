@@ -8,6 +8,7 @@ import type { Order } from '@/types/order'
 interface OrderConfirmedClientProps {
   purchase?: {
     dedupeKey: string
+    eventId: string
     orderNumber: string
     value: number
     items: Order['items']

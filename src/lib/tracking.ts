@@ -1,6 +1,7 @@
 'use client'
 
 import { track as trackVercelEvent } from '@vercel/analytics'
+import { getTikTokPixelId } from '@/lib/tiktokConfig'
 import type { CartItem } from '@/types/cart'
 import type { Order } from '@/types/order'
 
@@ -30,6 +31,7 @@ type AnalyticsWindow = Window & {
 type TikTokAnalyticsQueue = unknown[] & {
   page?: () => void
   track?: (name: string, params?: Record<string, unknown>, options?: Record<string, unknown>) => void
+  identify?: (params: Record<string, unknown>) => void
 }
 
 interface AddToCartTrackingParams {
@@ -53,6 +55,7 @@ interface BeginCheckoutTrackingParams {
 
 interface PurchaseTrackingParams {
   dedupeKey: string
+  eventId: string
   orderNumber: string
   value: number
   items: Order['items']
@@ -152,10 +155,6 @@ function sendToGtag(name: string, params: TrackingParams = {}) {
   analyticsWindow.gtag('event', name, params)
 }
 
-function getTikTokPixelId() {
-  return process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim()
-}
-
 function toTikTokContents(items: unknown) {
   if (!Array.isArray(items)) return undefined
 
@@ -197,6 +196,7 @@ function sendToTikTok(name: string, params: TrackingParams = {}) {
     const queue = [] as TikTokAnalyticsQueue
     queue.page = () => queue.push(['page'])
     queue.track = (eventName, eventParams, eventOptions) => queue.push(['track', eventName, eventParams, eventOptions])
+    queue.identify = (identityParams) => queue.push(['identify', identityParams])
     analyticsWindow.ttq = queue
   }
 
@@ -463,14 +463,14 @@ export function trackBeginCheckout({
   trackEvent('begin_checkout', payload)
 }
 
-export function trackPurchase({ dedupeKey, orderNumber, value, items, sourceChannel }: PurchaseTrackingParams) {
+export function trackPurchase({ dedupeKey, eventId, orderNumber, value, items, sourceChannel }: PurchaseTrackingParams) {
   if (!hasTrackingConsent() || typeof window === 'undefined') return
   if (hasTrackedEvent(dedupeKey)) return
 
   const itemCount = getItemCount(items)
   const payload = {
     currency: 'EUR',
-    event_id: dedupeKey,
+    event_id: eventId,
     transaction_id: orderNumber,
     order_number: orderNumber,
     value: roundCurrency(value),
@@ -483,6 +483,24 @@ export function trackPurchase({ dedupeKey, orderNumber, value, items, sourceChan
 
   trackEvent('purchase', payload)
   markTrackedEvent(dedupeKey)
+}
+
+export function identifyTikTokUser(email: string) {
+  if (!hasTrackingConsent() || typeof window === 'undefined' || !getTikTokPixelId()) return
+
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return
+
+  const analyticsWindow = window as AnalyticsWindow
+  if (!analyticsWindow.ttq) {
+    const queue = [] as TikTokAnalyticsQueue
+    queue.page = () => queue.push(['page'])
+    queue.track = (eventName, eventParams, eventOptions) => queue.push(['track', eventName, eventParams, eventOptions])
+    queue.identify = (identityParams) => queue.push(['identify', identityParams])
+    analyticsWindow.ttq = queue
+  }
+
+  analyticsWindow.ttq.identify?.({ email: normalizedEmail })
 }
 
 export function subscribeToTrackingConsent(onChange: () => void) {

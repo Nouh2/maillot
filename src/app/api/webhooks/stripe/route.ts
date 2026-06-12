@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         await sendTikTokCompletePaymentEvent({
           order,
           session,
-          eventId: `purchase:${order.id}`,
+          eventId: session.id,
         })
       } catch (error) {
         console.error('TikTok webhook event processing failed:', event.id, order.id, error)

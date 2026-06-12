@@ -36,7 +36,8 @@ export default async function OrderConfirmedPage({ searchParams }: OrderConfirme
       <OrderConfirmedClient
         purchase={order && order.total_amount !== null && order.total_amount !== undefined
           ? {
-              dedupeKey: `purchase:${order.id}`,
+              dedupeKey: `purchase:${sessionId ?? order.id}`,
+              eventId: sessionId ?? order.stripe_session_id ?? order.id,
               orderNumber: getOrderDisplayReference(order),
               value: order.total_amount,
               items: order.items,

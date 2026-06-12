@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+import { identifyTikTokUser } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 
 interface CheckoutContactFieldsProps {
@@ -12,6 +14,15 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
   const setCustomerEmail = useCartStore((state) => state.setCustomerEmail)
   const setMarketingOptIn = useCartStore((state) => state.setMarketingOptIn)
 
+  const handleEmailChange = (value: string) => {
+    setCustomerEmail(value)
+    identifyTikTokUser(value)
+  }
+
+  useEffect(() => {
+    identifyTikTokUser(customerEmail)
+  }, [customerEmail])
+
   return (
     <div className={`rounded-2xl border border-[var(--cream-3)] bg-white ${compact ? 'p-4' : 'p-5'}`}>
       <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Avant le paiement</p>
@@ -21,7 +32,7 @@ export function CheckoutContactFields({ compact = false }: CheckoutContactFields
       <input
         type="email"
         value={customerEmail}
-        onChange={(event) => setCustomerEmail(event.target.value)}
+        onChange={(event) => handleEmailChange(event.target.value)}
         placeholder="vous@exemple.com"
         className={`mt-2 w-full rounded-xl border border-[var(--cream-3)] px-4 ${compact ? 'py-2.5' : 'py-3'} text-sm text-[var(--black)] outline-none transition-colors focus:border-[var(--terra)]`}
       />

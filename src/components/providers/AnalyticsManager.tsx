@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { getTikTokPixelId } from '@/lib/tiktokConfig'
 import {
   captureAttribution,
   getTrackingConsent,
@@ -17,7 +18,7 @@ export function AnalyticsManager() {
   const consent = useSyncExternalStore(subscribeToTrackingConsent, getTrackingConsent, () => null)
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
   const ga4Id = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID?.trim()
-  const tiktokPixelId = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim()
+  const tiktokPixelId = getTikTokPixelId()
 
   useEffect(() => {
     captureAttribution(searchParams)
