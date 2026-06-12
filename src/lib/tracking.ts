@@ -29,7 +29,7 @@ type AnalyticsWindow = Window & {
 
 type TikTokAnalyticsQueue = unknown[] & {
   page?: () => void
-  track?: (name: string, params?: Record<string, unknown>) => void
+  track?: (name: string, params?: Record<string, unknown>, options?: Record<string, unknown>) => void
 }
 
 interface AddToCartTrackingParams {
@@ -179,6 +179,7 @@ function toTikTokPayload(params: TrackingParams = {}) {
   return {
     currency: params.currency,
     value: params.value,
+    event_id: params.event_id,
     content_type: 'product',
     content_id: params.product_id ?? params.product_ids,
     content_name: params.product_name,
@@ -195,7 +196,7 @@ function sendToTikTok(name: string, params: TrackingParams = {}) {
   if (!analyticsWindow.ttq) {
     const queue = [] as TikTokAnalyticsQueue
     queue.page = () => queue.push(['page'])
-    queue.track = (eventName, eventParams) => queue.push(['track', eventName, eventParams])
+    queue.track = (eventName, eventParams, eventOptions) => queue.push(['track', eventName, eventParams, eventOptions])
     analyticsWindow.ttq = queue
   }
 
@@ -214,7 +215,11 @@ function sendToTikTok(name: string, params: TrackingParams = {}) {
   const tiktokEventName = eventMap[name]
   if (!tiktokEventName) return
 
-  ttq.track?.(tiktokEventName, toTikTokPayload(params))
+  ttq.track?.(
+    tiktokEventName,
+    toTikTokPayload(params),
+    typeof params.event_id === 'string' ? { event_id: params.event_id } : undefined,
+  )
 }
 
 function sendToVercel(name: string, params: TrackingParams = {}) {
@@ -465,6 +470,7 @@ export function trackPurchase({ dedupeKey, orderNumber, value, items, sourceChan
   const itemCount = getItemCount(items)
   const payload = {
     currency: 'EUR',
+    event_id: dedupeKey,
     transaction_id: orderNumber,
     order_number: orderNumber,
     value: roundCurrency(value),

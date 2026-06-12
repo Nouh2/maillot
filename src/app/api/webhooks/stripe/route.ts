@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { getOrderById, getOrderByStripeSessionId, getOrderDisplayReference, recordMarketingEvent, runOrderPostCheckoutTasks, synchronizeOrderFromCheckoutSession } from '@/lib/orders'
 import { getStripe } from '@/lib/stripe'
+import { sendTikTokCompletePaymentEvent } from '@/lib/tiktokEvents'
 import type { Order } from '@/types/order'
 
 const POST_CHECKOUT_EVENT_TYPES = new Set([
@@ -83,6 +84,16 @@ export async function POST(request: NextRequest) {
         await runOrderPostCheckoutTasks(order.id)
       } catch (error) {
         console.error('Post-checkout webhook processing failed:', event.id, order.id, error)
+      }
+
+      try {
+        await sendTikTokCompletePaymentEvent({
+          order,
+          session,
+          eventId: `purchase:${order.id}`,
+        })
+      } catch (error) {
+        console.error('TikTok webhook event processing failed:', event.id, order.id, error)
       }
     })
   } else if (CHECKOUT_FAILURE_EVENT_TYPES.has(event.type)) {
