@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
 import { CartItem } from '@/components/cart/CartItem'
-import { formatEuro, PACK_DISCOUNT_AMOUNT } from '@/lib/cartPricing'
+import { calculateCartPricing, formatEuro } from '@/lib/cartPricing'
 import { isSupportedPromoCode, normalizePromoCode } from '@/lib/promoCodes'
 import { useCartStore } from '@/store/cart'
 import { MobileCheckoutBar } from '@/components/cart/MobileCheckoutBar'
@@ -15,6 +15,7 @@ export default function CartPage() {
   const { items, subtotal, discountTotal, total, itemCount, promoCode, setPromoCode } = useCartStore()
   const quantity = itemCount()
   const discount = discountTotal()
+  const pricing = calculateCartPricing(items, { promoCode })
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search)
@@ -68,7 +69,7 @@ export default function CartPage() {
               </div>
               {discount > 0 ? (
                 <div className="flex items-center justify-between text-sm text-[var(--terra)]">
-                  <span>{promoCode ? `Code ${promoCode}` : 'Remise pack'}</span>
+                  <span>{pricing.discountSource === 'promo_code' ? `Code ${pricing.promoCode}` : 'Remise pack'}</span>
                   <span>-{formatEuro(discount)}</span>
                 </div>
               ) : null}
@@ -81,9 +82,9 @@ export default function CartPage() {
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
               <p className="mt-2">Livraison incluse sur toutes les commandes.</p>
-              <p className="mt-1">Pack 3 maillots : {formatEuro(PACK_DISCOUNT_AMOUNT)} de remise immediate, appliquee automatiquement si elle est plus avantageuse que le code promo.</p>
-              {discount > 0 && promoCode ? (
-                <p className="mt-1 text-[var(--terra)]">Code {promoCode} applique : -10% sur les maillots du panier.</p>
+              <p className="mt-1">2 maillots : -5 EUR. Des 3 maillots : le moins cher par tranche de 3 passe a -50%.</p>
+              {pricing.discountSource === 'promo_code' ? (
+                <p className="mt-1 text-[var(--terra)]">Code {pricing.promoCode} applique car plus avantageux que la remise pack.</p>
               ) : null}
             </div>
 

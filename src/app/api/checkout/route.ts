@@ -212,14 +212,41 @@ export async function POST(request: NextRequest) {
       await syncLeadToBrevo({ email, marketingOptIn })
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      allow_promotion_codes: pricing.discountSource === null,
-      locale: 'fr',
-      client_reference_id: pendingOrder.id,
-      customer_email: email,
-      line_items: [
-        ...pricing.discountedUnitGroups.map((group) => {
+    const packCoupon = pricing.discountSource === 'pack' && pricing.discount > 0
+      ? await stripe.coupons.create({
+          amount_off: Math.round(pricing.discount * 100),
+          currency: 'eur',
+          duration: 'once',
+          name: 'Remise pack',
+        })
+      : null
+
+    const checkoutLineItems = pricing.discountSource === 'pack'
+      ? normalizedItems.map((item) => {
+          const imageUrl = toStripeImageUrl(item.photo, baseUrl)
+
+          return {
+            price_data: {
+              currency: 'eur',
+              product_data: {
+                name: [
+                  item.name,
+                  `Taille ${item.size}`,
+                  item.patch_names.length > 0 ? `Patch ${item.patch_names.join(', ')}` : null,
+                  item.flocage_name || item.flocage_number
+                    ? `Flocage ${[item.flocage_name, item.flocage_number].filter(Boolean).join(' #')}`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' - '),
+                ...(imageUrl ? { images: [imageUrl] } : {}),
+              },
+              unit_amount: Math.round(item.price * 100),
+            },
+            quantity: item.qty,
+          }
+        })
+      : pricing.discountedUnitGroups.map((group) => {
           const item = normalizedItems[group.sourceIndex]
           const imageUrl = toStripeImageUrl(item.photo, baseUrl)
 
@@ -243,8 +270,16 @@ export async function POST(request: NextRequest) {
             },
             quantity: group.quantity,
           }
-        }),
-      ],
+        })
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      allow_promotion_codes: pricing.discountSource === null,
+      locale: 'fr',
+      client_reference_id: pendingOrder.id,
+      customer_email: email,
+      line_items: checkoutLineItems,
+      ...(packCoupon ? { discounts: [{ coupon: packCoupon.id }] } : {}),
       shipping_address_collection: {
         allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'ES', 'IT', 'GB', 'NL', 'PT'],
       },
@@ -266,9 +301,12 @@ export async function POST(request: NextRequest) {
               promo_discount_amount: String(pricing.discount),
             }
           : {}),
-        ...(pricing.discountSource === 'pack_3'
+        ...(pricing.discountSource === 'pack'
           ? {
               pack_discount_amount: String(pricing.packDiscount),
+              pack_discount_tier: pricing.packDiscountTier,
+              pack_discounted_item_count: String(pricing.packDiscountedItemCount),
+              pack_coupon_id: packCoupon?.id ?? '',
             }
           : {}),
       },

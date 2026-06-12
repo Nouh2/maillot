@@ -2,18 +2,26 @@
 
 import { useMemo, useState } from 'react'
 import { BadgePercent, CheckCircle2, PackagePlus, Sparkles } from 'lucide-react'
-import { PACK_DISCOUNT_AMOUNT, PACK_DISCOUNT_MIN_ITEMS, formatEuro } from '@/lib/cartPricing'
+import { FAN_JERSEY_PRICE, calculateCartPricing, formatEuro } from '@/lib/cartPricing'
 
 const BUNDLE_OPTIONS = [
-  { qty: 1, label: '1 maillot', price: 'des 25,90 EUR', benefit: 'livraison incluse', icon: PackagePlus },
-  { qty: 2, label: '2 maillots', price: 'mix libre', benefit: 'plus de choix', icon: Sparkles },
-  { qty: 3, label: '3 maillots', price: `-${formatEuro(PACK_DISCOUNT_AMOUNT)}`, benefit: 'remise immediate', tag: 'Le plus choisi', icon: BadgePercent },
+  { qty: 1, label: '1 maillot', benefit: 'livraison incluse', icon: PackagePlus },
+  { qty: 2, label: '2 maillots', benefit: 'economise 5 EUR', icon: Sparkles },
+  { qty: 3, label: '3 maillots', benefit: '3e a -50 %', tag: 'Le plus choisi', icon: BadgePercent },
 ] as const
 
+function getOptionPrice(qty: number) {
+  const pricing = calculateCartPricing([{ price: FAN_JERSEY_PRICE, qty }])
+  return {
+    total: pricing.total,
+    discount: pricing.packDiscount,
+  }
+}
+
 export function BundleOffer() {
-  const [selectedQty, setSelectedQty] = useState(PACK_DISCOUNT_MIN_ITEMS)
-  const progress = useMemo(() => Math.min(100, (selectedQty / PACK_DISCOUNT_MIN_ITEMS) * 100), [selectedQty])
-  const packUnlocked = selectedQty >= PACK_DISCOUNT_MIN_ITEMS
+  const [selectedQty, setSelectedQty] = useState(3)
+  const selectedPricing = useMemo(() => getOptionPrice(selectedQty), [selectedQty])
+  const progress = useMemo(() => Math.min(100, (Math.min(selectedQty, 3) / 3) * 100), [selectedQty])
 
   const scrollToProducts = () => {
     document.getElementById('selection-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -28,32 +36,24 @@ export function BundleOffer() {
               Pack malin
             </p>
             <h2 className="mt-2 font-bebas text-5xl leading-[0.9] md:text-7xl">
-              Compose ton pack
+              Plus tu prends, plus tu gagnes
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
-              Choisis plusieurs maillots de la selection. Au 3e maillot, {formatEuro(PACK_DISCOUNT_AMOUNT)} de remise se declenchent automatiquement.
+              2 maillots : -5 EUR. Des 3 maillots : le moins cher par tranche de 3 passe a -50 %. Livraison incluse.
             </p>
 
             <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.06] p-4">
               <div className="mb-2 flex items-center justify-between font-condensed text-xs font-bold uppercase tracking-[0.16em] text-white/60">
                 <span>Progression pack</span>
-                <span>{selectedQty}/{PACK_DISCOUNT_MIN_ITEMS}</span>
+                <span>{Math.min(selectedQty, 3)}/3</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/15">
                 <div className="h-full rounded-full bg-[var(--terra)] transition-all" style={{ width: `${progress}%` }} />
               </div>
               <p className="mt-3 flex items-center gap-2 text-sm font-semibold">
-                {packUnlocked ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 text-[var(--terra)]" />
-                    Remise pack active
-                  </>
-                ) : (
-                  <>
-                    <BadgePercent className="h-4 w-4 text-white/50" />
-                    Ajoute encore {PACK_DISCOUNT_MIN_ITEMS - selectedQty} maillot{PACK_DISCOUNT_MIN_ITEMS - selectedQty > 1 ? 's' : ''} pour la remise
-                  </>
-                )}
+                <CheckCircle2 className="h-4 w-4 text-[var(--terra)]" />
+                Total pack : {formatEuro(selectedPricing.total)}
+                {selectedPricing.discount > 0 ? ` - economie ${formatEuro(selectedPricing.discount)}` : ''}
               </p>
             </div>
           </div>
@@ -63,6 +63,7 @@ export function BundleOffer() {
               {BUNDLE_OPTIONS.map((option) => {
                 const Icon = option.icon
                 const selected = selectedQty === option.qty
+                const optionPricing = getOptionPrice(option.qty)
 
                 return (
                   <button
@@ -91,7 +92,7 @@ export function BundleOffer() {
                       <span className="mt-0.5 block font-bebas text-3xl leading-none text-[var(--black)]">{option.label}</span>
                     </span>
                     <span className="col-start-2 shrink-0 text-left font-condensed text-xs font-bold uppercase tracking-[0.12em] text-[var(--grey)] sm:col-start-auto sm:text-right">
-                      {option.price}
+                      {formatEuro(optionPricing.total)}
                     </span>
                   </button>
                 )

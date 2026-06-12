@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
-import { formatEuro } from '@/lib/cartPricing'
+import { calculateCartPricing, formatEuro } from '@/lib/cartPricing'
 import { CartBundleOffer } from './CartBundleOffer'
 import { CartItem } from './CartItem'
 import { CheckoutButton } from './CheckoutButton'
@@ -17,8 +17,10 @@ export function CartDrawer() {
     subtotal,
     discountTotal,
     total,
+    promoCode,
   } = useCartStore()
   const discount = discountTotal()
+  const pricing = calculateCartPricing(items, { promoCode })
 
   useEffect(() => {
     if (!isOpen) return
@@ -85,7 +87,7 @@ export function CartDrawer() {
                 </div>
                 {discount > 0 ? (
                   <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--terra)]">
-                    <span>Remises</span>
+                    <span>{pricing.discountSource === 'promo_code' ? `Code ${pricing.promoCode}` : 'Remise pack'}</span>
                     <span>-{formatEuro(discount)}</span>
                   </div>
                 ) : null}

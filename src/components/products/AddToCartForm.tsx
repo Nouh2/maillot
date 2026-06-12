@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Minus, Plus } from 'lucide-react'
 import {
   FLOCAGE_PRICE,
+  calculateCartPricing,
   calculateCartItemUnitPrice,
   formatEuro,
   getProductPricing,
@@ -65,6 +66,29 @@ export function AddToCartForm({
     hasFlocage,
   })
   const totalPrice = unitPrice * qty
+  const selectedPackPricing = calculateCartPricing([{ price: unitPrice, qty }])
+  const packOptions = [
+    {
+      qty: 1,
+      label: '1 maillot',
+      detail: formatEuro(unitPrice),
+      total: unitPrice,
+      discount: 0,
+    },
+    {
+      qty: 2,
+      label: '2 maillots',
+      detail: 'economise 5 EUR',
+      ...calculateCartPricing([{ price: unitPrice, qty: 2 }]),
+    },
+    {
+      qty: 3,
+      label: '3 maillots',
+      detail: 'le 3e a -50 %',
+      tag: 'Le plus choisi',
+      ...calculateCartPricing([{ price: unitPrice, qty: 3 }]),
+    },
+  ]
 
   useEffect(() => {
     trackEvent('product_view', {
@@ -214,6 +238,40 @@ export function AddToCartForm({
         ) : null}
 
         <div className="flex flex-col gap-3">
+          <div className="rounded-2xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="font-condensed text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--grey)]">Remise pack</p>
+              <p className="text-right text-xs font-semibold text-[var(--terra)]">
+                {selectedPackPricing.packDiscount > 0 ? `Economie ${formatEuro(selectedPackPricing.packDiscount)}` : 'Livraison incluse'}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {packOptions.map((option) => {
+                const selected = qty === option.qty
+
+                return (
+                  <button
+                    key={option.qty}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setQty(option.qty)}
+                    className={`min-h-[74px] rounded-xl border px-2 py-2 text-left transition-all ${
+                      selected
+                        ? 'border-[var(--terra)] bg-white shadow-[0_0_0_2px_rgba(193,68,14,0.12)]'
+                        : 'border-[var(--cream-3)] bg-white/70 hover:border-[var(--terra)]/40'
+                    }`}
+                  >
+                    <span className="block font-condensed text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--black)]">{option.label}</span>
+                    <span className="mt-1 block text-[11px] leading-tight text-[var(--grey)]">{option.detail}</span>
+                    <span className="mt-1 block font-condensed text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--terra)]">
+                      Total {formatEuro(option.total)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           <div className="flex items-center">
             <div className="flex h-[58px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
               <button
@@ -235,7 +293,7 @@ export function AddToCartForm({
               onClick={handleAdd}
               className="ml-3 flex h-[58px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-0 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
             >
-              Ajouter au panier - {formatEuro(totalPrice)}
+              Ajouter au panier - {formatEuro(selectedPackPricing.total)}
             </button>
           </div>
 

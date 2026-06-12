@@ -12,6 +12,10 @@ const FAQ_ITEMS = [
     a: "Les patchs (LDC, Coupe de France, FA Cup...) sont disponibles selon l'eligibilite du club. Vous pouvez les ajouter lors de l'achat.",
   },
   {
+    q: 'Comment fonctionne la remise pack ?',
+    a: '2 maillots dans le panier donnent -5 EUR. Des 3 maillots, le maillot le moins cher par tranche de 3 passe a -50%. La remise pack ne se cumule pas avec les codes promo : le meilleur avantage est applique.',
+  },
+  {
     q: 'Puis-je retourner mon maillot ?',
     a: 'Oui, les retours sont acceptes sous 14 jours suivant la reception, en etat neuf avec les etiquettes, hors articles personnalises sauf defaut produit ou erreur du vendeur.',
   },

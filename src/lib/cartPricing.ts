@@ -15,8 +15,9 @@ export const STANDARD_PRICE = 33.99
 export const STANDARD_PROMO_PRICE = 25.99
 export const RETRO_PRICE = 40.99
 export const RETRO_PROMO_PRICE = 33.99
-export const PACK_DISCOUNT_MIN_ITEMS = 3
-export const PACK_DISCOUNT_AMOUNT = 5
+export const PACK_TWO_ITEMS_DISCOUNT = 5
+export const PACK_HALF_PRICE_GROUP_SIZE = 3
+export const PACK_HALF_PRICE_RATE = 0.5
 
 const FIXED_PRODUCT_PRICES: Record<string, number> = {
   'maillot-domicile-stadium-psg-25-26-flocage-champions-of-europe': 36,
@@ -41,6 +42,8 @@ type DiscountableUnit = {
   amountAfterDiscountCents: number
 }
 
+export type PackDiscountTier = 'none' | 'two_items' | 'half_every_three'
+
 type CartPricingOptions = {
   promoCode?: string | null
 }
@@ -51,11 +54,13 @@ export type CartPricingBreakdown = {
   discount: number
   promoDiscount: number
   packDiscount: number
+  packDiscountTier: PackDiscountTier
+  packDiscountedItemCount: number
   shipping: number
   total: number
   promoCode: string | null
   promoDiscountRate: number
-  discountSource: 'promo_code' | 'pack_3' | null
+  discountSource: 'promo_code' | 'pack' | null
   freeShippingUnlocked: boolean
   discountedUnitGroups: DiscountedUnitGroup[]
 }
@@ -152,6 +157,69 @@ export function calculateItemsSubtotal(items: PriceableCartItem[]): number {
   return items.reduce((sum, item) => sum + (item.price * item.qty), 0)
 }
 
+function getHalfPriceDiscountCents(unitCents: number): number {
+  return Math.floor(unitCents * PACK_HALF_PRICE_RATE)
+}
+
+function calculateFlatPackAllocations(units: DiscountableUnit[], discountCents: number): number[] {
+  const allocations = Array(units.length).fill(0) as number[]
+  let remainingCents = discountCents
+  const sortedUnitIndexes = units
+    .map((unit, index) => ({ index, capacityCents: getHalfPriceDiscountCents(unit.unitCents) }))
+    .filter((unit) => unit.capacityCents > 0)
+    .sort((a, b) => units[a.index].unitCents - units[b.index].unitCents)
+
+  for (const { index, capacityCents } of sortedUnitIndexes) {
+    if (remainingCents <= 0) break
+    const allocationCents = Math.min(capacityCents, remainingCents)
+    allocations[index] = allocationCents
+    remainingCents -= allocationCents
+  }
+
+  return allocations
+}
+
+function calculatePackDiscount(units: DiscountableUnit[], itemCount: number): {
+  tier: PackDiscountTier
+  discountCents: number
+  discountedItemCount: number
+  allocations: number[]
+} {
+  if (itemCount < 2 || units.length === 0) {
+    return { tier: 'none', discountCents: 0, discountedItemCount: 0, allocations: Array(units.length).fill(0) }
+  }
+
+  if (itemCount === 2) {
+    const discountCents = Math.min(toCents(PACK_TWO_ITEMS_DISCOUNT), units.reduce((sum, unit) => sum + getHalfPriceDiscountCents(unit.unitCents), 0))
+    const allocations = calculateFlatPackAllocations(units, discountCents)
+
+    return {
+      tier: discountCents > 0 ? 'two_items' : 'none',
+      discountCents,
+      discountedItemCount: discountCents > 0 ? 2 : 0,
+      allocations,
+    }
+  }
+
+  const discountedItemCount = Math.floor(itemCount / PACK_HALF_PRICE_GROUP_SIZE)
+  const allocations = Array(units.length).fill(0) as number[]
+  const sortedUnitIndexes = units
+    .map((unit, index) => ({ index, unitCents: unit.unitCents }))
+    .sort((a, b) => a.unitCents - b.unitCents)
+    .slice(0, discountedItemCount)
+
+  for (const { index } of sortedUnitIndexes) {
+    allocations[index] = getHalfPriceDiscountCents(units[index].unitCents)
+  }
+
+  return {
+    tier: discountedItemCount > 0 ? 'half_every_three' : 'none',
+    discountCents: allocations.reduce((sum, allocation) => sum + allocation, 0),
+    discountedItemCount,
+    allocations,
+  }
+}
+
 export function calculateCartPricing(items: PriceableCartItem[], options: CartPricingOptions = {}): CartPricingBreakdown {
   const itemCount = items.reduce((sum, item) => sum + item.qty, 0)
   const subtotalCents = items.reduce((sum, item) => sum + (toCents(item.price) * item.qty), 0)
@@ -171,34 +239,19 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     }
   }
 
-  const packDiscountCents = itemCount >= PACK_DISCOUNT_MIN_ITEMS ? Math.min(toCents(PACK_DISCOUNT_AMOUNT), subtotalCents) : 0
-  const shouldApplyPromo = promoDiscountCents > 0 && promoDiscountCents >= packDiscountCents
-  const shouldApplyPack = packDiscountCents > 0 && !shouldApplyPromo
-  const discountSource = shouldApplyPromo ? 'promo_code' : shouldApplyPack ? 'pack_3' : null
-  const discountCents = shouldApplyPromo ? promoDiscountCents : shouldApplyPack ? packDiscountCents : 0
+  const packDiscount = calculatePackDiscount(units, itemCount)
+  const shouldApplyPromo = promoDiscountCents > 0 && promoDiscountCents >= packDiscount.discountCents
+  const shouldApplyPack = packDiscount.discountCents > 0 && !shouldApplyPromo
+  const discountSource = shouldApplyPromo ? 'promo_code' : shouldApplyPack ? 'pack' : null
+  const discountCents = shouldApplyPromo ? promoDiscountCents : shouldApplyPack ? packDiscount.discountCents : 0
   const discountedSubtotalCents = Math.max(0, subtotalCents - discountCents)
 
   if (shouldApplyPromo) {
     for (const unit of units) {
       unit.amountAfterDiscountCents = Math.max(0, Math.round(unit.unitCents * (1 - promoDiscountRate)))
     }
-  } else if (shouldApplyPack && subtotalCents > 0) {
-    let allocatedCents = 0
-    const allocations = units.map((unit) => {
-      const share = Math.min(unit.unitCents, Math.floor((discountCents * unit.unitCents) / subtotalCents))
-      allocatedCents += share
-      return share
-    })
-
-    let remainder = discountCents - allocatedCents
-    for (const [index, unit] of units.entries()) {
-      if (remainder <= 0) break
-      const capacity = unit.unitCents - allocations[index]
-      if (capacity <= 0) continue
-      allocations[index] += 1
-      remainder -= 1
-    }
-
+  } else if (shouldApplyPack) {
+    const allocations = packDiscount.allocations
     units.forEach((unit, index) => {
       unit.amountAfterDiscountCents = Math.max(0, unit.unitCents - allocations[index])
     })
@@ -227,7 +280,9 @@ export function calculateCartPricing(items: PriceableCartItem[], options: CartPr
     subtotal: fromCents(subtotalCents),
     discount: fromCents(discountCents),
     promoDiscount: fromCents(promoDiscountCents),
-    packDiscount: fromCents(packDiscountCents),
+    packDiscount: fromCents(packDiscount.discountCents),
+    packDiscountTier: packDiscount.tier,
+    packDiscountedItemCount: packDiscount.discountedItemCount,
     shipping: fromCents(shippingCents),
     total: fromCents(discountedSubtotalCents + shippingCents),
     promoCode: shouldApplyPromo ? promoCode : null,
