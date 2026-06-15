@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { CheckoutContactFields } from '@/components/cart/CheckoutContactFields'
 import { CheckoutButton } from '@/components/cart/CheckoutButton'
@@ -13,17 +14,25 @@ import { CartBundleOffer } from '@/components/cart/CartBundleOffer'
 
 export default function CartPage() {
   const { items, subtotal, discountTotal, total, itemCount, promoCode, setPromoCode } = useCartStore()
+  const [promoInput, setPromoInput] = useState('')
+  const [promoError, setPromoError] = useState('')
   const quantity = itemCount()
   const discount = discountTotal()
   const pricing = calculateCartPricing(items, { promoCode })
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
-    const code = normalizePromoCode(searchParams.get('promo'))
+  const handlePromoSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const code = normalizePromoCode(promoInput)
+
     if (isSupportedPromoCode(code)) {
       setPromoCode(code)
+      setPromoInput('')
+      setPromoError('')
+      return
     }
-  }, [setPromoCode])
+
+    setPromoError('Code promo invalide ou expiré.')
+  }
 
   return (
     <div className="min-h-screen bg-[var(--cream)]">
@@ -78,6 +87,46 @@ export default function CartPage() {
                 <span className="font-bold">{formatEuro(total())}</span>
               </div>
             </div>
+
+            <form onSubmit={handlePromoSubmit} className="mt-5 rounded-2xl border border-[var(--cream-3)] bg-white p-4">
+              <label htmlFor="promo-code" className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">
+                Code promo
+              </label>
+              <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                <input
+                  id="promo-code"
+                  type="text"
+                  value={promoInput}
+                  onChange={(event) => {
+                    setPromoInput(event.target.value)
+                    setPromoError('')
+                  }}
+                  placeholder="ADDICT10"
+                  className="min-h-11 w-full rounded-full border border-[var(--cream-3)] bg-[var(--cream)] px-4 text-sm font-semibold uppercase tracking-[0.08em] outline-none transition-colors focus:border-[var(--black)]"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                />
+                <button
+                  type="submit"
+                  className="min-h-11 rounded-full bg-[var(--black)] px-4 font-condensed text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[var(--terra)]"
+                >
+                  Appliquer
+                </button>
+              </div>
+              {promoCode ? (
+                <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--terra)]">
+                  <span>Code {promoCode} enregistré. Le panier garde la meilleure remise entre code et pack.</span>
+                  <button
+                    type="button"
+                    onClick={() => setPromoCode(null)}
+                    className="shrink-0 font-condensed font-bold uppercase tracking-[0.12em] text-[var(--black)] underline underline-offset-4"
+                  >
+                    Retirer
+                  </button>
+                </div>
+              ) : null}
+              {promoError ? <p className="mt-2 text-xs font-semibold text-red-700">{promoError}</p> : null}
+            </form>
 
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>

@@ -420,7 +420,7 @@ function promoCodeBlock(code: string): string {
     '<div style="margin:0 0 18px;padding:18px 20px;border:1px solid #e8dfd0;border-radius:22px;background:#fff7ed;">',
     '<p style="margin:0 0 8px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#c1440e;font-weight:700;">Code panier</p>',
     `<p style="margin:0;color:#1c1712;font-size:28px;line-height:1;font-weight:900;letter-spacing:0.12em;">${escapeHtml(code)}</p>`,
-    '<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.6;">-10 % appliqués automatiquement depuis le lien si tu veux finaliser aujourd’hui.</p>',
+    '<p style="margin:10px 0 0;color:#3d3229;font-size:13px;line-height:1.6;">-10 % à renseigner dans le panier si tu veux finaliser aujourd’hui.</p>',
     '</div>',
   ].join('')
 }
@@ -445,7 +445,7 @@ function abandonedCartStageTemplate(params: {
   items?: AbandonedCartItem[] | null
 }) {
   const resumeLink = `${getBaseUrl()}/panier`
-  const promoResumeLink = `${getBaseUrl()}/panier?promo=${ABANDONED_CART_PROMO_CODE}`
+  const promoResumeLink = `${getBaseUrl()}/panier`
   const landingLink = getLandingUrl()
   const summary = getCartSummary(params.items)
   const itemSummary = formatCartItems(params.items)
@@ -505,7 +505,7 @@ function abandonedCartStageTemplate(params: {
           ]),
         ],
         primaryCta: {
-          label: 'Utiliser le code',
+          label: 'Reprendre mon panier',
           href: promoResumeLink,
           tone: 'terra',
         },
@@ -514,7 +514,7 @@ function abandonedCartStageTemplate(params: {
           href: landingLink,
           tone: 'ghost',
         },
-        note: `Code ${ABANDONED_CART_PROMO_CODE} : la remise est appliquée automatiquement depuis ce lien panier.`,
+        note: `Code ${ABANDONED_CART_PROMO_CODE} : saisis-le dans le panier pour appliquer la remise si elle est plus avantageuse que l’offre pack.`,
       }),
     }
   }
