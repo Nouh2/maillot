@@ -4,6 +4,7 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { getProductDisplayClub, getProductDisplayName } from '@/lib/productDisplay'
 import type { Product } from '@/types/product'
 import { ProductFamilyBadge } from './ProductFamilyBadge'
 
@@ -17,6 +18,8 @@ export function ProductCard({
   openSizeOnClick?: boolean
 }) {
   const photo = product.photos[0]
+  const displayName = getProductDisplayName(product)
+  const displayClub = getProductDisplayClub(product)
   const productHref = `/shop/${product.slug}${openSizeOnClick ? '?taille=1' : ''}`
   const pricing = getProductPricing({
     isRetro: product.is_retro,
@@ -35,7 +38,7 @@ export function ProductCard({
           {photo ? (
             <ExternalProductImage
               src={photo}
-              alt={product.name}
+              alt={displayName}
               fill
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
@@ -64,7 +67,7 @@ export function ProductCard({
         </div>
 
         <div className="p-4">
-          <p className="mb-1 font-condensed text-xs uppercase tracking-widest text-[var(--grey)]">{product.club}</p>
+          <p className="mb-1 font-condensed text-xs uppercase tracking-widest text-[var(--grey)]">{displayClub}</p>
           <p className="font-condensed text-sm font-semibold text-[var(--black)]">{getProductMetaLine(product)}</p>
 
           <div className="mt-3 flex items-end justify-between gap-3">

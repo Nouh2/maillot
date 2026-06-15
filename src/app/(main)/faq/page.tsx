@@ -13,7 +13,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Comment fonctionne la remise pack ?',
-    a: '2 maillots dans le panier donnent -5 EUR. Des 3 maillots, le maillot le moins cher par tranche de 3 passe a -50%. La remise pack ne se cumule pas avec les codes promo : le meilleur avantage est applique.',
+    a: '2 maillots dans le panier donnent -5 EUR. Dès 3 maillots, le maillot le moins cher par tranche de 3 passe à -50%. La remise pack ne se cumule pas avec les codes promo : le meilleur avantage est appliqué.',
   },
   {
     q: 'Puis-je retourner mon maillot ?',

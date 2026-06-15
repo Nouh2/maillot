@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Gift, Plus, Shirt, Trophy, X } from 'lucide-react'
 import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { calculateCartPricing, formatEuro } from '@/lib/cartPricing'
-import { normalizeProductTextSeasons } from '@/lib/season'
+import { normalizeVisibleText } from '@/lib/productDisplay'
+import { isPlaceholderSeason } from '@/lib/season'
 
 export type PackBuilderSuggestion = {
   id: string
@@ -50,20 +51,20 @@ function getHeadline(slotCount: number) {
 }
 
 function compactSeason(season?: string) {
-  if (!season) return ''
+  if (!season || isPlaceholderSeason(season)) return ''
   const rangeMatch = season.match(/^20(\d{2})-20(\d{2})$/)
   if (rangeMatch) return `${rangeMatch[1]}/${rangeMatch[2]}`
   return season
 }
 
 function displaySuggestionName(product: PackBuilderSuggestion) {
-  const club = product.club || normalizeProductTextSeasons(product.name)
+  const club = product.club || normalizeVisibleText(product.name)
   const season = compactSeason(product.season)
   return [club, season].filter(Boolean).join(' ')
 }
 
 function displaySlotName(slot: PackBuilderSlot) {
-  const base = slot.club || normalizeProductTextSeasons(slot.name)
+  const base = slot.club || normalizeVisibleText(slot.name)
   return `${base} · ${slot.size ?? '?'}`
 }
 

@@ -31,8 +31,11 @@ export function StickyAddToCart({ productName, currentPrice, originalPrice, prom
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-full overflow-hidden border-t border-[var(--cream-3)] bg-white md:hidden"
-      style={{ transform: visible ? 'translateY(0)' : 'translateY(100%)', transition: 'transform 0.3s ease' }}
+      className="fixed bottom-[var(--ma-sticky-bottom-offset)] left-0 right-0 z-50 w-full max-w-full overflow-hidden border-t border-[var(--cream-3)] bg-white md:hidden"
+      style={{
+        transform: visible ? 'translateY(0)' : 'translateY(calc(100% + var(--ma-sticky-bottom-offset)))',
+        transition: 'transform 0.3s ease',
+      }}
     >
       <div className="w-full max-w-full overflow-hidden px-4 py-3" style={{ height: '108px' }}>
         <div className="mb-2 flex w-full items-center justify-between overflow-hidden">

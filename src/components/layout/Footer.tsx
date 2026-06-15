@@ -63,7 +63,7 @@ export function Footer() {
       </div>
 
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-white/10 px-4 py-4 sm:flex-row sm:px-6">
-        <p className="text-xs text-[var(--grey-lt)]">© {new Date().getFullYear()} MAILLOT ADDICT - Tous droits reserves</p>
+        <p className="text-xs text-[var(--grey-lt)]">© {new Date().getFullYear()} MAILLOT ADDICT - Tous droits réservés</p>
         <div className="flex items-center gap-3">
           {['Visa', 'Mastercard', 'CB'].map((provider) => (
             <span

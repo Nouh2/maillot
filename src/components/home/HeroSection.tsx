@@ -3,6 +3,7 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { getProductDisplayClub, getProductDisplayName } from '@/lib/productDisplay'
 import type { Product } from '@/types/product'
 
 export function HeroSection({ featured }: { featured: Product[] }) {
@@ -54,6 +55,8 @@ export function HeroSection({ featured }: { featured: Product[] }) {
           <div className="absolute left-1/2 top-1/2 -z-10 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--terra)]/5 blur-3xl" />
           {featured.slice(0, 4).map((product) => (
             (() => {
+              const displayName = getProductDisplayName(product)
+              const displayClub = getProductDisplayClub(product)
               const pricing = getProductPricing({
                 isRetro: product.is_retro,
                 isConcept: product.is_concept,
@@ -72,7 +75,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                     {product.photos[0] ? (
                       <ExternalProductImage
                         src={product.photos[0]}
-                        alt={product.name}
+                        alt={displayName}
                         fill
                         priority
                         fallbackMode="proxy"
@@ -91,7 +94,7 @@ export function HeroSection({ featured }: { featured: Product[] }) {
                   <div className="flex flex-1 flex-col justify-between p-4 transition-colors group-hover:bg-[var(--cream)] sm:p-5">
                     <div>
                       <p className="mb-1 font-condensed text-[10px] uppercase tracking-[0.2em] text-[var(--grey)] sm:mb-2 sm:text-xs">
-                        {product.club}
+                        {displayClub}
                       </p>
                       <p className="line-clamp-2 font-condensed text-sm font-bold leading-tight text-[var(--black)] transition-colors group-hover:text-[var(--terra)] sm:text-base">
                         {getProductMetaLine(product)}

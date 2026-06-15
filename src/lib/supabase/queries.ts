@@ -5,6 +5,13 @@ import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPrese
 import { CATALOG_CACHE_TAG, toCatalogProduct } from '@/lib/catalogProducts'
 import { FAN_JERSEY_PRICE, getProductPricing } from '@/lib/cartPricing'
 import { NATIONAL_TEAMS_VALUE } from '@/lib/catalog'
+import { isPlaceholderSeason } from '@/lib/season'
+import {
+  getProductDisplayClub,
+  getProductDisplayName,
+  hasPlaceholderSlug,
+  isProductDisplayableInSuggestions,
+} from '@/lib/productDisplay'
 import { getSupabasePublicClient } from './server'
 
 type ProductQueryPage = {
@@ -51,7 +58,7 @@ const NATIONAL_TEAM_CLUBS = new Set(
 )
 
 function isBlockedProductSlug(slug: string): boolean {
-  return BLOCKED_PRODUCT_SLUGS.has(slug)
+  return BLOCKED_PRODUCT_SLUGS.has(slug) || hasPlaceholderSlug(slug)
 }
 
 function normalizePackSuggestionText(value: string | null | undefined): string {
@@ -365,6 +372,23 @@ function isFanPackSuggestion(product: Product): boolean {
   )
 }
 
+function isEligiblePackSuggestion(product: Product): boolean {
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
+  })
+
+  return (
+    product.product_kind === 'jersey' &&
+    !product.is_retro &&
+    !product.is_concept &&
+    pricing.currentPrice >= FAN_JERSEY_PRICE
+  )
+}
+
 const PACK_SUGGESTION_PRIORITY = [
   {
     slug: 'paris-saint-germain-maillot-domicile-2026-2027',
@@ -421,14 +445,72 @@ function isPreferredPackSuggestion(product: Product) {
   )
 }
 
+function toDisplaySafePackSuggestion(product: Product): Product {
+  return {
+    ...product,
+    name: getProductDisplayName(product),
+    club: getProductDisplayClub(product),
+    season: isPlaceholderSeason(product.season) ? '' : product.season,
+  }
+}
+
+function dedupePackSuggestions(products: Product[]): Product[] {
+  const seen = new Set<string>()
+  const deduped: Product[] = []
+
+  for (const product of products) {
+    const signature = [
+      normalizePackSuggestionText(product.name),
+      normalizePackSuggestionText(product.league),
+      normalizePackSuggestionText(product.club),
+      product.is_retro ? 'retro' : 'standard',
+      product.is_concept ? 'concept' : product.jersey_version,
+    ].join('|')
+
+    if (seen.has(signature)) continue
+
+    seen.add(signature)
+    deduped.push(product)
+  }
+
+  return deduped
+}
+
+function scoreContextualPackSuggestion(candidate: Product, product: Product): number {
+  let score = 0
+
+  if (normalizePackSuggestionText(candidate.club) === normalizePackSuggestionText(product.club)) score += 50
+  if (normalizePackSuggestionText(candidate.country) === normalizePackSuggestionText(product.country)) score += 20
+  if (normalizePackSuggestionText(candidate.league) === normalizePackSuggestionText(product.league)) score += 16
+  if (candidate.product_kind === product.product_kind) score += 8
+  if (candidate.jersey_version === product.jersey_version) score += 6
+  if (candidate.season === product.season && !isPlaceholderSeason(candidate.season)) score += 5
+  if (candidate.type !== product.type) score += 4
+  if (candidate.is_featured) score += 2
+
+  return score
+}
+
 export async function getPackSuggestionProducts(product?: Product | null, limit = 6): Promise<Product[]> {
   const currentSlug = product?.slug
   const primaryLeague = product?.league || NATIONAL_TEAMS_VALUE
   const products = await getProducts({ productKind: 'jersey' })
-  const seenClubs = new Set<string>()
-
-  const preferredProducts = products
+  const eligibleProducts = products
     .filter((candidate) => candidate.slug !== currentSlug)
+    .filter(isEligiblePackSuggestion)
+
+  const contextualProducts = product
+    ? eligibleProducts
+        .map((candidate) => ({ candidate, score: scoreContextualPackSuggestion(candidate, product) }))
+        .filter(({ score }) => score > 0)
+        .sort((left, right) => {
+          if (right.score !== left.score) return right.score - left.score
+          return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
+        })
+        .map(({ candidate }) => candidate)
+    : []
+
+  const preferredProducts = eligibleProducts
     .filter(isPreferredPackSuggestion)
     .sort((left, right) => {
       const rankDiff = packSuggestionPriorityRank(left) - packSuggestionPriorityRank(right)
@@ -438,8 +520,7 @@ export async function getPackSuggestionProducts(product?: Product | null, limit 
       return new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
     })
 
-  const scoredProducts = products
-    .filter((candidate) => candidate.slug !== currentSlug)
+  const scoredProducts = eligibleProducts
     .filter(isFanPackSuggestion)
     .map((candidate) => {
       let score = 0
@@ -456,13 +537,13 @@ export async function getPackSuggestionProducts(product?: Product | null, limit 
       return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
     })
 
-  return dedupeCatalogProducts([...preferredProducts, ...scoredProducts.map(({ candidate }) => candidate)])
-    .filter((candidate) => {
-      const normalizedClub = normalizePackSuggestionText(candidate.club)
-      if (seenClubs.has(normalizedClub)) return false
-      seenClubs.add(normalizedClub)
-      return true
-    })
+  return dedupePackSuggestions([
+    ...contextualProducts,
+    ...preferredProducts,
+    ...scoredProducts.map(({ candidate }) => candidate),
+  ])
+    .filter(isProductDisplayableInSuggestions)
+    .map(toDisplaySafePackSuggestion)
     .slice(0, limit)
 }
 

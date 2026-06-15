@@ -7,6 +7,7 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { getProductDisplayName } from '@/lib/productDisplay'
 import type { HomepageFastMoverGroup } from '@/types/homepageCuration'
 
 export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }) {
@@ -56,6 +57,7 @@ export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }
       {display.length > 0 ? (
         <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
           {display.map((product, index) => {
+            const displayName = getProductDisplayName(product)
             const pricing = getProductPricing({
               isRetro: product.is_retro,
               isConcept: product.is_concept,
@@ -71,7 +73,7 @@ export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }
                     {product.photos[0] ? (
                       <ExternalProductImage
                         src={product.photos[0]}
-                        alt={product.name}
+                        alt={displayName}
                         fill
                         loading={index < 4 ? 'eager' : 'lazy'}
                         fetchPriority={index < 4 ? 'high' : 'auto'}
@@ -105,7 +107,7 @@ export function CollectionsTabs({ groups }: { groups: HomepageFastMoverGroup[] }
           })}
         </div>
       ) : (
-        <p className="py-8 text-center font-condensed text-sm text-[var(--grey)]">Collection bientot disponible</p>
+        <p className="py-8 text-center font-condensed text-sm text-[var(--grey)]">Collection bientôt disponible</p>
       )}
 
       {activeGroup ? (

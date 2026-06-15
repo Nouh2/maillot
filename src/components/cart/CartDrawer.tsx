@@ -103,7 +103,7 @@ export function CartDrawer({ packSuggestions = [] }: { packSuggestions?: Product
                 onClick={closeCart}
                 className="block text-center font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)] underline underline-offset-4"
               >
-                Voir le panier detaille
+                Voir le panier détaillé
               </Link>
 
               <CheckoutContactFields compact />

@@ -7,7 +7,7 @@ import { FAN_JERSEY_PRICE, calculateCartPricing, formatEuro } from '@/lib/cartPr
 const BUNDLE_OPTIONS = [
   { qty: 1, label: '1 maillot', benefit: 'livraison incluse', icon: PackagePlus },
   { qty: 2, label: '2 maillots', benefit: 'economise 5 EUR', icon: Sparkles },
-  { qty: 3, label: '3 maillots', benefit: '3e a -50 %', tag: 'Le plus choisi', icon: BadgePercent },
+  { qty: 3, label: '3 maillots', benefit: '3e à -50 %', tag: 'Le plus choisi', icon: BadgePercent },
 ] as const
 
 function getOptionPrice(qty: number) {
@@ -39,7 +39,7 @@ export function BundleOffer() {
               Plus tu prends, plus tu gagnes
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
-              2 maillots : -5 EUR. Des 3 maillots : le moins cher par tranche de 3 passe a -50 %. Livraison incluse.
+              2 maillots : -5 EUR. Dès 3 maillots : le moins cher par tranche de 3 passe à -50 %. Livraison incluse.
             </p>
 
             <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.06] p-4">

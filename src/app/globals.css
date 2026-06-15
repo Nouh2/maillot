@@ -22,6 +22,8 @@
   --terra-lt: #fdf0ea;
   --terra-mid: #e8956d;
   --white: #ffffff;
+  --ma-cookie-banner-height: 0px;
+  --ma-sticky-bottom-offset: 0px;
 }
 
 html,
@@ -31,6 +33,16 @@ body {
   overflow-x: hidden;
   position: relative;
   width: 100%;
+}
+
+body.maillot-cookie-pending {
+  --ma-cookie-banner-height: 124px;
+  --ma-sticky-bottom-offset: calc(var(--ma-cookie-banner-height) + 12px + env(safe-area-inset-bottom, 0px));
+}
+
+body:has(#maillot-cookie-banner) {
+  --ma-cookie-banner-height: 124px;
+  --ma-sticky-bottom-offset: calc(var(--ma-cookie-banner-height) + 12px + env(safe-area-inset-bottom, 0px));
 }
 
 

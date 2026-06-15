@@ -696,7 +696,7 @@ function buildEmailTemplatePreview(templateId: EmailTemplateId): EmailTemplatePr
         stage,
         items: [
           {
-            name: 'Belgique Maillot Exterieur 2026',
+            name: 'Belgique Maillot Extérieur 2026',
             size: 'M',
             qty: 1,
             price: 25.9,

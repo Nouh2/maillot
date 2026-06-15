@@ -32,6 +32,14 @@ export function AnalyticsManager() {
     }
   }, [consent, pathname])
 
+  useEffect(() => {
+    document.body.classList.toggle('maillot-cookie-pending', consent === null)
+
+    return () => {
+      document.body.classList.remove('maillot-cookie-pending')
+    }
+  }, [consent])
+
   const gtmScript = useMemo(() => {
     if (!gtmId) return null
 
@@ -96,7 +104,10 @@ export function AnalyticsManager() {
       ) : null}
 
       {consent === null ? (
-        <div className="fixed inset-x-2 bottom-[calc(82px+env(safe-area-inset-bottom,0px))] z-[180] mx-auto max-w-4xl rounded-xl border border-[var(--cream-3)] bg-white/95 p-3 shadow-xl backdrop-blur sm:bottom-3 sm:p-4">
+        <div
+          id="maillot-cookie-banner"
+          className="fixed inset-x-2 bottom-[calc(12px+env(safe-area-inset-bottom,0px))] z-[300] mx-auto max-h-[calc(100dvh-24px-env(safe-area-inset-bottom,0px))] max-w-4xl overflow-y-auto rounded-xl border border-[var(--cream-3)] bg-white/95 p-3 shadow-xl backdrop-blur sm:bottom-3 sm:p-4"
+        >
           <p className="sr-only">Cookies et mesure</p>
           <p className="text-xs leading-snug text-[var(--black)] sm:text-sm">
             Cookies de mesure pour TikTok, Clarity et analytics. Rien sans ton accord.

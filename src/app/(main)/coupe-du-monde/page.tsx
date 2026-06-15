@@ -18,13 +18,13 @@ const BESTSELLER_PRODUCT_PRIORITY = [
   { club: 'Argentine' },
   { club: 'Angleterre' },
   { club: 'Maroc' },
-  { club: 'Algerie' },
+  { club: 'Algérie' },
 ] as const
 
 const BESTSELLER_CLUB_FALLBACK_ORDER = [
   'France',
   'Maroc',
-  'Algerie',
+  'Algérie',
   'Portugal',
   'Argentine',
   'Bresil',
@@ -119,7 +119,7 @@ export default async function CoupeDuMondePage() {
       </Suspense>
       <a
         href="#worldcup-best-sellers"
-        className="fixed inset-x-3 bottom-3 z-[80] flex min-h-[52px] items-center justify-center rounded-md bg-[var(--terra)] px-4 py-3 text-center font-condensed text-sm font-bold uppercase tracking-[0.16em] text-white shadow-[0_-8px_24px_rgba(0,0,0,0.08)] md:hidden"
+        className="fixed inset-x-3 bottom-[calc(var(--ma-sticky-bottom-offset)+12px)] z-[80] flex min-h-[52px] items-center justify-center rounded-md bg-[var(--terra)] px-4 py-3 text-center font-condensed text-sm font-bold uppercase tracking-[0.16em] text-white shadow-[0_-8px_24px_rgba(0,0,0,0.08)] md:hidden"
       >
         Voir les best-sellers
       </a>

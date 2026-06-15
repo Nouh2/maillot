@@ -45,7 +45,7 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
                 event.stopPropagation()
                 goToPrevious()
               }}
-              aria-label={`Voir la photo precedente de ${name}`}
+              aria-label={`Voir la photo précédente de ${name}`}
               className="absolute top-1/2 left-3 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[var(--black)] shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
             >
               <ChevronLeft className="h-5 w-5" />

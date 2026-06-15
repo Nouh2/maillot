@@ -11,7 +11,7 @@ import {
   formatEuro,
   getProductPricing,
 } from '@/lib/cartPricing'
-import { normalizeProductTextSeasons } from '@/lib/season'
+import { getProductDisplayClub, getProductDisplayName, isProductDisplayableInSuggestions } from '@/lib/productDisplay'
 import { trackAddToCart, trackEvent } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import type { Patch, Product } from '@/types/product'
@@ -40,8 +40,8 @@ function toBuilderSuggestion(product: Product): PackBuilderSuggestion {
   return {
     id: product.id,
     slug: product.slug,
-    name: normalizeProductTextSeasons(product.name),
-    club: product.club,
+    name: getProductDisplayName(product),
+    club: getProductDisplayClub(product),
     season: product.season,
     price: pricing.currentPrice,
     photo: product.photos[0] ?? '',
@@ -92,13 +92,14 @@ export function AddToCartForm({
     hasFlocage,
   })
   const selectedPatchObjects = patches.filter((patch) => selectedPatches.includes(patch.code))
-  const normalizedName = normalizeProductTextSeasons(product.name)
+  const normalizedName = getProductDisplayName(product)
+  const displayClub = getProductDisplayClub(product)
   const currentSlot: PackBuilderSlot = {
     key: `current-${product.id}`,
     productId: product.id,
     slug: product.slug,
     name: normalizedName,
-    club: product.club,
+    club: displayClub,
     season: product.season,
     price: unitPrice,
     photo: product.photos[0] ?? '',
@@ -119,16 +120,18 @@ export function AddToCartForm({
   const packSlots = [currentSlot, ...suggestionSlots].slice(0, 3)
   const packPricing = calculateCartPricing(packSlots.map((slot) => ({ price: slot.price, qty: 1 })))
   const packComplete = packSlots.length >= 3
-  const builderSuggestions = packSuggestions.map(toBuilderSuggestion)
+  const builderSuggestions = packSuggestions
+    .filter(isProductDisplayableInSuggestions)
+    .map(toBuilderSuggestion)
 
   useEffect(() => {
     trackEvent('product_view', {
       product_id: product.id,
-      product_name: normalizeProductTextSeasons(product.name),
+      product_name: normalizedName,
       price: pricing.currentPrice,
       league: product.league,
     })
-  }, [pricing.currentPrice, product.id, product.league, product.name])
+  }, [normalizedName, pricing.currentPrice, product.id, product.league])
 
   const promptForSize = useCallback(() => {
     setError('Choisis ta taille pour continuer')
@@ -168,7 +171,7 @@ export function AddToCartForm({
       product_id: product.id,
       slug: product.slug,
       name: normalizedName,
-      club: product.club,
+      club: displayClub,
       size,
       patches: selectedPatches,
       patch_names: selectedPatchObjects.map((patch) => patch.name),
@@ -182,7 +185,7 @@ export function AddToCartForm({
     trackAddToCart({
       productId: product.id,
       productName: normalizedName,
-      club: product.club,
+      club: displayClub,
       quantity: 1,
       size,
       patchCount: selectedPatches.length,

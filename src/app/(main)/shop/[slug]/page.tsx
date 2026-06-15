@@ -12,7 +12,8 @@ import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { TrustBadge } from '@/components/ui/TrustBadge'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
-import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
+import { getProductDisplayClub, getProductDisplayName } from '@/lib/productDisplay'
+import { resolveProductSeasonLabel } from '@/lib/season'
 import { getPackSuggestionProducts, getPatches, getProductBySlug, getRelatedProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
@@ -68,11 +69,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     productSlug: product.slug,
   })
   const season = resolveProductSeasonLabel(product)
+  const displayName = getProductDisplayName(product)
 
   return {
-    title: normalizeProductTextSeasons(product.name),
+    title: displayName,
     description: [
-      `Achetez le ${normalizeProductTextSeasons(product.name)}`,
+      `Achetez le ${displayName}`,
       productDescriptor,
       season ? `saison ${season}` : null,
       `prix ${formatEuro(pricing.currentPrice)}`,
@@ -101,13 +103,20 @@ export default async function ProductPage({ params, searchParams }: Props) {
     getRelatedProducts(product),
     getPackSuggestionProducts(product, 6),
   ])
+  const displayName = getProductDisplayName(product)
+  const displayClub = getProductDisplayClub(product)
   const productDescription = getProductDisplayDescription(product)
-  const displayProduct: Product = { ...product, description: productDescription }
+  const displayProduct: Product = {
+    ...product,
+    name: displayName,
+    club: displayClub,
+    description: productDescription,
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[var(--cream)] md:pb-0">
       <StickyAddToCart
-        productName={normalizeProductTextSeasons(product.name)}
+        productName={displayName}
         currentPrice={pricing.currentPrice}
         originalPrice={pricing.promoActive ? pricing.originalPrice : null}
         promoLabel={pricing.promoLabel}
@@ -123,10 +132,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <span className="opacity-30">|</span>
               <span className="truncate">{product.league}</span>
               <span className="opacity-30">|</span>
-              <span className="truncate font-bold text-[var(--black)]">{normalizeProductTextSeasons(product.name)}</span>
+              <span className="truncate font-bold text-[var(--black)]">{displayName}</span>
             </nav>
 
-            <PhotoGallery photos={product.photos} name={normalizeProductTextSeasons(product.name)} />
+            <PhotoGallery photos={product.photos} name={displayName} />
 
             <div className="mt-3 flex justify-center md:justify-start">
               <TrustBadge />
@@ -138,10 +147,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
               <ProductFamilyBadge product={displayProduct} />
             </div>
             <h1 className="mb-1 font-bebas text-[34px] leading-[0.95] text-[var(--black)] md:text-5xl">
-              {normalizeProductTextSeasons(product.name)}
+              {displayName}
             </h1>
             <p className="mb-2 font-condensed text-xs uppercase tracking-widest text-[var(--grey)] md:text-sm">
-              {product.club} · {getProductMetaLine(product)}
+              {displayClub} · {getProductMetaLine(product)}
             </p>
 
             <PriceDisplay
@@ -175,7 +184,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
           <section className="border-t border-[var(--cream-3)] pt-10 md:pt-14">
             <ProductsGrid
               products={relatedProducts}
-              sub={product.club}
+              sub={displayClub}
               title="Vous pourriez aimer"
             />
           </section>

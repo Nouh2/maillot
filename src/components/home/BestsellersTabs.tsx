@@ -8,6 +8,7 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
+import { getProductDisplayClub, getProductDisplayName } from '@/lib/productDisplay'
 import type { HomepageBestsellerTab } from '@/types/homepageCuration'
 
 import { TrustBadge } from '@/components/ui/TrustBadge'
@@ -82,11 +83,12 @@ export function BestsellersTabs({
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-3">
                 <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Sélection</p>
-                <p className="font-condensed text-[15px] font-bold uppercase leading-tight text-white">Les Plus<br />Demandes</p>
+                <p className="font-condensed text-[15px] font-bold uppercase leading-tight text-white">Les Plus<br />Demandés</p>
                 <p className="mt-2 font-condensed text-[11px] font-semibold uppercase tracking-wide text-[var(--terra)]">Voir tout →</p>
               </div>
             </Link>
             {rest.slice(0, 2).map((product, index) => {
+              const displayName = getProductDisplayName(product)
               const pricing = getProductPricing({
                 isRetro: product.is_retro,
                 isConcept: product.is_concept,
@@ -100,7 +102,7 @@ export function BestsellersTabs({
                     {product.photos[0] ? (
                       <ExternalProductImage
                         src={product.photos[0]}
-                        alt={product.name}
+                        alt={displayName}
                         fill
                         loading="eager"
                         fetchPriority={index < 2 ? 'high' : 'auto'}
@@ -137,12 +139,14 @@ export function BestsellersTabs({
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,23,18,0.88) 0%, transparent 55%)' }} />
               <div className="absolute bottom-0 left-0 p-4">
                 <p className="mb-1 font-condensed text-[10px] uppercase tracking-widest text-white/60">Sélection</p>
-                <p className="font-condensed text-base font-bold uppercase leading-tight text-white">Les Plus<br />Demandes</p>
+                <p className="font-condensed text-base font-bold uppercase leading-tight text-white">Les Plus<br />Demandés</p>
                 <p className="mt-2 font-condensed text-[11px] font-semibold uppercase tracking-wide text-[var(--terra)]">Voir tout →</p>
               </div>
               <div className="absolute inset-0" style={{ aspectRatio: '3/4' }} />
             </Link>
             {rest.slice(0, 3).map((product, index) => {
+              const displayName = getProductDisplayName(product)
+              const displayClub = getProductDisplayClub(product)
               const pricing = getProductPricing({
                 isRetro: product.is_retro,
                 isConcept: product.is_concept,
@@ -156,7 +160,7 @@ export function BestsellersTabs({
                     {product.photos[0] ? (
                       <ExternalProductImage
                         src={product.photos[0]}
-                        alt={product.name}
+                        alt={displayName}
                         fill
                         loading="eager"
                         fetchPriority={index < 3 ? 'high' : 'auto'}
@@ -171,7 +175,7 @@ export function BestsellersTabs({
                     </div>
                   </div>
                   <div className="px-3 py-2">
-                    <p className="truncate font-condensed text-[12px] text-[var(--black)]">{product.club}</p>
+                    <p className="truncate font-condensed text-[12px] text-[var(--black)]">{displayClub}</p>
                     <p className="truncate font-condensed text-[11px] text-[var(--grey)]">{getProductMetaLine(product)}</p>
                     <PriceDisplay currentPrice={formatEuro(pricing.currentPrice)} originalPrice={pricing.promoActive ? formatEuro(pricing.originalPrice) : undefined} promoLabel={pricing.promoActive ? 'Promo' : undefined} size="sm" />
                   </div>

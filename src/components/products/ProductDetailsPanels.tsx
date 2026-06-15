@@ -15,12 +15,12 @@ const DEMO_REVIEWS = [
   {
     name: 'Yohan R.',
     image: '/images/avis/IMG_8142_2.webp',
-    text: 'Tres bonne qualite de maillot, bien floque. Le rendu est propre.',
+    text: 'Très bonne qualité de maillot, bien floqué. Le rendu est propre.',
   },
   {
     name: 'Prenfat S.',
     image: '/images/avis/IMG_8147_2.webp',
-    text: 'Tres beau maillot, tissu confortable et coupe nickel.',
+    text: 'Très beau maillot, tissu confortable et coupe nickel.',
   },
   {
     name: 'Sarah M.',
@@ -30,7 +30,7 @@ const DEMO_REVIEWS = [
   {
     name: 'Nabil H.',
     image: '/images/avis/24d5b5d7-8afe-43ca-a786-fd9c7ca02b8f.jpg',
-    text: 'Bien emballe, rendu propre et suivi de commande clair.',
+    text: 'Bien emballé, rendu propre et suivi de commande clair.',
   },
 ] as const
 
@@ -50,28 +50,28 @@ export function ProductDetailsPanels({ product }: { product: Product }) {
       <div className="space-y-0 border-y border-[var(--cream-3)]">
         <details className="group border-b border-[var(--cream-3)] py-4" open>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-bold text-[var(--black)]">
-            Specifications
+            Spécifications
             <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
           </summary>
           <p className="mt-2 text-sm leading-relaxed text-[var(--grey)]">
-            Coupe : {product.jersey_version === 'player' ? 'player ajustee' : 'standard / unisexe'}.
+            Coupe : {product.jersey_version === 'player' ? 'player ajustée' : 'standard / unisexe'}.
             Prends ta taille habituelle. Type : {product.type}. Saison : {product.season}.
           </p>
         </details>
 
         <details className="group py-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-bold text-[var(--black)]">
-            Materiaux & Entretien
+            Matériaux & Entretien
             <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
           </summary>
           <p className="mt-2 text-sm leading-relaxed text-[var(--grey)]">
-            Tissu leger et respirant. Lavage doux a froid recommande. Evite le seche-linge pour preserver le flocage.
+            Tissu léger et respirant. Lavage doux à froid recommandé. Évite le sèche-linge pour préserver le flocage.
           </p>
         </details>
       </div>
 
       <div className="rounded-lg bg-white p-5">
-        <h2 className="text-lg font-bold text-[var(--black)]">Paiement & Securite</h2>
+        <h2 className="text-lg font-bold text-[var(--black)]">Paiement & Sécurité</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {PAYMENT_METHODS.map((method) => (
             <span key={method.name} className="flex h-7 w-11 items-center justify-center rounded border border-[var(--cream-3)] bg-white px-1.5">
@@ -86,7 +86,7 @@ export function ProductDetailsPanels({ product }: { product: Product }) {
           ))}
         </div>
         <p className="mt-4 text-sm font-medium leading-relaxed text-[var(--grey)]">
-          Vos informations de paiement sont traitees de maniere securisee. Nous ne stockons pas les informations de carte bancaire.
+          Vos informations de paiement sont traitées de manière sécurisée. Nous ne stockons pas les informations de carte bancaire.
         </p>
       </div>
 
@@ -101,7 +101,7 @@ export function ProductDetailsPanels({ product }: { product: Product }) {
           </button>
         </div>
         <button type="button" className="mb-5 min-h-[44px] w-full rounded-lg border border-[var(--cream-3)] bg-white px-4 py-3 text-sm font-semibold text-[var(--black)]">
-          Ecrire un avis
+          Écrire un avis
         </button>
         <div className="grid grid-cols-2 gap-3">
           {DEMO_REVIEWS.map((review) => (

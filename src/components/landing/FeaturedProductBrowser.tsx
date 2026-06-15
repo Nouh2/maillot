@@ -6,7 +6,7 @@ import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductMetaLine } from '@/lib/productLabels'
-import { normalizeProductTextSeasons } from '@/lib/season'
+import { getProductDisplayClub, getProductDisplayName } from '@/lib/productDisplay'
 import { cn } from '@/lib/utils'
 import type { Product } from '@/types/product'
 
@@ -102,6 +102,8 @@ function matchesFilter(product: Product, filter: FilterKey) {
 
 function ProductTile({ product, priority = false }: { product: Product; priority?: boolean }) {
   const sizeHref = `/shop/${product.slug}?taille=1`
+  const displayName = getProductDisplayName(product)
+  const displayClub = getProductDisplayClub(product)
   const pricing = getProductPricing({
     isRetro: product.is_retro,
     isConcept: product.is_concept,
@@ -117,7 +119,7 @@ function ProductTile({ product, priority = false }: { product: Product; priority
           {product.photos[0] ? (
             <ExternalProductImage
               src={product.photos[0]}
-              alt={product.name}
+              alt={displayName}
               fill
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
@@ -131,9 +133,9 @@ function ProductTile({ product, priority = false }: { product: Product; priority
       </Link>
 
       <div className="p-3 sm:p-4">
-        <p className="font-condensed text-[11px] uppercase tracking-[0.16em] text-[var(--terra)]">{product.club}</p>
+        <p className="font-condensed text-[11px] uppercase tracking-[0.16em] text-[var(--terra)]">{displayClub}</p>
         <h2 className="mt-1 line-clamp-2 min-h-[2.4em] text-sm font-bold leading-tight text-[var(--black)] sm:text-base">
-          {normalizeProductTextSeasons(product.name)}
+          {displayName}
         </h2>
         <p className="mt-1 text-xs text-[var(--grey)]">{getProductMetaLine(product)}</p>
         <div className="mt-3">

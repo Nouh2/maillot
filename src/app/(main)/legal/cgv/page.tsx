@@ -22,8 +22,8 @@ const CGV_SECTIONS = [
       'Les prix des produits sont indiqués en euros (€) et sont affichés directement sur les pages produits du site.',
       'Maillot Addict se réserve le droit de modifier ses prix à tout moment. Le prix appliqué sera celui affiché au moment de la validation de la commande.',
       'La livraison est incluse dans le prix affiche. Le total avant paiement tient compte des remises automatiques applicables.',
-      'Les offres pack sont calculees sur les maillots du panier uniquement : 2 maillots donnent -5 EUR, puis a partir de 3 maillots le moins cher par tranche de 3 passe a -50%.',
-      'Les remises pack ne sont pas cumulables avec les codes promo. Si un code promo est disponible, le meilleur avantage entre le code et la remise pack est applique.',
+      'Les offres pack sont calculées sur les maillots du panier uniquement : 2 maillots donnent -5 EUR, puis à partir de 3 maillots le moins cher par tranche de 3 passe à -50%.',
+      'Les remises pack ne sont pas cumulables avec les codes promo. Si un code promo est disponible, le meilleur avantage entre le code et la remise pack est appliqué.',
     ],
   },
   {

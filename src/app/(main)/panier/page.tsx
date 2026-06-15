@@ -82,9 +82,9 @@ export default function CartPage() {
             <div className="mt-6 rounded-2xl bg-[var(--cream)] p-4 text-sm text-[var(--black)]">
               <p className="font-condensed text-xs uppercase tracking-[0.18em] text-[var(--grey)]">Offres panier</p>
               <p className="mt-2">Livraison incluse sur toutes les commandes.</p>
-              <p className="mt-1">2 maillots : -5 EUR. Des 3 maillots : le moins cher par tranche de 3 passe a -50%.</p>
+              <p className="mt-1">2 maillots : -5 EUR. Dès 3 maillots : le moins cher par tranche de 3 passe à -50%.</p>
               {pricing.discountSource === 'promo_code' ? (
-                <p className="mt-1 text-[var(--terra)]">Code {pricing.promoCode} applique car plus avantageux que la remise pack.</p>
+                <p className="mt-1 text-[var(--terra)]">Code {pricing.promoCode} appliqué car plus avantageux que la remise pack.</p>
               ) : null}
             </div>
 
@@ -99,7 +99,7 @@ export default function CartPage() {
             <p className="font-condensed text-xs uppercase tracking-[0.24em] text-[var(--grey)]">Rappel</p>
             <h2 className="mt-3 font-bebas text-4xl text-[var(--black)]">Personnalisation</h2>
             <p className="mt-4 text-sm leading-relaxed text-[var(--grey)]">
-              Le flocage est facture {formatEuro(5)} par maillot. Les patchs selectionnes restent ajoutes article par article.
+              Le flocage est facturé {formatEuro(5)} par maillot. Les patchs sélectionnés restent ajoutés article par article.
             </p>
           </section>
         </aside>

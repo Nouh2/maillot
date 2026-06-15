@@ -4,7 +4,12 @@ import Link from 'next/link'
 import { PackBuilderCard, type PackBuilderSlot, type PackBuilderSuggestion } from '@/components/bundle/PackBuilderCard'
 import { SummerPackCard } from '@/components/bundle/SummerPackCard'
 import { calculateCartPricing, getProductPricing } from '@/lib/cartPricing'
-import { normalizeProductTextSeasons } from '@/lib/season'
+import {
+  getCartItemDisplayName,
+  getProductDisplayClub,
+  getProductDisplayName,
+  isProductDisplayableInSuggestions,
+} from '@/lib/productDisplay'
 import { trackAddToCart } from '@/lib/tracking'
 import { useCartStore } from '@/store/cart'
 import type { CartItem } from '@/types/cart'
@@ -40,8 +45,8 @@ function toBuilderSuggestion(product: Product): PackBuilderSuggestion {
   return {
     id: product.id,
     slug: product.slug,
-    name: normalizeProductTextSeasons(product.name),
-    club: product.club,
+    name: getProductDisplayName(product),
+    club: getProductDisplayClub(product),
     season: product.season,
     price: pricing.currentPrice,
     photo: product.photos[0] ?? '',
@@ -56,7 +61,7 @@ function expandCartSlots(items: CartItem[]): PackBuilderSlot[] {
         key: `cart-${item.product_id}-${item.size}-${index}`,
         productId: item.product_id,
         slug: item.slug,
-        name: normalizeProductTextSeasons(item.name),
+        name: getCartItemDisplayName(item),
         club: item.club,
         price: item.price,
         photo: item.photo,
@@ -71,7 +76,9 @@ export function CartBundleOffer({ compact = false, packSuggestions = [] }: { com
   const { items, promoCode, addItem, updateQty } = useCartStore()
   const pricing = calculateCartPricing(items, { promoCode })
   const maxRewardAmount = getProjectedMaxReward(items)
-  const builderSuggestions = packSuggestions.map(toBuilderSuggestion)
+  const builderSuggestions = packSuggestions
+    .filter(isProductDisplayableInSuggestions)
+    .map(toBuilderSuggestion)
   const builderSlots = expandCartSlots(items)
 
   const handleAddSuggestion = (suggestion: PackBuilderSuggestion, size: string) => {

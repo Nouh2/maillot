@@ -35,7 +35,7 @@ const PRODUCT_KIND_OPTIONS: Array<{ value: OpsProductDraft['product_kind']; labe
 
 const PRODUCT_TYPE_OPTIONS: Array<{ value: OpsProductDraft['type']; label: string }> = [
   { value: 'domicile', label: 'Domicile' },
-  { value: 'exterieur', label: 'Exterieur' },
+  { value: 'exterieur', label: 'Extérieur' },
   { value: 'third', label: 'Third' },
 ]
 

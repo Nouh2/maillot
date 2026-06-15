@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 const PATCH_GROUPS: { label: string; codes: string[] }[] = [
   { label: 'UEFA', codes: ['ucl', 'uel', 'uecl', 'uefa_super_cup', 'nations_league'] },
   { label: 'FIFA', codes: ['world_cup', 'club_world_cup'] },
-  { label: 'Ameriques & Afrique', codes: ['can', 'copa_america', 'gold_cup', 'afc_cup'] },
+  { label: 'Amériques & Afrique', codes: ['can', 'copa_america', 'gold_cup', 'afc_cup'] },
   { label: 'Premier League', codes: ['pl_winner', 'fa_cup', 'efl_cup'] },
   { label: 'La Liga', codes: ['laliga_winner', 'copa_del_rey', 'supercopa'] },
   { label: 'Bundesliga', codes: ['bundesliga_winner', 'dfb_pokal'] },

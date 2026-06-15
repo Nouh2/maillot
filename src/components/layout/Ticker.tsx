@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 const TICKER_ITEMS = [
-  'LIVRAISON INCLUSE · 3 MAILLOTS = LE 3E A -50 %',
+  'LIVRAISON INCLUSE · 3 MAILLOTS = LE 3E À -50 %',
 ]
 
 export function Ticker() {
@@ -13,7 +13,7 @@ export function Ticker() {
     return (
       <div className="w-full bg-[var(--terra)] px-4 py-2 text-center" role="region" aria-label="Offre du moment">
         <span className="font-condensed text-sm font-bold uppercase tracking-[0.18em] text-white">
-          Livraison incluse · 3 maillots = le 3e a -50 %
+          Livraison incluse · 3 maillots = le 3e à -50 %
         </span>
       </div>
     )

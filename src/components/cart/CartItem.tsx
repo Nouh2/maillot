@@ -3,12 +3,12 @@
 import { ExternalProductImage } from '@/components/ui/ExternalProductImage'
 import { useCartStore } from '@/store/cart'
 import { formatEuro } from '@/lib/cartPricing'
-import { normalizeProductTextSeasons } from '@/lib/season'
+import { getCartItemDisplayName } from '@/lib/productDisplay'
 import type { CartItem as CartItemType } from '@/types/cart'
 
 export function CartItem({ item }: { item: CartItemType }) {
   const { removeItem, updateQty } = useCartStore()
-  const displayName = normalizeProductTextSeasons(item.name)
+  const displayName = getCartItemDisplayName(item)
 
   return (
     <div className="flex gap-4 border-b border-[var(--cream-3)] py-4">
@@ -32,7 +32,7 @@ export function CartItem({ item }: { item: CartItemType }) {
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center border border-[var(--cream-3)]">
             <button
-              aria-label="Diminuer la quantite"
+              aria-label="Diminuer la quantité"
               onClick={() => updateQty(item, item.qty - 1)}
               className="px-2 py-1 hover:bg-[var(--cream)]"
             >
@@ -40,7 +40,7 @@ export function CartItem({ item }: { item: CartItemType }) {
             </button>
             <span className="px-3 py-1 text-sm">{item.qty}</span>
             <button
-              aria-label="Augmenter la quantite"
+              aria-label="Augmenter la quantité"
               onClick={() => updateQty(item, item.qty + 1)}
               className="px-2 py-1 hover:bg-[var(--cream)]"
             >

@@ -8,7 +8,7 @@ const SOCIAL_PROOF_ITEMS = [
   {
     name: 'Yanis R',
     avatar: '/images/avis/03be5b47-1c8e-4c2a-aa56-6438dd238b17.jpg',
-    text: 'Franchement lourd, le flocage est propre. Recu vite, le rendu en vrai est encore mieux.',
+    text: 'Franchement lourd, le flocage est propre. Reçu vite, le rendu en vrai est encore mieux.',
   },
   {
     name: 'Sarah M',
@@ -18,12 +18,12 @@ const SOCIAL_PROOF_ITEMS = [
   {
     name: 'Nabil H',
     avatar: '/images/avis/24d5b5d7-8afe-43ca-a786-fd9c7ca02b8f.jpg',
-    text: 'Maillot bien emballe, suivi clair et qualite au top.',
+    text: 'Maillot bien emballé, suivi clair et qualité au top.',
   },
   {
     name: 'Karim B',
     avatar: '/images/avis/IMG_8147_2.webp',
-    text: 'Recu nickel, les details sont propres et la taille tombe bien.',
+    text: 'Reçu nickel, les détails sont propres et la taille tombe bien.',
   },
 ] as const
 
@@ -53,11 +53,11 @@ export function ProductConversionProof() {
   return (
     <section className="space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-[var(--black)]">Commande rapide et securisee</h2>
+        <h2 className="text-base font-semibold text-[var(--black)]">Commande rapide et sécurisée</h2>
         <div className="relative mt-3 rounded-xl bg-white p-3">
           <button
             type="button"
-            aria-label="Avis precedent"
+            aria-label="Avis précédent"
             onClick={showPrevious}
             className="absolute -left-2 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--cream-3)] bg-white text-[var(--grey)]"
           >
@@ -106,7 +106,7 @@ export function ProductConversionProof() {
 
       <div className="flex items-center gap-2 text-[var(--black)]">
         <Truck className="h-5 w-5" />
-        <p className="text-base font-semibold">Livraison estimee : {deliveryRange}</p>
+        <p className="text-base font-semibold">Livraison estimée : {deliveryRange}</p>
       </div>
 
     </section>
