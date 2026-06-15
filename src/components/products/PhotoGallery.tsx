@@ -32,6 +32,8 @@ export function PhotoGallery({ photos, name }: { photos: string[]; name: string 
           bunnyTransform="gallery"
           className="object-cover transition-transform duration-500 hover:scale-105"
           priority={active === 0}
+          loading={active === 0 ? 'eager' : 'lazy'}
+          fetchPriority={active === 0 ? 'high' : 'auto'}
           sizes="(max-width: 768px) 100vw, 50vw"
         />
 

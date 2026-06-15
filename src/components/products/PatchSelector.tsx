@@ -18,6 +18,27 @@ const PATCH_GROUPS: { label: string; codes: string[] }[] = [
   { label: 'Distinctions', codes: ['captain', 'ballon_dor', 'best_fifa'] },
 ]
 
+const FALLBACK_PATCHES: Patch[] = [
+  { id: 'fallback-ucl', code: 'ucl', name: 'Ligue des Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-uel', code: 'uel', name: 'Europa League', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-uecl', code: 'uecl', name: 'Conference League', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-world-cup', code: 'world_cup', name: 'Coupe du Monde', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-nations-league', code: 'nations_league', name: 'Nations League', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-can', code: 'can', name: 'CAN', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-copa-america', code: 'copa_america', name: 'Copa America', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-pl-winner', code: 'pl_winner', name: 'Premier League Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-fa-cup', code: 'fa_cup', name: 'FA Cup', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-laliga-winner', code: 'laliga_winner', name: 'La Liga Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-copa-del-rey', code: 'copa_del_rey', name: 'Copa del Rey', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-bundesliga-winner', code: 'bundesliga_winner', name: 'Bundesliga Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-serie-a-winner', code: 'serie_a_winner', name: 'Serie A Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-ligue1-winner', code: 'ligue1_winner', name: 'Ligue 1 Champions', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-coupe-de-france', code: 'coupe_de_france', name: 'Coupe de France', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-captain', code: 'captain', name: 'Captain', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-ballon-dor', code: 'ballon_dor', name: 'Ballon d’Or', emoji: '', countries: [], competitions: [] },
+  { id: 'fallback-best-fifa', code: 'best_fifa', name: 'The Best FIFA', emoji: '', countries: [], competitions: [] },
+]
+
 export function PatchSelector({
   patches,
   selected,
@@ -28,6 +49,7 @@ export function PatchSelector({
   onSelect: (codes: string[]) => void
 }) {
   const [open, setOpen] = useState(false)
+  const displayPatches = patches.length > 0 ? patches : FALLBACK_PATCHES
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -35,8 +57,6 @@ export function PatchSelector({
       document.body.style.overflow = ''
     }
   }, [open])
-
-  if (patches.length === 0) return null
 
   const toggle = (code: string) => {
     if (selected.includes(code)) {
@@ -46,7 +66,7 @@ export function PatchSelector({
     }
   }
 
-  const patchMap = Object.fromEntries(patches.map((patch) => [patch.code, patch]))
+  const patchMap = Object.fromEntries(displayPatches.map((patch) => [patch.code, patch]))
 
   return (
     <>
@@ -75,7 +95,7 @@ export function PatchSelector({
                 {selected.length === 0
                   ? 'Sans patch'
                   : selected.length === 1
-                    ? patches.find((patch) => patch.code === selected[0])?.name ?? '1 patch'
+                    ? displayPatches.find((patch) => patch.code === selected[0])?.name ?? '1 patch'
                     : `${selected.length} patchs sélectionnés`}
               </p>
               <p className="mt-0.5 text-[11px] text-[#999]">
@@ -120,7 +140,7 @@ export function PatchSelector({
             <div>
               <p className="font-bebas text-[28px] leading-none tracking-wide text-[var(--black)]">Patchs maillot</p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[#999]">
-                {patches.length} patchs · +{formatEuro(PATCH_PRICE)} / patch · cumul possible
+                {displayPatches.length} patchs · +{formatEuro(PATCH_PRICE)} / patch · cumul possible
               </p>
             </div>
             <button

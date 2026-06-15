@@ -13,7 +13,7 @@ import { TrustBadge } from '@/components/ui/TrustBadge'
 import { formatEuro, getProductPricing } from '@/lib/cartPricing'
 import { getProductKindLabel, getProductMetaLine, getProductTypeLabel, showProductType } from '@/lib/productLabels'
 import { normalizeProductTextSeasons, resolveProductSeasonLabel } from '@/lib/season'
-import { getPatches, getProductBySlug, getRelatedProducts } from '@/lib/supabase/queries'
+import { getPackSuggestionProducts, getPatches, getProductBySlug, getRelatedProducts } from '@/lib/supabase/queries'
 import type { Product } from '@/types/product'
 
 export const revalidate = 86400
@@ -97,7 +97,10 @@ export default async function ProductPage({ params, searchParams }: Props) {
     jerseyVersion: product.jersey_version,
     productSlug: product.slug,
   })
-  const relatedProducts = await getRelatedProducts(product)
+  const [relatedProducts, packSuggestions] = await Promise.all([
+    getRelatedProducts(product),
+    getPackSuggestionProducts(product, 6),
+  ])
   const productDescription = getProductDisplayDescription(product)
   const displayProduct: Product = { ...product, description: productDescription }
 
@@ -151,7 +154,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
             <div id="product-cta-sentinel" />
 
-            <AddToCartForm product={displayProduct} patches={patches} openSizeOnLoad={openSizeOnLoad} />
+            <AddToCartForm product={displayProduct} patches={patches} packSuggestions={packSuggestions} openSizeOnLoad={openSizeOnLoad} />
 
             <div className="mt-5">
               <ProductConversionProof />

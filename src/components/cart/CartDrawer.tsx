@@ -8,8 +8,9 @@ import { CartBundleOffer } from './CartBundleOffer'
 import { CartItem } from './CartItem'
 import { CheckoutButton } from './CheckoutButton'
 import { CheckoutContactFields } from './CheckoutContactFields'
+import type { Product } from '@/types/product'
 
-export function CartDrawer() {
+export function CartDrawer({ packSuggestions = [] }: { packSuggestions?: Product[] }) {
   const {
     items,
     isOpen,
@@ -78,7 +79,7 @@ export function CartDrawer() {
                 ))}
               </div>
 
-              <CartBundleOffer compact />
+              <CartBundleOffer compact packSuggestions={packSuggestions} />
 
               <div className="space-y-2 rounded-2xl bg-[var(--cream)] p-4">
                 <div className="flex justify-between font-condensed text-sm tracking-wide text-[var(--grey)]">

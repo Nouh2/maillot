@@ -2,7 +2,8 @@
 
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Minus, Plus } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { PackBuilderCard, type PackBuilderSlot, type PackBuilderSuggestion } from '@/components/bundle/PackBuilderCard'
 import {
   FLOCAGE_PRICE,
   calculateCartPricing,
@@ -26,18 +27,42 @@ const PAYMENT_METHODS = [
   { name: 'Shop Pay', src: '/payment/shop-pay.svg' },
   { name: 'Visa', src: '/payment/visa.svg' },
 ] as const
+
+function toBuilderSuggestion(product: Product): PackBuilderSuggestion {
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
+  })
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: normalizeProductTextSeasons(product.name),
+    club: product.club,
+    season: product.season,
+    price: pricing.currentPrice,
+    photo: product.photos[0] ?? '',
+    sizes: product.sizes,
+  }
+}
+
 export function AddToCartForm({
   product,
   patches,
   openSizeOnLoad = false,
+  packSuggestions = [],
 }: {
   product: Product
   patches: Patch[]
   openSizeOnLoad?: boolean
+  packSuggestions?: Product[]
 }) {
   const [size, setSize] = useState<string | null>(null)
   const [selectedPatches, setSelectedPatches] = useState<string[]>([])
-  const [qty, setQty] = useState(1)
+  const [packItems, setPackItems] = useState<Array<{ suggestion: PackBuilderSuggestion; size: string }>>([])
   const [hasFlocage, setHasFlocage] = useState(false)
   const [flocageName, setFlocageName] = useState('')
   const [flocageNumber, setFlocageNumber] = useState('')
@@ -55,40 +80,46 @@ export function AddToCartForm({
     productSlug: product.slug,
   })
 
-  const availablePatches =
+  const filteredAvailablePatches =
     product.available_patches.length > 0
       ? patches.filter((patch) => product.available_patches.includes(patch.code))
-      : patches
+      : []
+  const availablePatches = filteredAvailablePatches.length > 0 ? filteredAvailablePatches : patches
 
   const unitPrice = calculateCartItemUnitPrice({
     basePrice: pricing.currentPrice,
     patchCount: selectedPatches.length,
     hasFlocage,
   })
-  const totalPrice = unitPrice * qty
-  const selectedPackPricing = calculateCartPricing([{ price: unitPrice, qty }])
-  const packOptions = [
-    {
-      qty: 1,
-      label: '1 maillot',
-      detail: formatEuro(unitPrice),
-      total: unitPrice,
-      discount: 0,
-    },
-    {
-      qty: 2,
-      label: '2 maillots',
-      detail: 'economise 5 EUR',
-      ...calculateCartPricing([{ price: unitPrice, qty: 2 }]),
-    },
-    {
-      qty: 3,
-      label: '3 maillots',
-      detail: 'le 3e a -50 %',
-      tag: 'Le plus choisi',
-      ...calculateCartPricing([{ price: unitPrice, qty: 3 }]),
-    },
-  ]
+  const selectedPatchObjects = patches.filter((patch) => selectedPatches.includes(patch.code))
+  const normalizedName = normalizeProductTextSeasons(product.name)
+  const currentSlot: PackBuilderSlot = {
+    key: `current-${product.id}`,
+    productId: product.id,
+    slug: product.slug,
+    name: normalizedName,
+    club: product.club,
+    season: product.season,
+    price: unitPrice,
+    photo: product.photos[0] ?? '',
+    size,
+  }
+  const suggestionSlots: PackBuilderSlot[] = packItems.map(({ suggestion, size }, index) => ({
+    key: `suggestion-${suggestion.id}-${size}-${index}`,
+    productId: suggestion.id,
+    slug: suggestion.slug,
+    name: suggestion.name,
+    club: suggestion.club,
+    season: suggestion.season,
+    price: suggestion.price,
+    photo: suggestion.photo,
+    size,
+    removable: true,
+  }))
+  const packSlots = [currentSlot, ...suggestionSlots].slice(0, 3)
+  const packPricing = calculateCartPricing(packSlots.map((slot) => ({ price: slot.price, qty: 1 })))
+  const packComplete = packSlots.length >= 3
+  const builderSuggestions = packSuggestions.map(toBuilderSuggestion)
 
   useEffect(() => {
     trackEvent('product_view', {
@@ -133,9 +164,6 @@ export function AddToCartForm({
 
     setError('')
 
-    const selectedPatchObjects = patches.filter((patch) => selectedPatches.includes(patch.code))
-    const normalizedName = normalizeProductTextSeasons(product.name)
-
     addItem({
       product_id: product.id,
       slug: product.slug,
@@ -148,20 +176,64 @@ export function AddToCartForm({
       flocage_number: hasFlocage ? flocageNumber : null,
       price: unitPrice,
       photo: product.photos[0] ?? '',
-      qty,
+      qty: 1,
     })
 
     trackAddToCart({
       productId: product.id,
       productName: normalizedName,
       club: product.club,
-      quantity: qty,
+      quantity: 1,
       size,
       patchCount: selectedPatches.length,
       hasFlocage,
       unitPrice,
-      value: totalPrice,
+      value: unitPrice,
     })
+
+    if (packComplete) {
+      packItems.slice(0, 2).forEach(({ suggestion, size: suggestionSize }) => {
+        addItem({
+          product_id: suggestion.id,
+          slug: suggestion.slug,
+          name: suggestion.name,
+          club: suggestion.club,
+          size: suggestionSize,
+          patches: [],
+          patch_names: [],
+          flocage_name: null,
+          flocage_number: null,
+          price: suggestion.price,
+          photo: suggestion.photo,
+          qty: 1,
+        })
+
+        trackAddToCart({
+          productId: suggestion.id,
+          productName: suggestion.name,
+          club: suggestion.club,
+          quantity: 1,
+          size: suggestionSize,
+          patchCount: 0,
+          hasFlocage: false,
+          unitPrice: suggestion.price,
+          value: suggestion.price,
+        })
+      })
+
+      setPackItems([])
+    }
+  }
+
+  const handleAddSuggestion = (suggestion: PackBuilderSuggestion, suggestionSize: string) => {
+    setPackItems((items) => {
+      if (items.length >= 2 || items.some((item) => item.suggestion.id === suggestion.id)) return items
+      return [...items, { suggestion, size: suggestionSize }]
+    })
+  }
+
+  const handleRemovePackSlot = (slot: PackBuilderSlot) => {
+    setPackItems((items) => items.filter((item) => item.suggestion.id !== slot.productId))
   }
 
   return (
@@ -238,64 +310,22 @@ export function AddToCartForm({
         ) : null}
 
         <div className="flex flex-col gap-3">
-          <div className="rounded-2xl border border-[var(--cream-3)] bg-[var(--cream)] p-3">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="font-condensed text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--grey)]">Remise pack</p>
-              <p className="text-right text-xs font-semibold text-[var(--terra)]">
-                {selectedPackPricing.packDiscount > 0 ? `Economie ${formatEuro(selectedPackPricing.packDiscount)}` : 'Livraison incluse'}
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {packOptions.map((option) => {
-                const selected = qty === option.qty
+          <button
+            onClick={handleAdd}
+            className="flex min-h-[58px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-3 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
+          >
+            {packComplete
+              ? `Ajouter le pack au panier - ${formatEuro(packPricing.total)} au lieu de ${formatEuro(packPricing.subtotal)}`
+              : `Ajouter au panier - ${formatEuro(unitPrice)}`}
+          </button>
 
-                return (
-                  <button
-                    key={option.qty}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setQty(option.qty)}
-                    className={`min-h-[74px] rounded-xl border px-2 py-2 text-left transition-all ${
-                      selected
-                        ? 'border-[var(--terra)] bg-white shadow-[0_0_0_2px_rgba(193,68,14,0.12)]'
-                        : 'border-[var(--cream-3)] bg-white/70 hover:border-[var(--terra)]/40'
-                    }`}
-                  >
-                    <span className="block font-condensed text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--black)]">{option.label}</span>
-                    <span className="mt-1 block text-[11px] leading-tight text-[var(--grey)]">{option.detail}</span>
-                    <span className="mt-1 block font-condensed text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--terra)]">
-                      Total {formatEuro(option.total)}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <div className="flex h-[58px] items-center rounded-xl border-2 border-[var(--cream-3)] bg-white px-2 shadow-sm">
-              <button
-                onClick={() => setQty(Math.max(1, qty - 1))}
-                className="flex h-9 w-9 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
-              >
-                <Minus size={18} />
-              </button>
-              <span className="w-8 text-center font-bebas text-xl text-[var(--black)]">{qty}</span>
-              <button
-                onClick={() => setQty(qty + 1)}
-                className="flex h-9 w-9 items-center justify-center text-[var(--grey)] transition-colors hover:text-[var(--black)]"
-              >
-                <Plus size={18} />
-              </button>
-            </div>
-
-            <button
-              onClick={handleAdd}
-              className="ml-3 flex h-[58px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--black)] px-5 py-0 text-center text-[14px] font-bold uppercase leading-tight tracking-wider text-white shadow-lg transition-all hover:opacity-90 hover:shadow-xl active:scale-[0.98] sm:text-[15px]"
-            >
-              Ajouter au panier - {formatEuro(selectedPackPricing.total)}
-            </button>
-          </div>
+          <PackBuilderCard
+            slots={packSlots}
+            suggestions={builderSuggestions}
+            onAddSuggestion={handleAddSuggestion}
+            onRemoveSlot={handleRemovePackSlot}
+            onCurrentSlotClick={promptForSize}
+          />
 
           <div>
             <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
@@ -304,7 +334,13 @@ export function AddToCartForm({
                   key={method.name}
                   className="flex h-6 w-[38px] items-center justify-center rounded border border-[var(--cream-3)] bg-white px-1.5 shadow-xs"
                 >
-                  <Image src={method.src} alt={method.name} width={34} height={16} className="max-h-4 w-auto object-contain" />
+                  <Image
+                    src={method.src}
+                    alt={method.name}
+                    width={34}
+                    height={16}
+                    className="object-contain"
+                  />
                 </span>
               ))}
             </div>

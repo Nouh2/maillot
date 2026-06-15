@@ -75,7 +75,13 @@ export function ProductDetailsPanels({ product }: { product: Product }) {
         <div className="mt-4 flex flex-wrap gap-2">
           {PAYMENT_METHODS.map((method) => (
             <span key={method.name} className="flex h-7 w-11 items-center justify-center rounded border border-[var(--cream-3)] bg-white px-1.5">
-              <Image src={method.src} alt={method.name} width={38} height={18} className="max-h-5 w-auto object-contain" />
+              <Image
+                src={method.src}
+                alt={method.name}
+                width={38}
+                height={18}
+                className="object-contain"
+              />
             </span>
           ))}
         </div>

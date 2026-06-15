@@ -190,7 +190,11 @@ export function FilterSidebar({
 
   return (
     <div className="relative z-40 mb-6 w-full md:mb-8" ref={dropdownRef}>
-      <div className="-mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
+      <div
+        className={`-mx-4 flex flex-nowrap items-center gap-2 px-4 pb-2 sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0 ${
+          openDropdown ? 'overflow-visible' : 'overflow-x-auto'
+        }`}
+      >
         <button
           type="button"
           onClick={togglePrimaryFilter}

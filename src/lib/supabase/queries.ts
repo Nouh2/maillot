@@ -3,6 +3,8 @@ import type { Club, League, Patch, Product } from '@/types/product'
 import catalogEntities from '../../../data/catalog-entities.json'
 import { dedupeCatalogProducts, filterConceptProducts } from '@/lib/catalogPresentation'
 import { CATALOG_CACHE_TAG, toCatalogProduct } from '@/lib/catalogProducts'
+import { FAN_JERSEY_PRICE, getProductPricing } from '@/lib/cartPricing'
+import { NATIONAL_TEAMS_VALUE } from '@/lib/catalog'
 import { getSupabasePublicClient } from './server'
 
 type ProductQueryPage = {
@@ -42,9 +44,40 @@ const CATALOG_LIST_SELECT =
 const CATALOG_LIST_SELECT_LEGACY =
   'id, slug, name, club, league, country, product_kind, type, season, price, photos, available_patches, is_featured, is_retro, is_concept, source_title, source_category_key, created_at'
 const BLOCKED_PRODUCT_SLUGS = new Set(['portugal-maillot-domicile-2026-226332504'])
+const NATIONAL_TEAM_CLUBS = new Set(
+  catalogEntities
+    .filter((entry) => entry.league === NATIONAL_TEAMS_VALUE)
+    .map((entry) => normalizePackSuggestionText(entry.club)),
+)
 
 function isBlockedProductSlug(slug: string): boolean {
   return BLOCKED_PRODUCT_SLUGS.has(slug)
+}
+
+function normalizePackSuggestionText(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function isNationalTeamLikeProduct(product: Product): boolean {
+  const normalizedLeague = normalizePackSuggestionText(product.league)
+  const normalizedClub = normalizePackSuggestionText(product.club)
+  const normalizedCountry = normalizePackSuggestionText(product.country)
+  const normalizedSource = normalizePackSuggestionText(product.source_category_key)
+
+  return (
+    product.league === NATIONAL_TEAMS_VALUE ||
+    normalizedLeague.includes('selection') ||
+    normalizedLeague.includes('coupe du monde') ||
+    normalizedSource.includes('selection') ||
+    normalizedSource.includes('world cup') ||
+    NATIONAL_TEAM_CLUBS.has(normalizedClub) ||
+    NATIONAL_TEAM_CLUBS.has(normalizedCountry)
+  )
 }
 
 function isMissingCatalogOptionalColumn(error: unknown): boolean {
@@ -309,6 +342,128 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
     console.error('Related products fetch failed:', product.slug, error)
     return []
   }
+}
+
+function isFanPackSuggestion(product: Product): boolean {
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
+  })
+  const normalizedClub = normalizePackSuggestionText(product.club)
+
+  return (
+    product.product_kind === 'jersey' &&
+    product.jersey_version === 'fan' &&
+    !product.is_retro &&
+    !product.is_concept &&
+    isNationalTeamLikeProduct(product) &&
+    NATIONAL_TEAM_CLUBS.has(normalizedClub) &&
+    pricing.currentPrice === FAN_JERSEY_PRICE
+  )
+}
+
+const PACK_SUGGESTION_PRIORITY = [
+  {
+    slug: 'paris-saint-germain-maillot-domicile-2026-2027',
+    clubAliases: ['paris saint germain', 'psg'],
+    bonusTerms: ['back', '2026 2027', '26 27', '25 26'],
+  },
+  {
+    slug: 'portugal-maillot-exterieur-version-joueur-2026',
+    clubAliases: ['portugal'],
+    type: 'exterieur',
+  },
+  {
+    slug: 'espagne-maillot-exterieur-2026',
+    clubAliases: ['espagne'],
+  },
+] as const
+
+function packSuggestionPriorityRank(product: Product) {
+  const text = normalizePackSuggestionText(`${product.slug} ${product.name} ${product.club} ${product.country} ${product.season} ${product.type}`)
+  const club = normalizePackSuggestionText(product.club)
+
+  const exactRank = PACK_SUGGESTION_PRIORITY.findIndex((priority) => priority.slug === product.slug)
+  if (exactRank !== -1) return exactRank
+
+  const termRank = PACK_SUGGESTION_PRIORITY.findIndex((priority) => {
+    const clubMatches = priority.clubAliases.some((alias) => club === normalizePackSuggestionText(alias))
+    const typeMatches = !('type' in priority) || product.type === priority.type
+    return clubMatches && typeMatches
+  })
+  if (termRank === -1) return PACK_SUGGESTION_PRIORITY.length + 20
+
+  const priority = PACK_SUGGESTION_PRIORITY[termRank]
+  const hasBonus = 'bonusTerms' in priority && priority.bonusTerms.some((term) => text.includes(normalizePackSuggestionText(term)))
+  return termRank + (hasBonus ? 0 : 0.25)
+}
+
+function isPreferredPackSuggestion(product: Product) {
+  const rank = packSuggestionPriorityRank(product)
+  if (rank >= PACK_SUGGESTION_PRIORITY.length) return false
+
+  const pricing = getProductPricing({
+    isRetro: product.is_retro,
+    isConcept: product.is_concept,
+    productKind: product.product_kind,
+    jerseyVersion: product.jersey_version,
+    productSlug: product.slug,
+  })
+
+  return (
+    product.product_kind === 'jersey' &&
+    !product.is_retro &&
+    !product.is_concept &&
+    pricing.currentPrice >= FAN_JERSEY_PRICE
+  )
+}
+
+export async function getPackSuggestionProducts(product?: Product | null, limit = 6): Promise<Product[]> {
+  const currentSlug = product?.slug
+  const primaryLeague = product?.league || NATIONAL_TEAMS_VALUE
+  const products = await getProducts({ productKind: 'jersey' })
+  const seenClubs = new Set<string>()
+
+  const preferredProducts = products
+    .filter((candidate) => candidate.slug !== currentSlug)
+    .filter(isPreferredPackSuggestion)
+    .sort((left, right) => {
+      const rankDiff = packSuggestionPriorityRank(left) - packSuggestionPriorityRank(right)
+      if (rankDiff !== 0) return rankDiff
+      if (left.jersey_version !== right.jersey_version) return left.jersey_version === 'fan' ? -1 : 1
+      if (left.type !== right.type) return left.type === 'exterieur' ? -1 : 1
+      return new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+    })
+
+  const scoredProducts = products
+    .filter((candidate) => candidate.slug !== currentSlug)
+    .filter(isFanPackSuggestion)
+    .map((candidate) => {
+      let score = 0
+
+      if (candidate.league === primaryLeague) score += 20
+      if (candidate.league === NATIONAL_TEAMS_VALUE) score += 10
+      if (candidate.is_featured) score += 5
+      if (product && candidate.country === product.country) score += 2
+
+      return { candidate, score }
+    })
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score
+      return new Date(right.candidate.created_at).getTime() - new Date(left.candidate.created_at).getTime()
+    })
+
+  return dedupeCatalogProducts([...preferredProducts, ...scoredProducts.map(({ candidate }) => candidate)])
+    .filter((candidate) => {
+      const normalizedClub = normalizePackSuggestionText(candidate.club)
+      if (seenClubs.has(normalizedClub)) return false
+      seenClubs.add(normalizedClub)
+      return true
+    })
+    .slice(0, limit)
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
